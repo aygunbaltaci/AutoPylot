@@ -18,19 +18,7 @@ init(autoreset = True) # turn off colors after each print()
 ###################### PLOTTER
 class plotPython:
     # =============================== Initializer / Instance attributes
-    def __init__(self, numData, thirdAxis, threeD, multiGraph, legendName, xLabel, yLabel, zLabel, title, data, binRes, xAxesColNums):
-        self.numData = numData
-        self.thirdAxis = thirdAxis
-        self.threeD = threeD
-        self.multiGraph = multiGraph
-        self.legendName = legendName
-        self.xLabel = xLabel
-        self.yLabel = yLabel
-        self.zLabel = zLabel
-        self.title  = title
-        self.data = data
-        self.binRes = binRes
-        self.xAxesColNums = xAxesColNums
+    def __init__(self):
         self.colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#bcbd22', '#17becf'] # blue, orange, green, red, purple, brown, pink, dark gray, light green, cyan. Check out https://matplotlib.org/3.1.0/users/dflt_style_changes.html
         self.lineTypes = ['-', '--', '-.', '.']
         self.plotFuncName = ''
@@ -38,13 +26,6 @@ class plotPython:
         self.color_y2 = 1 
         self.figRowCnt = 0
         self.figColCnt = 0
-        #self.logDir = "logs"
-        #self.figFormat = "pdf"
-        #self.figDimX = 19.2 # save the figure in 1920x1080 format
-        #self.figDimY = 10.8
-        #self.dpi = 1000 # figure resolution
-        #self.axisLabelSize = 15 
-        #self.titleLabelSize = 25
         self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.fTxtNoXServer = f"""
 {Fore.RED}Your X-server is not running, cannot plot the graph.
@@ -55,34 +36,20 @@ Please turn on your X-server first and then hit [enter]"""
         exitLoop = False
         while True:
             try: 
-                #if numOfPlots == 1:
-                #    self.host = [0] # set host as array since the it is in array format when multiplotting with subplots
-                #    self.fig = plt.figure(figsize = (config.figDimX, config.figDimY)) 
-                #    self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(111)
-                #else:
                 numOfRow = 2 if numOfPlots > 1 else 1
                 self.fig, self.host = plt.subplots(math.ceil(numOfPlots / numOfRow), numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
-                #self.fig = plt.figure(figsize = (config.figDimX, config.figDimY)) 
-                if numOfPlots != 1 and numOfPlots % 2 == 1: # turn off the axes of last unused plot, because there is leftover plot in when total plots are odd
-                    print("num of plots = %d" %numOfPlots)
-                    print("Result = %d" %int(numOfPlots // 2))
+                if numOfPlots != 1 and numOfPlots % 2 == 1: # turn off the axes of last unused plot, because there is leftover plot in when total plots are oddW
                     self.host[int(numOfPlots / 2), 1].axis('off')
                 exitLoop = True
             except tkinter._tkinter.TclError: # fail if X-server not running
                 print(self.fTxtNoXServer)
                 userInput = input()
-                if userInput in ['exit', 'EXIT', 'quit', 'QUIT']:
+                if userInput in ['exit', 'EXIT', 'quit', 'QUIT']: # exit options
                     sys.exit(0)
                 exitLoop = False
             if exitLoop: 
                 break
-        
-        #if self.threeD == True: 
-        #    self.host = self.fig.add_subplot(111, projection = '3d')
-        #else: 
-        #    self.host = self.fig.add_subplot(111)
-        
-            
+                
     # =============================== Color the axes
     def axisColoring(self):
         # color the axes of the plot. For now, it is implemented only for 3-axis 2D graphs. TO BE EXTENDED!
@@ -102,83 +69,32 @@ Please turn on your X-server first and then hit [enter]"""
             self.guest.set_ylabel(yLabel2, size = config.axisLabelSize)
         if threeD: 
             self.host[self.figColCnt, self.figRowCnt].set_zlabel(zLabel, size = config.axisLabelSize)
-        #self.fig.suptitle(title, size = config.titleLabelSize) # Main title
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
             self.host[self.figColCnt, self.figRowCnt].title.set_size(config.axisLabelSize)
         if not thirdAxis:
             plt.legend()
         
-        # print ("plotCounter = %d rowcnt = %d, colcnt = %d" %(plotCounter, self.figRowCnt, self.figColCnt))
+        # logic to place subplots in the right location
         if plotCounter % 2 == 0:
-            #if plotCounter != 0 and plotCounter % 4 == 0:
-            #    self.figRowCnt -= 1
-            #else:
             self.figRowCnt += 1
-            #if plotCounter == 4 or plotCounter - 4 % 6 == 0: 
-            #    self.figColCnt -= 1
         else:
             self.figColCnt += 1
             self.figRowCnt -= 1
-            #if plotCounter == 1 or plotCounter - 1 % 6 == 0: 
-            #    self.figRowCnt -= 1
-        print ("NEW rowcnt = %d, colcnt = %d" %(self.figRowCnt, self.figColCnt))
         
     def showPlot(self, title, numOfPlots):
-        #plt.title(title, size = config.titleLabelSize)
         self.fig.suptitle(title, size = config.titleLabelSize) # Main title
+        
+        # leave some space between subplots
         if numOfPlots >= 2: 
-            self.fig.subplots_adjust(hspace = 0.5)
+            self.fig.subplots_adjust(hspace = config.subplots_hSpace)
 
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat, dpi = config.dpi)
-        #self.fig.tight_layout() # to adjust spacing between graphs and labels
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
         
-    # =============================== Plot bar graph
-    def barPlot(self):
-        self.mainPlotter()
-    
-    # =============================== Plot box graph
-    def boxPlot(self):
-        self.prepPlot()
-        plt.boxplot(self.data)
-        self.showPlot()
-    
-    # =============================== Plot CDF graph
-    def cdfPlot(self):
-        self.mainPlotter()
-        
-    # =============================== Plot line graph
-    def linePlot(self):
-        self.mainPlotter()
-        
-    # =============================== Plot scatter Graph
-    def scatterPlot(self):
-        self.mainPlotter()
-    
-    # =============================== Plot histogram Graph    
-    def histogramPlot(self):
-        self.mainPlotter()
-    
     # =============================== Plotter function
     def mainPlotter(self, plotCounter, numOfPlots, plotType, numData, colNumX, colNumY, colNumZ, legendName, binRes, thirdAxis, data):
-        #numOfRow = 2 if numOfPlots > 1 else 1
-        #self.fig, self.host = plt.subplots(numOfRow, math.ceil(numOfPlots / numOfRow))
-        '''
-        numOfRow = 2 if numOfPlots > 1 else 1
-        if plotType == '3d':
-            self.host = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d') # # of plots in x-axis, # of plots in y-axis, plotNum(e.g. 1 is the left top plot, 2 is the right top)
-        else:
-            if numOfPlots == 2: # display vertically if only 2 graphs 
-                if plotCounter == 0: 
-                    self.host = self.fig.add_subplot(numOfRow, math.ceil(numOfPlots / numOfRow), plotCounter + 1) # # of plots in x-axis, # of plots in y-axis, plotNum(e.g. 1 is the left top plot, 2 is the right top)
-                else:
-                    self.host = self.fig.add_subplot(numOfRow, math.ceil(numOfPlots / numOfRow), plotCounter + 1)
-            else:
-                self.host = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1)
-        '''
-        
         if plotType == 'bar':
             for i in range(numData):
                 self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], label = legendName[i]) 
@@ -188,17 +104,14 @@ Please turn on your X-server first and then hit [enter]"""
                 boxData.append(data[colNumX[i]])
             self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1)
             self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
-            #self.host.set(xticklabels.append(str(i))) np.array(range(len(boxData))) + 1
         elif plotType == 'cdf':
             bin_edges_list = [] 
             cdfData = []
             data_size = len(data[colNumX[0]]) # taken from: https://stackoverflow.com/questions/24575869/read-file-and-plot-cdf-in-python
-            #for j in range(numData - 1):
             data_set = sorted(set(data[colNumX[0]]))
             bins = np.append(data_set, data_set[-1] + 1)
             counts, bin_edges = np.histogram(data[colNumX[0]], bins = bins, density = False) # Use histogram function to bin data
             counts = counts.astype(float) / data_size
-            #bin_edges_list.append(bin_edges)
             cdfData = np.cumsum(counts)
             self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData) 
         elif plotType == 'histogram':
@@ -228,7 +141,6 @@ Please turn on your X-server first and then hit [enter]"""
         elif plotType == 'scatter':
             if thirdAxis:
                 p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[self.color_y1], label = legendName[0])  
-                #plt.legend()
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                 p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[self.color_y2], label = legendName[1])             
                 lines = [p1, p2]
@@ -237,148 +149,34 @@ Please turn on your X-server first and then hit [enter]"""
             else:
                 for i in range(numData):
                     self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
-                    #self.host.plot(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
         elif plotType == '3d':
-            #self.host[self.figRowCnt] = self.fig.add_subplot(projection = '3d')
             self.host[self.figColCnt, self.figRowCnt].axis('off')
             numOfRow = 2 if numOfPlots > 1 else 1
-            #if numOfPlots == 2: 
             self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
-            #else:
-            #    self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(numOfRow, math.ceil(numOfPlots / numOfRow), plotCounter + 1, projection = '3d')
-            #self.host[self.figColCnt, self.figRowCnt] = plt.axes(projection='3d')
             for i in range(numData):
                 self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]],  label = legendName[i])
-            #self.host[self.figColCnt, self.figRowCnt].dist = 10
+            # padding and scaling options for z-axis
             self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
+            self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
+        
+        # label padding for x- and y-axis
         self.host[self.figColCnt, self.figRowCnt].axes.xaxis.labelpad = config.xAxis_labelPad
         self.host[self.figColCnt, self.figRowCnt].axes.yaxis.labelpad = config.yAxis_labelPad
         
+        # scaling options for x- and y-axis
         self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX)
         self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY)
         
-        
-        '''
-        if not self.multiGraph: # 1 graph only
-            self.prepPlot()
-            if not self.thirdAxis and not self.threeD:
-                for i in range(1, self.numData): 
-                    if prevFuncName == 'linePlot':
-                        self.host.plot(self.data[0], self.data[i], label=self.legendName[i - 1]) 
-                    elif prevFuncName == 'scatterPlot':
-                        self.host.scatter(self.data[0], self.data[i], label=self.legendName[i - 1]) 
-                    elif prevFuncName == 'barPlot':
-                        self.host.bar(self.data[0], self.data[i], label=self.legendName[i - 1]) 
-                    elif prevFuncName == 'cdfPlot':
-                        print(bin_edges_list[i - 1])
-                        print(cdfData[i-1])
-                        self.host.plot(bin_edges_list[i - 1][0:-1], cdfData[i - 1], label = self.legendName[i - 1]) 
-                    elif prevFuncName == 'histogramPlot':
-                        self.bins = np.arange(min(self.data[i - 1]) - self.binRes[i - 1], max(self.data[i - 1]) + self.binRes[i - 1] * 2, self.binRes[i - 1])
-                        self.host.hist(self.data[i - 1], bins=self.bins, align='left', label=self.legendName[i - 1])  
-                        plt.xticks(self.bins[:-1])
-                    else:
-                        break
-            elif self.threeD: # plot 3D
-                for i in range(2, self.numData):
-                    if prevFuncName == 'linePlot':
-                        self.host.plot(self.data[0], self.data[1], self.data[i],  label=self.legendName[0]) 
-                    elif prevFuncName == 'scatterPlot':
-                        self.host.scatter(self.data[0], self.data[1], self.data[i],  label=self.legendName[0]) 
-                    elif prevFuncName == 'barPlot':
-                        self.host.bar(self.data[0], self.data[1], self.data[i],  label=self.legendName[0]) 
-                    else:
-                        break
-            else: # plot with a 3rd axis, 
-            # taken from: https://stackoverflow.com/questions/48618992/matplotlib-graph-with-more-than-2-y-axes
-                if prevFuncName == 'linePlot':
-                    p1, = self.host.plot(self.data[0], self.data[1], self.colors[self.color_y1], label=self.legendName[0]) 
-                elif prevFuncName == 'scatterPlot':
-                    p1, = self.host.scatter(self.data[0], self.data[1], self.colors[1]+self.lineTypes[0], label=self.legendName[0])  
-                elif prevFuncName == 'barPlot':
-                    p1, = self.host.bar(self.data[0], self.data[1], self.colors[1]+self.lineTypes[0], label=self.legendName[0])  
-                plt.legend()
-                self.guest = self.host.twinx() # setup 2nd axis based on the first graph
-                if prevFuncName == 'linePlot':
-                    p2, = self.guest.plot(self.data[0], self.data[2], self.colors[self.color_y2], label=self.legendName[1])             
-                elif prevFuncName == 'scatterPlot':
-                    p2, = self.guest.scatter(self.data[0], self.data[2], self.colors[2]+self.lineTypes[1], label=self.legendName[1])
-                elif prevFuncName == 'barPlot':
-                    p2, = self.guest.bar(self.data[0], self.data[2], self.colors[2]+self.lineTypes[1], label=self.legendName[1])
-                lines = [p1, p2]
-                self.host.legend(lines, [l.get_label() for l in lines])
-                self.axisColoring()
-            #self.showPlot()
-        else: # multiple graphs
-            plotRows = 2 # print 2 cols of plots
-            self.fig = plt.figure(figsize=(config.figDimX,config.figDimY))
-            self.fig.suptitle(self.title, size = config.titleLabelSize) # Main title
-            i = 1
-            for i in range(1, self.numData - len(self.xAxesColNums)): # +1 to make subplot values start from 1
-                if not self.thirdAxis and not self.threeD:
-                    #for i in range(1, numData): 
-                    self.host = self.fig.add_subplot(math.ceil((self.numData - len(self.xAxesColNums))/ plotRows), (self.numData - len(self.xAxesColNums)) / plotRows, i)
-                    if prevFuncName == 'linePlot':
-                        self.host.plot(self.data[self.xAxesColNums[i]], self.data[i], label=self.legendName[i - 1])
-                    elif prevFuncName == 'scatterPlot':
-                        self.host.scatter(self.data[self.xAxesColNums[i]], self.data[i], label=self.legendName[i - 1])
-                    elif prevFuncName == 'barPlot':
-                        self.host.bar(self.data[self.xAxesColNums[i]], self.data[i], label=self.legendName[i - 1])
-                    elif prevFuncName == 'cdfPlot':
-                        self.host.plot(bin_edges_list[i - 1][0:-1], cdfData[i - 1], label=self.legendName[i - 1])
-                    elif prevFuncName == 'histogramPlot':
-                        self.bins = np.arange(min(self.data[i - 1]) - self.binRes[i - 1], max(self.data[i - 1]) + self.binRes[i - 1] * 2, self.binRes[i - 1])
-                        self.host.hist(self.data[i - 1], bins=self.bins, align='left', label=self.legendName[i - 1])
-                        plt.xticks(self.bins[:-1])
-                    else:
-                        break
-                    self.host.set_xlabel(self.xLabel)
-                    self.host.set_ylabel(self.yLabel[i - 1])
-                    plt.legend()
-                elif self.threeD: # plot 3D, TBD
-                    for i in range(2, self.numData): 
-                        self.host = self.fig.add_subplot(j, k, i, projection = '3d')
-                        if prevFuncName == 'linePlot':
-                            self.host.plot(self.data[0], self.data[1], self.data[i],  label=self.legendName[0])
-                        elif prevFuncName == 'scatterPlot':
-                            self.host.scatter(self.data[0], self.data[1], self.data[i],  label=self.legendName[0])
-                        elif prevFuncName == 'barPlot':
-                            self.host.bar(self.data[0], self.data[1], self.data[i],  label=self.legendName[0])
-                        else:
-                            break   
-                i = i + 1 
-                if i == self.numData + 1: # You've plotted all the graphs
-                    break
-            
-            self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat, dpi = config.dpi)
-            plt.tight_layout()
-            plt.show()
-            '''
 ###################### USER INTERACTIONS
 class userInteractions:
     # =============================== Initializer
     def __init__(self):
         self.defaultThirdAxis = False
         self.defaultThreeD = False
-        self.defaultMultiGraph = False
-        self.defaultMultiXAxis = False
-        self.defaultNumXAxis = 2
         self.printQuestion = 'q'
         self.printFailure = 'f'
         self.printSuccess = 's'
-        #self.defaultPlotSelect = 'line'
-        #self.defaultInputDir = 'inputCsvFiles'
-        #self.defaultInputFile = 'plotFromCsv.csv'
-        #self.defaultDelimeter = ','
-        #self.defaultEncoding = 'utf-8-sig'
-        #self.defaultLegendNames = ['self.data']
         self.defaultLabels = [] 
-        #self.defaultXLabel = 'x'
-        #self.defaultYLabel = 'y'
-        #self.defaultZLabel = 'z'
-        #self.defaultTitle = 'title'
-        #self.histDefaultLabel = 'Frequency of Occurence'
-        #self.cdfDefaultLabel = 'CDF (%)'
         self.data = []
         self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line', 'scatter', 'line + scatter', '3d']
         self.printVars = []
@@ -400,9 +198,6 @@ class userInteractions:
         # Set default values
         self.thirdAxis = self.defaultThirdAxis
         self.threeD = self.defaultThreeD
-        self.multiGraph = self.defaultMultiGraph
-        self.multiXAxis = self.defaultMultiXAxis
-        self.numXAxis = self.defaultNumXAxis
         self.legendName = []
         self.xLabel = config.defaultXLabel
         self.yLabel = config.defaultYLabel
@@ -423,8 +218,6 @@ class userInteractions:
         self.yDataCounter = 0
         self.numOfPlots = self.defaultNumOfPlots
         self.binRes = self.defaultBinRes
-        self.xAxesColNums = []
-        self.numYDataPerPlot = []
         self.csvData = True
         self.fetchXFunc = False
         self.fetchYFunc = False
@@ -483,11 +276,7 @@ What is the column number of x-axis for your dataset %d?"""
         self.qTxtLegendName = """
 What is the %s name for dataset %d? """ 
         self.qTxtLabelName = """
-What is the label name of %s-axis? """
-        self.qTxtLabelMultiGraph = """
-Subplot %d """      
-        self.qTxtLabelThirdAxis = """
-%s axis """
+What is the label name of %s-axis? """    
         self.qTxtTitleName = """
 What is the title name of the graph? """
         self.qTxtMainTitleName = """
@@ -544,8 +333,6 @@ Please make sure that x and y data sizes match! """
         self.yTxtTitleName = f"""
 {Fore.GREEN}Title of the graph is: {Fore.CYAN}%s """
         
-    
-
     # =============================== Quit the program
     def check_quit(self, input): # taken from: https://stackoverflow.com/questions/53271077/how-to-end-program-if-input-quit-with-many-if-statements
         if input in ['exit', 'EXIT', 'quit', 'QUIT']:
@@ -802,22 +589,12 @@ Please make sure that x and y data sizes match! """
                     del self.data[i][0]
             
             # convert input self.data to float 
-            #print(self.data)
             for i in range(self.numData):
                 self.data[i] = [x for x in self.data[i] if len(x.strip()) > 0]
-            #print(self.data)
             for i in range(self.numData): # iterate over each column    
                for j in range(len(self.data[i])):
-               # try: # Exit the program if conversion to float fails
-                    #self.data[i] = list(map(float, self.data[i]))  # convert self.data to float
-                    #self.data[i][j] = self.data[i][j] if self.data[i][j] != '' else 0.0 # convert empty cells to float 
                     try:
-                        #if self.data[i][j] != '': # dealing with empty cells is problematic. !!! FIND A SOLUTION!!!
-                            self.data[i][j] = float(self.data[i][j])
-                        #else:
-                            #str_list = list(filter(None, str_list))
-                            #del self.data[i][j]
-                            #continue
+                        self.data[i][j] = float(self.data[i][j])
                     except ValueError: 
                         print(self.fInputDataNotValid)
                         sys.exit(0)
@@ -1091,11 +868,6 @@ Please make sure that x and y data sizes match! """
                     self.printText(self.printQuestion, printVar, processType) 
                     self.title = self.acceptUserInput(config.defaultTitle, processType)
                     self.printText(self.printSuccess, self.title, processType)
-            #self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-            #self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i], processType))
-            #self.printText(self.printSuccess, self.legendName, processType)
-                    
-            #self.printText(self.printSuccess, self.fetchColY, processType)
             plotCounter = i
             self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
             self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.yLabel2, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter)
@@ -1105,16 +877,7 @@ Please make sure that x and y data sizes match! """
             self.fetchColZ = []
             self.legendName = []
             self.threeD = False
-            self.thirdAxis = False
-            #self.xLabel = ''
-            #self.yLabel = ''
-            #self.zLabel = ''
-            #self.title = ''
-            
-            
-            
-            #functionCallName = 'plotPyt.'+ self.plotSelect + 'Plot(', self.plotSelect, ')')
-            #exec(functionCallName.translate(str.maketrans({"'":None}))) # execute the expression    
+            self.thirdAxis = False   
             
         # Fetch title name from user
         processType = 'getTitleName'
@@ -1123,137 +886,12 @@ Please make sure that x and y data sizes match! """
         self.printText(self.printQuestion, printVar, processType) 
         self.title = self.acceptUserInput(config.defaultTitle, processType)
         self.printText(self.printSuccess, self.title, processType)
-        
         self.plotPyt.showPlot(self.title, self.numOfPlots)
             
-            
-    # =============================== Fetch bin resolution
-        '''
-        if (self.plotSelect == 'histogram'):
-            for i in range(1, self.numData):
-                processType = 'binResolution'
-                self.printText(self.printQuestion, i - 1, processType)
-                self.binRes.append(self.acceptUserInput(self.defaultBinRes, processType))
-                self.printText(self.printSuccess, self.binRes, processType)
-            
-    # =============================== Multiple Plotting
-        if (self.numData > 2):
-            processType = 'checkMultiGraph'
-            self.printText(self.printQuestion, self.defaultMultiGraph, processType)
-            self.multiGraph = self.acceptUserInput(self.defaultMultiGraph, processType)
-            self.printText(self.printSuccess, self.multiGraph, processType)
-    
-    # =============================== 3D Plotting
-        # Enable 3D plotting
-        if (self.plotSelect == 'line' or self.plotSelect == 'scatter') and (self.numData >= 3 and self.multiGraph == False):
-            processType = 'checkThreeDGraph'
-            self.printText(self.printQuestion, self.defaultThreeD, processType)
-            self.threeD = self.acceptUserInput(self.defaultThreeD, processType)
-            self.printText(self.printSuccess, self.threeD, processType)
-    
-    # =============================== 2D with 3rd-axis Plotting 
-        # Enable 3rd axis for line plot
-        if (self.plotSelect == 'line' or self.plotSelect == 'scatter') and (self.numData == 3 and self.multiGraph == False and self.threeD == False): 
-            processType = 'checkThirdAxis'
-            self.printText(self.printQuestion, self.defaultThirdAxis, processType)
-            self.thirdAxis = self.acceptUserInput(self.defaultThirdAxis, processType)
-            self.printText(self.printSuccess, self.thirdAxis, processType)
-    
-    # =============================== Check for Multi X-Axes
-        if self.multiGraph and (self.plotSelect is not 'cdf' or self.plotSelect is not 'histogram'):
-            processType = 'checkMultiXAxis'
-            self.printText(self.printQuestion, self.defaultThirdAxis, processType)
-            self.multiXAxis = self.acceptUserInput(self.defaultMultiXAxis, processType)
-            self.printText(self.printSuccess, self.multiXAxis, processType)
-            
-    # =============================== Check Number of Different X-Axes
-        if self.multiXAxis and (self.plotSelect is not 'cdf' or self.plotSelect is not 'histogram'):
-            self.maxNumXAxis = math.floor(self.numData / 2)
-            printVal = [self.defaultNumXAxis, self.maxNumXAxis]
-            processType = 'checkNumXAxis'
-            self.printText(self.printQuestion, printVal, processType)
-            self.numXAxis = self.acceptUserInput(self.defaultNumXAxis, processType)
-            self.printText(self.printSuccess, self.numXAxis, processType)
-        numYData = self.numData - self.numXAxis
-    # =============================== Fetch X-Axis Column Numbers from User
-        if self.multiXAxis and (self.plotSelect is not 'cdf' or self.plotSelect is not 'histogram'):        
-            processType = 'fetchXAxisColNum'
-            for i in range(0, int(numYData)):
-                self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.xAxesColNums.append(self.acceptUserInput(0, processType))
-            self.printText(self.printSuccess, self.xAxesColNums, processType)
-        
-    # =============================== Get Legend Names
-        # Get legend name(s) from user
-        if not self.threeD: # obtain legend omitting 1st self.dataset
-            for i in range(0, int(numYData)):
-                processType = 'getLegendNames'
-                self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i], processType))
-            self.printText(self.printSuccess, self.legendName, processType)
-        else: # obtain legend name omitting 1st and 2nd self.dataset
-            for i in range(2, self.numData):
-                processType = 'getLegendNames'
-                self.printText(self.printQuestion, i - 2, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i - 2], processType))
-            self.printText(self.printSuccess, self.legendName, processType)
-    
-    # =============================== Get X-axis Label
-        processType = 'getLabelX'
-        self.printText(self.printQuestion, config.defaultXLabel, processType) 
-        self.xLabel = self.acceptUserInput(config.defaultXLabel, processType)
-        self.printText(self.printSuccess, self.xLabel, processType)
-        
-    # =============================== Get Y-axis Label
-        if self.multiGraph:
-            # set y-axes labels
-            for i in range(0, int(numYData)):
-                processType = 'getLabelY'
-                self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.yLabel.append(self.acceptUserInput(config.defaultYLabel[i], processType))
-            self.printText(self.printSuccess, self.yLabel, processType)
-        elif self.threeD: 
-            # set y-axis label
-            processType = processType
-            self.printText(self.printQuestion, 0, processType) 
-            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[0], processType))
-            self.printText(self.printSuccess, 0, processType)
-            
-            # set z-axis label
-            processType = 'getLabelY'
-            self.printText(self.printQuestion, 1, processType) 
-            self.zLabel = self.acceptUserInput(config.defaultYLabel[1], processType)
-            self.printText(self.printSuccess, 1, processType)
-        elif self.thirdAxis:
-            # set 1st y-axis label
-            processType = 'getLabelY'
-            self.printText(self.printQuestion, 0, processType) 
-            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[0], processType))
-            self.printText(self.printSuccess, 0, processType)
-            
-            # set 2nd y-axis label
-            self.printText(self.printQuestion, 1, processType) 
-            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[1], processType))
-            self.printText(self.printSuccess, 1, processType)
-        else: # 2D regular plot 
-            processType = 'getLabelY'
-            self.printText(self.printQuestion, 0, processType) 
-            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[0], processType))
-            self.printText(self.printSuccess, self.yLabel, processType)
-        
-    # =============================== Get Title Name
-        # Get title name from user
-        processType = 'getTitleName'
-        self.printText(self.printQuestion, config.defaultTitle, processType) 
-        self.title = self.acceptUserInput(config.defaultTitle, processType)
-        self.printText(self.printSuccess, self.title, processType)
-        '''
+       
     # =============================== Initiate and Run the PlotPython Class
     def initiatePlotter(self):
-        self.plotPyt = plotPython(self.numData, self.thirdAxis, self.threeD, self.multiGraph, self.legendName, self.xLabel, self.yLabel, self.zLabel, self.title, self.data, self.binRes, self.xAxesColNums)
-        # Execute the corresponding plotting function
-        #functionCallName = 'task2.'+ self.plotSelect + 'Plot()'
-        #exec(functionCallName.translate(str.maketrans({"'":None}))) # execute the expression
+        self.plotPyt = plotPython()
 
 # #################################### MAIN
 task = userInteractions()
