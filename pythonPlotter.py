@@ -12,6 +12,7 @@ import inspect
 from colorama import Fore, Back, Style, init # colored output on the terminal
 from datetime import datetime
 import tkinter
+import config
 init(autoreset = True) # turn off colors after each print()
 
 ###################### PLOTTER
@@ -35,13 +36,15 @@ class plotPython:
         self.plotFuncName = ''
         self.color_y1 = 0 
         self.color_y2 = 1 
-        self.logDir = "logs"
-        self.figFormat = "pdf"
-        self.figDimX = 19.2 # save the figure in 1920x1080 format
-        self.figDimY = 10.8
-        self.dpi = 1000 # figure resolution
-        self.axisLabelSize = 15 
-        self.titleLabelSize = 25
+        self.figRowCnt = 0
+        self.figColCnt = 0
+        #self.logDir = "logs"
+        #self.figFormat = "pdf"
+        #self.figDimX = 19.2 # save the figure in 1920x1080 format
+        #self.figDimY = 10.8
+        #self.dpi = 1000 # figure resolution
+        #self.axisLabelSize = 15 
+        #self.titleLabelSize = 25
         self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.fTxtNoXServer = f"""
 {Fore.RED}Your X-server is not running, cannot plot the graph.
@@ -52,7 +55,18 @@ Please turn on your X-server first and then hit [enter]"""
         exitLoop = False
         while True:
             try: 
-                self.fig = plt.figure(figsize = (self.figDimX,self.figDimY)) 
+                #if numOfPlots == 1:
+                #    self.host = [0] # set host as array since the it is in array format when multiplotting with subplots
+                #    self.fig = plt.figure(figsize = (config.figDimX, config.figDimY)) 
+                #    self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(111)
+                #else:
+                numOfRow = 2 if numOfPlots > 1 else 1
+                self.fig, self.host = plt.subplots(math.ceil(numOfPlots / numOfRow), numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
+                #self.fig = plt.figure(figsize = (config.figDimX, config.figDimY)) 
+                if numOfPlots != 1 and numOfPlots % 2 == 1: # turn off the axes of last unused plot, because there is leftover plot in when total plots are odd
+                    print("num of plots = %d" %numOfPlots)
+                    print("Result = %d" %int(numOfPlots // 2))
+                    self.host[int(numOfPlots / 2), 1].axis('off')
                 exitLoop = True
             except tkinter._tkinter.TclError: # fail if X-server not running
                 print(self.fTxtNoXServer)
@@ -72,36 +86,51 @@ Please turn on your X-server first and then hit [enter]"""
     # =============================== Color the axes
     def axisColoring(self):
         # color the axes of the plot. For now, it is implemented only for 3-axis 2D graphs. TO BE EXTENDED!
-        self.host.spines['left'].set_color(self.colors[self.color_y1])
-        self.host.tick_params(axis='y', colors=self.colors[self.color_y1])
-        self.host.yaxis.label.set_color(self.colors[self.color_y1])
+        self.host[self.figColCnt, self.figRowCnt].spines['left'].set_color(self.colors[self.color_y1])
+        self.host[self.figColCnt, self.figRowCnt].tick_params(axis='y', colors=self.colors[self.color_y1])
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[self.color_y1])
         self.guest.spines['right'].set_color(self.colors[self.color_y2])
         self.guest.tick_params(axis='y', colors=self.colors[self.color_y2])
         self.guest.yaxis.label.set_color(self.colors[self.color_y2])
     
     # =============================== Show the plot
-    def plotLabeling(self, xLabel, yLabel, zLabel, thirdAxis, threeD, title, numOfPlots):
-        self.fig.savefig('%s' %self.logDir + os.sep + '%s.%s' %(self.date, self.figFormat), format = self.figFormat, dpi = self.dpi)
-        self.host.set_xlabel(xLabel, size = self.axisLabelSize)
-        self.host.set_ylabel(yLabel, size = self.axisLabelSize)
+    def plotLabeling(self, xLabel, yLabel, yLabel2, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter):
+        self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat, dpi = config.dpi)
+        self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel, size = config.axisLabelSize)
+        self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel, size = config.axisLabelSize)
         if thirdAxis:
-            self.guest.set_ylabel(yLabel, size = self.axisLabelSize)
+            self.guest.set_ylabel(yLabel2, size = config.axisLabelSize)
         if threeD: 
-            self.host.set_zlabel(zLabel, size = self.axisLabelSize)
-        #self.fig.suptitle(title, size = self.titleLabelSize) # Main title
+            self.host[self.figColCnt, self.figRowCnt].set_zlabel(zLabel, size = config.axisLabelSize)
+        #self.fig.suptitle(title, size = config.titleLabelSize) # Main title
         if numOfPlots > 1:
-            self.host.title.set_text(title)
-            self.host.title.set_size(self.axisLabelSize)
+            self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
+            self.host[self.figColCnt, self.figRowCnt].title.set_size(config.axisLabelSize)
         if not thirdAxis:
             plt.legend()
         
+        # print ("plotCounter = %d rowcnt = %d, colcnt = %d" %(plotCounter, self.figRowCnt, self.figColCnt))
+        if plotCounter % 2 == 0:
+            #if plotCounter != 0 and plotCounter % 4 == 0:
+            #    self.figRowCnt -= 1
+            #else:
+            self.figRowCnt += 1
+            #if plotCounter == 4 or plotCounter - 4 % 6 == 0: 
+            #    self.figColCnt -= 1
+        else:
+            self.figColCnt += 1
+            self.figRowCnt -= 1
+            #if plotCounter == 1 or plotCounter - 1 % 6 == 0: 
+            #    self.figRowCnt -= 1
+        print ("NEW rowcnt = %d, colcnt = %d" %(self.figRowCnt, self.figColCnt))
+        
     def showPlot(self, title, numOfPlots):
-        #plt.title(title, size = self.titleLabelSize)
-        self.fig.suptitle(title, size = self.titleLabelSize) # Main title
-        if numOfPlots == 2: 
+        #plt.title(title, size = config.titleLabelSize)
+        self.fig.suptitle(title, size = config.titleLabelSize) # Main title
+        if numOfPlots >= 2: 
             self.fig.subplots_adjust(hspace = 0.5)
 
-        self.fig.savefig('%s' %self.logDir + os.sep + '%s.%s' %(self.date, self.figFormat), bbox_inches = 'tight', format = self.figFormat, dpi = self.dpi)
+        self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat, dpi = config.dpi)
         #self.fig.tight_layout() # to adjust spacing between graphs and labels
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
@@ -134,23 +163,31 @@ Please turn on your X-server first and then hit [enter]"""
     
     # =============================== Plotter function
     def mainPlotter(self, plotCounter, numOfPlots, plotType, numData, colNumX, colNumY, colNumZ, legendName, binRes, thirdAxis, data):
-        plotPerRow = 2 if numOfPlots > 1 else 1
+        #numOfRow = 2 if numOfPlots > 1 else 1
+        #self.fig, self.host = plt.subplots(numOfRow, math.ceil(numOfPlots / numOfRow))
+        '''
+        numOfRow = 2 if numOfPlots > 1 else 1
         if plotType == '3d':
-            self.host = self.fig.add_subplot(math.ceil(numOfPlots / plotPerRow), plotPerRow, plotCounter + 1, projection = '3d') # # of plots in x-axis, # of plots in y-axis, plotNum(e.g. 1 is the left top plot, 2 is the right top)
+            self.host = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d') # # of plots in x-axis, # of plots in y-axis, plotNum(e.g. 1 is the left top plot, 2 is the right top)
         else:
             if numOfPlots == 2: # display vertically if only 2 graphs 
-                self.host = self.fig.add_subplot(plotPerRow, math.ceil(numOfPlots / plotPerRow), plotCounter + 1) # # of plots in x-axis, # of plots in y-axis, plotNum(e.g. 1 is the left top plot, 2 is the right top)
+                if plotCounter == 0: 
+                    self.host = self.fig.add_subplot(numOfRow, math.ceil(numOfPlots / numOfRow), plotCounter + 1) # # of plots in x-axis, # of plots in y-axis, plotNum(e.g. 1 is the left top plot, 2 is the right top)
+                else:
+                    self.host = self.fig.add_subplot(numOfRow, math.ceil(numOfPlots / numOfRow), plotCounter + 1)
             else:
-                self.host = self.fig.add_subplot(math.ceil(numOfPlots / plotPerRow), plotPerRow, plotCounter + 1)
+                self.host = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1)
+        '''
+        
         if plotType == 'bar':
             for i in range(numData):
-                self.host.bar(data[colNumX[i]], data[colNumY[i]], label = legendName[i]) 
+                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], label = legendName[i]) 
         elif plotType == 'box':
             boxData = []
             for i in range(numData):
                 boxData.append(data[colNumX[i]])
-            self.host.boxplot(boxData, positions = np.array(range(len(boxData))) + 1)
-            self.host.set_xticklabels(legendName)
+            self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1)
+            self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
             #self.host.set(xticklabels.append(str(i))) np.array(range(len(boxData))) + 1
         elif plotType == 'cdf':
             bin_edges_list = [] 
@@ -163,47 +200,63 @@ Please turn on your X-server first and then hit [enter]"""
             counts = counts.astype(float) / data_size
             #bin_edges_list.append(bin_edges)
             cdfData = np.cumsum(counts)
-            self.host.plot(bin_edges[0:-1], cdfData) 
+            self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData) 
         elif plotType == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
-            self.host.hist(data[colNumX[0]], bins = self.bins, align = 'left')  
+            self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, align = 'left')  
             plt.xticks(self.bins[:-1])
         elif plotType in ['line', 'line + scatter']:
             if thirdAxis:
                 if plotType == 'line':
-                    p1, = self.host.plot(data[colNumX[0]], data[colNumY[0]], self.colors[self.color_y1], label = legendName[0])  
+                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[self.color_y1], label = legendName[0])  
                 else:
-                    p1, = self.host.plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[self.color_y1], label = legendName[0])  
-                self.guest = self.host.twinx() # setup 2nd axis based on the first graph
+                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[self.color_y1], label = legendName[0])  
+                self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                 if plotType == 'line':
                     p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], self.colors[self.color_y2], label = legendName[1])             
                 else:
                     p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[self.color_y2], label = legendName[1]) 
                 lines = [p1, p2]
-                self.host.legend(lines, [l.get_label() for l in lines])
+                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines])
                 self.axisColoring()
             else:
                 for i in range(numData):
                     if plotType == 'line':
-                        self.host.plot(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
+                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
                     else:
-                        self.host.plot(data[colNumX[i]], data[colNumY[i]], '-o', label = legendName[i])
+                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], '-o', label = legendName[i])
         elif plotType == 'scatter':
             if thirdAxis:
-                p1 = self.host.scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[self.color_y1], label = legendName[0])  
+                p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[self.color_y1], label = legendName[0])  
                 #plt.legend()
-                self.guest = self.host.twinx() # setup 2nd axis based on the first graph
+                self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                 p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[self.color_y2], label = legendName[1])             
                 lines = [p1, p2]
-                self.host.legend(lines, [l.get_label() for l in lines])
+                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines])
                 self.axisColoring()
             else:
                 for i in range(numData):
-                    self.host.scatter(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
+                    self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
                     #self.host.plot(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
         elif plotType == '3d':
+            #self.host[self.figRowCnt] = self.fig.add_subplot(projection = '3d')
+            self.host[self.figColCnt, self.figRowCnt].axis('off')
+            numOfRow = 2 if numOfPlots > 1 else 1
+            #if numOfPlots == 2: 
+            self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
+            #else:
+            #    self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(numOfRow, math.ceil(numOfPlots / numOfRow), plotCounter + 1, projection = '3d')
+            #self.host[self.figColCnt, self.figRowCnt] = plt.axes(projection='3d')
             for i in range(numData):
-                self.host.plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]],  label = legendName[i])
+                self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]],  label = legendName[i])
+            #self.host[self.figColCnt, self.figRowCnt].dist = 10
+            self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
+        self.host[self.figColCnt, self.figRowCnt].axes.xaxis.labelpad = config.xAxis_labelPad
+        self.host[self.figColCnt, self.figRowCnt].axes.yaxis.labelpad = config.yAxis_labelPad
+        
+        self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX)
+        self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY)
+        
         
         '''
         if not self.multiGraph: # 1 graph only
@@ -258,8 +311,8 @@ Please turn on your X-server first and then hit [enter]"""
             #self.showPlot()
         else: # multiple graphs
             plotRows = 2 # print 2 cols of plots
-            self.fig = plt.figure(figsize=(self.figDimX,self.figDimY))
-            self.fig.suptitle(self.title, size = self.titleLabelSize) # Main title
+            self.fig = plt.figure(figsize=(config.figDimX,config.figDimY))
+            self.fig.suptitle(self.title, size = config.titleLabelSize) # Main title
             i = 1
             for i in range(1, self.numData - len(self.xAxesColNums)): # +1 to make subplot values start from 1
                 if not self.thirdAxis and not self.threeD:
@@ -297,7 +350,7 @@ Please turn on your X-server first and then hit [enter]"""
                 if i == self.numData + 1: # You've plotted all the graphs
                     break
             
-            self.fig.savefig('%s' %self.logDir + os.sep + '%s.%s' %(self.date, self.figFormat), format = self.figFormat, dpi = self.dpi)
+            self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat, dpi = config.dpi)
             plt.tight_layout()
             plt.show()
             '''
@@ -313,19 +366,19 @@ class userInteractions:
         self.printQuestion = 'q'
         self.printFailure = 'f'
         self.printSuccess = 's'
-        self.defaultPlotSelect = 'line'
-        self.defaultInputDir = 'inputCsvFiles'
-        self.defaultInputFile = 'plotFromCsv.csv'
-        self.defaultDelimeter = ','
-        self.defaultEncoding = 'utf-8-sig'
-        self.defaultLegendNames = ['self.data']
+        #self.defaultPlotSelect = 'line'
+        #self.defaultInputDir = 'inputCsvFiles'
+        #self.defaultInputFile = 'plotFromCsv.csv'
+        #self.defaultDelimeter = ','
+        #self.defaultEncoding = 'utf-8-sig'
+        #self.defaultLegendNames = ['self.data']
         self.defaultLabels = [] 
-        self.defaultXLabel = 'x'
-        self.defaultYLabel = 'y'
-        self.defaultZLabel = 'z'
-        self.defaultTitle = 'title'
-        self.histDefaultLabel = 'Frequency of Occurence'
-        self.cdfDefaultLabel = 'CDF (%)'
+        #self.defaultXLabel = 'x'
+        #self.defaultYLabel = 'y'
+        #self.defaultZLabel = 'z'
+        #self.defaultTitle = 'title'
+        #self.histDefaultLabel = 'Frequency of Occurence'
+        #self.cdfDefaultLabel = 'CDF (%)'
         self.data = []
         self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line', 'scatter', 'line + scatter', '3d']
         self.printVars = []
@@ -341,7 +394,7 @@ class userInteractions:
         self.defaultFetchColZ = 2
         self.defaultX = np.arange(float(self.defaultMinX), float(self.defaultMaxX), float(self.defaultResX))
         self.defaultY = self.defaultX ** 2
-        self.defaultZ = self.defaultX ** 2 + self.defaultY ** 2
+        self.defaultZ = self.defaultY ** 2
         self.printWelcomeTxt = True
        
         # Set default values
@@ -351,10 +404,11 @@ class userInteractions:
         self.multiXAxis = self.defaultMultiXAxis
         self.numXAxis = self.defaultNumXAxis
         self.legendName = []
-        self.xLabel = self.defaultXLabel
-        self.yLabel = self.defaultYLabel
-        self.zLabel = self.defaultZLabel
-        self.title = self.defaultTitle
+        self.xLabel = config.defaultXLabel
+        self.yLabel = config.defaultYLabel
+        self.yLabel2 = config.defaultYLabel
+        self.zLabel = config.defaultZLabel
+        self.title = config.defaultTitle
         self.minX = self.defaultMinX
         self.maxX = self.defaultMaxX
         self.resX = self.defaultResX
@@ -394,7 +448,7 @@ What type of graph do you want to plot? \nOptions:"""
         self.qTxtDefault = f"""
 Just hit [{Fore.YELLOW}enter{Fore.WHITE}] for default: ({Fore.CYAN}%s{Fore.WHITE})\n\n"""
         self.qTxtSelectYN = f"""
-Please select [{Fore.YELLOW}yY{Fore.WHITE}] or [{Fore.YELLOW}nN]{Fore.WHITE}."""
+Please select [{Fore.YELLOW}yY{Fore.WHITE}] or [{Fore.YELLOW}nN{Fore.WHITE}]."""
         self.qTxtNumOfPlots = """
 How many graphs do you want to plot?"""
         self.qTxtSkipCsvDataFetch = f"""
@@ -404,7 +458,7 @@ If you want to derive data from a function, please type [{Fore.YELLOW}fF{Fore.WH
         self.qTxtFetchCol = """
 What is the column number in your input data for %s-axis?"""
         self.qTxtNoMoreYData = f"""
-If you don't want to plot more data in this graph, please type [{Fore.YELLOW}qQ{Fore.WHITE}]"""
+{Fore.WHITE}If you don't want to plot more data in this graph, please type [{Fore.YELLOW}qQ{Fore.WHITE}]"""
         self.qTxtMinMaxResX = f"""
 Please enter the min, max. and resolution of x-axis."""
         self.qTxtEnterFormula = f"""
@@ -421,7 +475,7 @@ Do you want to use different x-axis for each subplot? ({Fore.YELLOW}y/N{Fore.WHI
         self.qTxtThreeDGraph = f"""
 Do you want to plot the graph in 3D? ({Fore.YELLOW}y/N{Fore.WHITE})"""    
         self.qTxtThirdAxis = f"""
-Do you want to enable 3rd axis on the graph? ({Fore.YELLOW}y/N{Fore.WHITE})"""
+Do you want to enable 3rd axis on the graph?"""
         self.qTxtNumColXAxis = """
 How many columns are x-axes data in your input csv file?"""
         self.qTxtFetchXAxisColNum = f"""
@@ -456,7 +510,7 @@ numpy (np.*) or math (math.*) libraries. \n\n """
         self.fTxtDelLength = """
 Delimeter length cannot be > 1. """
         self.fTxtNumXAxes = f"""
-    - Please enter a number between {Fore.YELLOW}%d{Fore.WHITE} and {Fore.YELLOW}%d{Fore.WHITE} """
+Please enter a number between {Fore.YELLOW}%d{Fore.WHITE} and {Fore.YELLOW}%d{Fore.WHITE} """
         self.fTxtDataSizeNoMatch = """
 Please make sure that x and y data sizes match! """
         self.yTxtPlotType = f"""
@@ -581,7 +635,7 @@ Please make sure that x and y data sizes match! """
             elif processType in 'getFuncYFromUser':
                 print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'x**2')
             elif processType in 'getFuncZFromUser':
-                print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'x**2 + y**2')
+                print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'y**2')
             elif processType in 'selectDelimeter':
                 print(self.fTxtNotValid + self.fTxtDelLength + self.fTxtDefault %printVal)
             elif processType in 'checkNumXAxis':
@@ -724,7 +778,7 @@ Please make sure that x and y data sizes match! """
             
     # =============================== Fetch input data from csv 
     def fetchInputData(self):
-        with open(self.defaultInputDir + os.sep + self.inputFile, 'r', encoding = self.defaultEncoding) as csvfile:
+        with open(config.defaultInputDir + os.sep + self.inputFile, 'r', encoding = config.defaultEncoding) as csvfile:
             plots = csv.reader(csvfile, delimiter = self.delimeter)
             
             # Fetch the self.data from each row
@@ -741,7 +795,7 @@ Please make sure that x and y data sizes match! """
                 for i in range(self.numData):
                     self.data[i][0] = self.data[i][0] if self.data[i][0] != '' else 'blank'
                     self.defaultLabels.append(self.data[i][0])
-                self.defaultLegendNames = self.defaultLabels
+                config.defaultLegendNames = self.defaultLabels
                 
                 # Delete labels
                 for i in range(self.numData):
@@ -772,14 +826,14 @@ Please make sure that x and y data sizes match! """
     def main(self): 
         # Get input file name from user
         processType = 'fetchInputData'
-        self.printText(self.printQuestion, self.defaultInputFile, processType)
-        self.inputFile = self.acceptUserInput(self.defaultInputFile, processType)
+        self.printText(self.printQuestion, config.defaultInputFile, processType)
+        self.inputFile = self.acceptUserInput(config.defaultInputFile, processType)
         if not self.inputFile in ['s', 'S']:
             self.printText(self.printSuccess, self.inputFile, processType)
             # Get self.delimeter type from user
             processType = 'selectDelimeter'
-            self.printText(self.printQuestion, self.defaultDelimeter, processType)
-            self.delimeter = self.acceptUserInput(self.defaultDelimeter, processType)
+            self.printText(self.printQuestion, config.defaultDelimeter, processType)
+            self.delimeter = self.acceptUserInput(config.defaultDelimeter, processType)
             self.printText(self.printSuccess, self.delimeter, processType)
             self.fetchInputData() # Fetch self.data from .csv file
         else:
@@ -802,10 +856,10 @@ Please make sure that x and y data sizes match! """
         for i in range(self.numOfPlots):
             # Select plot type
             processType = 'plotType'
-            printVal = [i + 1, self.defaultPlotSelect]
+            printVal = [i + 1, config.defaultPlotSelect]
             self.printText(self.printQuestion, printVal, processType)
-            self.plotSelect = self.acceptUserInput(self.defaultPlotSelect, processType)
-            if not self.plotSelect == self.defaultPlotSelect:
+            self.plotSelect = self.acceptUserInput(config.defaultPlotSelect, processType)
+            if not self.plotSelect == config.defaultPlotSelect:
                 self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
             self.printText(self.printSuccess, self.plotSelect, processType)
             
@@ -903,7 +957,7 @@ Please make sure that x and y data sizes match! """
                     self.fetchZFunc2 = True
                     if self.plotSelect == '3d':
                         processType = 'getFuncZFromUser'
-                        printVal = 'x**2 + y**2'
+                        printVal = 'y**2'
                         self.printText(self.printQuestion, printVal, processType)
                         print("z(x, y): ")
                         self.z = self.acceptUserInput(self.defaultZ, processType)
@@ -917,9 +971,9 @@ Please make sure that x and y data sizes match! """
                 processType = 'getLegendNames'
                 if self.plotSelect == 'box':
                     if not self.csvData or self.fetchXFunc:
-                        printVal = [i, self.defaultXLabel, 'xtick']
+                        printVal = [i, config.defaultXLabel, 'xtick']
                         self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(self.defaultXLabel, processType))
+                        self.legendName.append(self.acceptUserInput(config.defaultXLabel, processType))
                     else:
                         printVal = [i, self.defaultLabels[self.fetchColX[-1]], 'xtick']
                         self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
@@ -927,9 +981,9 @@ Please make sure that x and y data sizes match! """
                     self.printText(self.printSuccess, self.legendName, processType)
                 elif self.plotSelect == '3d': 
                     if not self.csvData or self.fetchZFunc:
-                        printVal = [i, self.defaultZLabel, 'legend']
+                        printVal = [i, config.defaultZLabel, 'legend']
                         self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(self.defaultZLabel, processType))
+                        self.legendName.append(self.acceptUserInput(config.defaultZLabel, processType))
                     else:
                         printVal = [i, self.defaultLabels[self.fetchColZ[-1]], 'legend']
                         self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
@@ -937,9 +991,9 @@ Please make sure that x and y data sizes match! """
                     self.printText(self.printSuccess, self.legendName, processType)
                 else:
                     if not self.csvData or self.fetchYFunc:
-                        printVal = [i, self.defaultYLabel, 'legend']
+                        printVal = [i, config.defaultYLabel, 'legend']
                         self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(self.defaultYLabel, processType))
+                        self.legendName.append(self.acceptUserInput(config.defaultYLabel, processType))
                     else:
                         printVal = [i, self.defaultLabels[self.fetchColY[-1]], 'legend']
                         self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
@@ -959,12 +1013,12 @@ Please make sure that x and y data sizes match! """
             # Fetch x-label
             processType = 'getLabelX'
             if self.plotSelect == 'box':
-                self.printText(self.printQuestion, self.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.xLabel = (self.acceptUserInput(self.defaultXLabel, processType))
+                self.printText(self.printQuestion, config.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
+                self.xLabel = (self.acceptUserInput(config.defaultXLabel, processType))
             else:
                 if not self.csvData or self.fetchXFunc2:
-                    self.printText(self.printQuestion, self.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                    self.xLabel = (self.acceptUserInput(self.defaultXLabel, processType))
+                    self.printText(self.printQuestion, config.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
+                    self.xLabel = (self.acceptUserInput(config.defaultXLabel, processType))
                 else:
                     self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]], processType) 
                     self.xLabel = self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]], processType)
@@ -977,37 +1031,49 @@ Please make sure that x and y data sizes match! """
                 self.printText(self.printSuccess, self.binRes, processType)
                     
             if self.plotSelect == 'cdf':
-                self.yLabel = self.cdfDefaultLabel
+                self.yLabel = config.cdfDefaultLabel
             elif self.plotSelect == 'histogram':
-                self.yLabel = self.histDefaultLabel
+                self.yLabel = config.histDefaultLabel
             elif self.plotSelect == 'box':
                 processType = 'getLabelY'
                 if not self.csvData or self.fetchYFunc2:
-                    self.printText(self.printQuestion, self.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                    self.yLabel = (self.acceptUserInput(self.defaultXLabel, processType)) # fetch x label to the y-axis
+                    self.printText(self.printQuestion, config.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
+                    self.yLabel = (self.acceptUserInput(config.defaultXLabel, processType)) # fetch x label to the y-axis
                 else:
                     self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]], processType) 
-                    self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]], processType)
+                    self.yLabel = (self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]], processType))
                 self.printText(self.printSuccess, self.yLabel, processType)
             
             if not self.plotSelect in ['cdf', 'histogram', 'box']:
                 # Fetch y-label
                 processType = 'getLabelY'
-                if not self.csvData or self.fetchYFunc2:
-                    self.printText(self.printQuestion, self.defaultYLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                    self.yLabel = (self.acceptUserInput(self.defaultYLabel, processType))
+                
+                if not self.thirdAxis:
+                    if not self.csvData or self.fetchYFunc2:
+                        self.printText(self.printQuestion, config.defaultYLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
+                        self.yLabel = self.acceptUserInput(config.defaultYLabel, processType)
+                    else:
+                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]], processType) 
+                        self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]], processType)
+                    self.printText(self.printSuccess, self.yLabel, processType)
                 else:
-                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]], processType) 
-                    self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]], processType)
-                self.printText(self.printSuccess, self.yLabel, processType)
+                    # Fetch y-label for the 3rd axis
+                    for j in range(2):
+                        if not self.csvData or self.fetchYFunc2:
+                            self.printText(self.printQuestion, config.defaultYLabel, processType) # send j instead of legend name to be able to print dataset # in printText()
+                            self.yLabel2 = self.acceptUserInput(config.defaultYLabel, processType) # fetch x label to the y-axis
+                        else:
+                            self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-2 + j]], processType) 
+                            self.yLabel2 = self.acceptUserInput(self.defaultLabels[self.fetchColY[-2 + j]], processType)
+                        self.printText(self.printSuccess, self.yLabel2, processType)
                 
                 
                 if self.plotSelect == '3d':
                     # set z-axis label
                     processType = 'getLabelZ'
                     if not self.csvData or self.fetchZFunc2:
-                        self.printText(self.printQuestion, self.defaultZLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.zLabel = (self.acceptUserInput(self.defaultZLabel, processType))
+                        self.printText(self.printQuestion, config.defaultZLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
+                        self.zLabel = self.acceptUserInput(config.defaultZLabel, processType)
                     else:
                         self.printText(self.printQuestion, self.defaultLabels[self.fetchColZ[-1]], processType) 
                         self.zLabel = self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]], processType)
@@ -1021,24 +1087,25 @@ Please make sure that x and y data sizes match! """
                     # Fetch title name from user
                     processType = 'getTitleName'
                     mainTitle = False
-                    printVar = [mainTitle, self.defaultTitle]
+                    printVar = [mainTitle, config.defaultTitle]
                     self.printText(self.printQuestion, printVar, processType) 
-                    self.title = self.acceptUserInput(self.defaultTitle, processType)
+                    self.title = self.acceptUserInput(config.defaultTitle, processType)
                     self.printText(self.printSuccess, self.title, processType)
             #self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-            #self.legendName.append(self.acceptUserInput(self.defaultLegendNames[i], processType))
+            #self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i], processType))
             #self.printText(self.printSuccess, self.legendName, processType)
                     
             #self.printText(self.printSuccess, self.fetchColY, processType)
             plotCounter = i
             self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
-            self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots)
+            self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.yLabel2, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter)
             self.yDataCounter = 0
             self.fetchColX = []
             self.fetchColY = []
             self.fetchColZ = []
             self.legendName = []
             self.threeD = False
+            self.thirdAxis = False
             #self.xLabel = ''
             #self.yLabel = ''
             #self.zLabel = ''
@@ -1052,9 +1119,9 @@ Please make sure that x and y data sizes match! """
         # Fetch title name from user
         processType = 'getTitleName'
         mainTitle = True
-        printVar = [mainTitle, self.defaultTitle]
+        printVar = [mainTitle, config.defaultTitle]
         self.printText(self.printQuestion, printVar, processType) 
-        self.title = self.acceptUserInput(self.defaultTitle, processType)
+        self.title = self.acceptUserInput(config.defaultTitle, processType)
         self.printText(self.printSuccess, self.title, processType)
         
         self.plotPyt.showPlot(self.title, self.numOfPlots)
@@ -1122,19 +1189,19 @@ Please make sure that x and y data sizes match! """
             for i in range(0, int(numYData)):
                 processType = 'getLegendNames'
                 self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(self.defaultLegendNames[i], processType))
+                self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i], processType))
             self.printText(self.printSuccess, self.legendName, processType)
         else: # obtain legend name omitting 1st and 2nd self.dataset
             for i in range(2, self.numData):
                 processType = 'getLegendNames'
                 self.printText(self.printQuestion, i - 2, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(self.defaultLegendNames[i - 2], processType))
+                self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i - 2], processType))
             self.printText(self.printSuccess, self.legendName, processType)
     
     # =============================== Get X-axis Label
         processType = 'getLabelX'
-        self.printText(self.printQuestion, self.defaultXLabel, processType) 
-        self.xLabel = self.acceptUserInput(self.defaultXLabel, processType)
+        self.printText(self.printQuestion, config.defaultXLabel, processType) 
+        self.xLabel = self.acceptUserInput(config.defaultXLabel, processType)
         self.printText(self.printSuccess, self.xLabel, processType)
         
     # =============================== Get Y-axis Label
@@ -1143,42 +1210,42 @@ Please make sure that x and y data sizes match! """
             for i in range(0, int(numYData)):
                 processType = 'getLabelY'
                 self.printText(self.printQuestion, i, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.yLabel.append(self.acceptUserInput(self.defaultYLabel[i], processType))
+                self.yLabel.append(self.acceptUserInput(config.defaultYLabel[i], processType))
             self.printText(self.printSuccess, self.yLabel, processType)
         elif self.threeD: 
             # set y-axis label
             processType = processType
             self.printText(self.printQuestion, 0, processType) 
-            self.yLabel.append(self.acceptUserInput(self.defaultYLabel[0], processType))
+            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[0], processType))
             self.printText(self.printSuccess, 0, processType)
             
             # set z-axis label
             processType = 'getLabelY'
             self.printText(self.printQuestion, 1, processType) 
-            self.zLabel = self.acceptUserInput(self.defaultYLabel[1], processType)
+            self.zLabel = self.acceptUserInput(config.defaultYLabel[1], processType)
             self.printText(self.printSuccess, 1, processType)
         elif self.thirdAxis:
             # set 1st y-axis label
             processType = 'getLabelY'
             self.printText(self.printQuestion, 0, processType) 
-            self.yLabel.append(self.acceptUserInput(self.defaultYLabel[0], processType))
+            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[0], processType))
             self.printText(self.printSuccess, 0, processType)
             
             # set 2nd y-axis label
             self.printText(self.printQuestion, 1, processType) 
-            self.yLabel.append(self.acceptUserInput(self.defaultYLabel[1], processType))
+            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[1], processType))
             self.printText(self.printSuccess, 1, processType)
         else: # 2D regular plot 
             processType = 'getLabelY'
             self.printText(self.printQuestion, 0, processType) 
-            self.yLabel.append(self.acceptUserInput(self.defaultYLabel[0], processType))
+            self.yLabel.append(self.acceptUserInput(config.defaultYLabel[0], processType))
             self.printText(self.printSuccess, self.yLabel, processType)
         
     # =============================== Get Title Name
         # Get title name from user
         processType = 'getTitleName'
-        self.printText(self.printQuestion, self.defaultTitle, processType) 
-        self.title = self.acceptUserInput(self.defaultTitle, processType)
+        self.printText(self.printQuestion, config.defaultTitle, processType) 
+        self.title = self.acceptUserInput(config.defaultTitle, processType)
         self.printText(self.printSuccess, self.title, processType)
         '''
     # =============================== Initiate and Run the PlotPython Class
