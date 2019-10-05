@@ -83,18 +83,30 @@ Please turn on your X-server first and then hit [enter]"""
             self.figRowCnt -= 1
         
     def showPlot(self, title, numOfPlots):
-        self.fig.suptitle(title, size = config.titleLabelSize) # Main title
         
+        self.fig.suptitle(title, size = config.titleLabelSize) # Main title
         # leave some space between subplots
         if numOfPlots >= 2: 
             self.fig.subplots_adjust(hspace = config.subplots_hSpace)
 
-        self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat, dpi = config.dpi)
+        self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat, dpi = config.dpi) # save fig to logs dir
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
+     
+    # =============================== Apply padding and scaling to x- and y-axis
+    def padAndScale(self):
+        # label padding for x- and y-axis
+        self.host[self.figColCnt, self.figRowCnt].axes.xaxis.labelpad = config.xAxis_labelPad
+        self.host[self.figColCnt, self.figRowCnt].axes.yaxis.labelpad = config.yAxis_labelPad
+        
+        # scaling options for x- and y-axis
+        self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX)
+        self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY)
         
     # =============================== Plotter function
     def mainPlotter(self, plotCounter, numOfPlots, plotType, numData, colNumX, colNumY, colNumZ, legendName, binRes, thirdAxis, data):
+        
+        # Main if clause for plots
         if plotType == 'bar':
             for i in range(numData):
                 self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], label = legendName[i]) 
@@ -158,14 +170,7 @@ Please turn on your X-server first and then hit [enter]"""
             # padding and scaling options for z-axis
             self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
             self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
-        
-        # label padding for x- and y-axis
-        self.host[self.figColCnt, self.figRowCnt].axes.xaxis.labelpad = config.xAxis_labelPad
-        self.host[self.figColCnt, self.figRowCnt].axes.yaxis.labelpad = config.yAxis_labelPad
-        
-        # scaling options for x- and y-axis
-        self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX)
-        self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY)
+        self.padAndScale()
         
 ###################### USER INTERACTIONS
 class userInteractions:
@@ -278,9 +283,9 @@ What is the %s name for dataset %d? """
         self.qTxtLabelName = """
 What is the label name of %s-axis? """    
         self.qTxtTitleName = """
-What is the title name of the graph? """
+What is the title name of the subplot? """
         self.qTxtMainTitleName = """
-What is the main title name? """ 
+What is the main title name of the graph? """ 
         self.fTxtDefault = f"""
 Just hit [{Fore.YELLOW}enter{Fore.RED}] for default: ({Fore.CYAN}%s{Fore.RED})\n\n"""
         self.fTxtNotValid = f"""
@@ -346,178 +351,189 @@ Please make sure that x and y data sizes match! """
         else: 
             return False
 
+    # =============================== Question messages on the terminal
+    def printText_question(self, printType, printVal):
+        if self.processType == 'plotType': 
+            # Welcome Text
+            print(self.qTxtTypeOfPlot %printVal[0])
+            # Get plot type from user
+            for i in range(len(self.plotTypes)):
+                print("%d. %s," %(i + 1, self.plotTypes[i]))
+            print(self.qTxtDefault %printVal[1])
+        elif self.processType == 'fetchInputData':
+            print(self.qTxtFileName + self.qTxtDefault %printVal + self.qTxtSkipCsvDataFetch)
+        elif self.processType == 'numOfPlots':
+            print(self.qTxtNumOfPlots + self.qTxtDefault %printVal)
+        elif self.processType == 'fetchColX':
+            if printVal[0] == 0: # first run, do not ask whether user want to plot any more data
+                print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction)
+            else:
+                print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction + self.qTxtNoMoreYData)
+        elif self.processType == 'fetchColY':
+            print(self.qTxtFetchCol %'y'+ self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
+        elif self.processType == 'fetchColZ':
+            print(self.qTxtFetchCol %'z' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
+        elif self.processType == 'getFuncXFromUser':
+            if printVal[0] == 0: # first run, do not ask whether user want to plot any more data
+                print(self.qTxtMinMaxResX + self.qTxtDefault %printVal[1:])
+        elif self.processType == 'getFuncYFromUser':
+            print(self.qTxtEnterFormula %('y', 'x') + self.qTxtDefault %printVal)
+        elif self.processType == 'getFuncZFromUser':
+            print(self.qTxtEnterFormula %('z', 'x, y')+ self.qTxtDefault %printVal)
+        elif self.processType == 'selectDelimeter':
+            print(self.qTxtDelimeter + self.qTxtDefault %printVal)
+        elif self.processType == 'binResolution':
+            print(self.qTxtBinResolution %printVal + self.qTxtDefault %self.defaultBinRes)
+        elif self.processType == 'checkMultiGraph':
+            print(self.qTxtMultiGraph + self.qTxtDefault %printVal)
+        elif self.processType == 'checkMultiXAxis':
+            print(self.qTxtMultiXAxis + self.qTxtDefault %printVal)
+        elif self.processType == 'checkNumXAxis':
+            print(self.qTxtNumColXAxis + self.fTxtNumXAxes %(printVal[0], printVal[1]))
+        elif self.processType == 'fetchXAxisColNum':
+            print(self.qTxtFetchXAxisColNum % printVal + self.fTxtNumXAxes %(0, self.numData - 1))
+        elif self.processType == 'checkThreeDGraph':
+            print(self.qTxtThreeDGraph + self.qTxtSelectYN + self.qTxtDefault %printVal)
+        elif self.processType == 'checkThirdAxis':
+            print(self.qTxtThirdAxis + self.qTxtSelectYN + self.qTxtDefault %printVal)
+        elif self.processType == 'getLegendNames':
+            print(self.qTxtLegendName %(printVal[2], printVal[0]) + self.qTxtDefault %printVal[1])
+        elif self.processType == 'getLabelX':
+            print(self.qTxtLabelName %'x' + self.qTxtDefault %printVal)
+        elif self.processType == 'getLabelY':
+            print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
+        elif self.processType == 'getLabelZ':
+            print(self.qTxtLabelName %'z' + self.qTxtDefault %printVal)
+        elif self.processType == 'getTitleName':
+            if printVal[0] == True: # print main title
+                print(self.qTxtMainTitleName + self.qTxtDefault %printVal[1])
+            else:
+                print(self.qTxtTitleName + self.qTxtDefault %printVal[1])
+                
+    # =============================== Failure messages on the terminal
+    def printText_failure(self, printType, printVal):
+        if self.processType in 'plotType':
+            print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minPlotType, self.maxPlotType) + self.fTxtDefault %printVal)
+        elif self.processType == 'fetchInputData':
+            print(self.fTxtNotValid + self.fTxtDefault %printVal)
+        elif self.processType == 'fetchColX':
+            print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minColNum, self.numData - 1))
+        elif self.processType == 'fetchColY':
+            print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtNoMoreYData + self.qTxtDataFromFunction)
+        elif self.processType == 'fetchColZ':
+            print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
+        elif self.processType in ['getFuncXFromUser', 'numOfPlots']:
+            print(self.fTxtNotValid + self.fTxtTypeIntOrFloat + self.fTxtDefault %printVal)
+        elif self.processType in 'getFuncYFromUser':
+            print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'x**2')
+        elif self.processType in 'getFuncZFromUser':
+            print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'y**2')
+        elif self.processType in 'selectDelimeter':
+            print(self.fTxtNotValid + self.fTxtDelLength + self.fTxtDefault %printVal)
+        elif self.processType in 'checkNumXAxis':
+            print(self.fTxtNotValid + self.fTxtNumXAxes %(self.defaultNumXAxis, self.maxNumXAxis) + self.fTxtDefault %self.defaultNumXAxis)
+        elif self.processType in 'fetchXAxisColNum':
+            print(self.fTxtNotValid + self.fTxtNumXAxes %(0, self.numData - 1) + self.fTxtDefault % 0)
+        elif self.processType in 'checkMultiGraph' or self.processType in 'checkMultiXAxis' or self.processType == 'checkThreeDGraph' or self.processType == 'checkThirdAxis':
+            print(self.fTxtNotValid + self.qTxtSelectYN + self.fTxtDefault %printVal)
+    
+    # =============================== Success messages on the terminal
+    def printText_success(self, printType, printVal):
+        if self.processType == 'plotType':   
+            print(self.yTxtPlotType %(printVal))
+        if self.processType == 'numOfPlots':   
+            print(self.yTxtNumOfPlots %printVal)
+        elif self.processType == 'fetchInputData':
+            print(self.yTxtFileName %printVal)
+        elif self.processType == 'fetchColX':
+            print(self.yTxtFetchCol %('x', printVal))
+        elif self.processType == 'fetchColY':
+            print(self.yTxtFetchCol %('y', printVal))
+        elif self.processType == 'fetchColZ':
+            print(self.yTxtFetchCol %('z', printVal))
+        elif self.processType in 'getFuncXFromUser':
+            print(self.yTxtDataFromFunction %('x', printVal))
+        elif self.processType in 'getFuncYFromUser':
+            print(self.yTxtDataFromFunction %('y', printVal))
+        elif self.processType in 'getFuncZFromUser':
+            print(self.yTxtDataFromFunction %('z', printVal))
+        elif self.processType == 'selectDelimeter':
+            print(self.yTxtDelimeter %printVal)
+        elif self.processType == 'checkMultiGraph':
+            print(self.yTxtMultiGraph %printVal)
+        elif self.processType == 'checkMultiXAxis':
+            print(self.yTxtMultiXAxis %printVal)
+        elif self.processType == 'checkNumXAxis':
+            print(self.yTxtNumXAxis %printVal)
+        elif self.processType == 'fetchXAxisColNum':
+            print(self.yTxtFetchXAxisColNum %printVal)
+        elif self.processType == 'checkThreeDGraph':
+            print(self.yTxtThreeDGraph %printVal)
+        elif self.processType == 'checkThirdAxis':
+            print(self.yTxtThirdAxis %printVal)
+        elif self.processType == 'getLegendNames':
+            print(self.yTxtLegendName %printVal)
+        elif self.processType == 'getLabelX':
+            print(self.yTxtLabelName %('X', printVal))
+        elif self.processType == 'getLabelY':
+            print(self.yTxtLabelName %('Y', printVal))
+        elif self.processType == 'getLabelZ':
+            print(self.yTxtLabelName %('Z', printVal))
+        elif self.processType == 'getTitleName':
+            print(self.yTxtTitleName %printVal)
+                
     # =============================== Print messages on the terminal
-    def printText(self, printType, printVal, processType):
+    def printText(self, printType, printVal):
+    
         if printType == self.printQuestion:
-            if processType == 'plotType': 
-                # Welcome Text
-                print(self.qTxtTypeOfPlot %printVal[0])
-                # Get plot type from user
-                for i in range(len(self.plotTypes)):
-                    print("%d. %s," %(i + 1, self.plotTypes[i]))
-                print(self.qTxtDefault %printVal[1])
-            elif processType == 'fetchInputData':
-                print(self.qTxtFileName + self.qTxtDefault %printVal + self.qTxtSkipCsvDataFetch)
-            elif processType == 'numOfPlots':
-                print(self.qTxtNumOfPlots + self.qTxtDefault %printVal)
-            elif processType == 'fetchColX':
-                if printVal[0] == 0: # first run, do not ask whether user want to plot any more data
-                    print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction)
-                else:
-                    print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction + self.qTxtNoMoreYData)
-            elif processType == 'fetchColY':
-                print(self.qTxtFetchCol %'y'+ self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
-            elif processType == 'fetchColZ':
-                print(self.qTxtFetchCol %'z' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
-            elif processType == 'getFuncXFromUser':
-                if printVal[0] == 0: # first run, do not ask whether user want to plot any more data
-                    print(self.qTxtMinMaxResX + self.qTxtDefault %printVal[1:])
-            elif processType == 'getFuncYFromUser':
-                print(self.qTxtEnterFormula %('y', 'x') + self.qTxtDefault %printVal)
-            elif processType == 'getFuncZFromUser':
-                print(self.qTxtEnterFormula %('z', 'x, y')+ self.qTxtDefault %printVal)
-            elif processType == 'selectDelimeter':
-                print(self.qTxtDelimeter + self.qTxtDefault %printVal)
-            elif processType == 'binResolution':
-                print(self.qTxtBinResolution %printVal + self.qTxtDefault %self.defaultBinRes)
-            elif processType == 'checkMultiGraph':
-                print(self.qTxtMultiGraph + self.qTxtDefault %printVal)
-            elif processType == 'checkMultiXAxis':
-                print(self.qTxtMultiXAxis + self.qTxtDefault %printVal)
-            elif processType == 'checkNumXAxis':
-                print(self.qTxtNumColXAxis + self.fTxtNumXAxes %(printVal[0], printVal[1]))
-            elif processType == 'fetchXAxisColNum':
-                print(self.qTxtFetchXAxisColNum % printVal + self.fTxtNumXAxes %(0, self.numData - 1))
-            elif processType == 'checkThreeDGraph':
-                print(self.qTxtThreeDGraph + self.qTxtSelectYN + self.qTxtDefault %printVal)
-            elif processType == 'checkThirdAxis':
-                print(self.qTxtThirdAxis + self.qTxtSelectYN + self.qTxtDefault %printVal)
-            elif processType == 'getLegendNames':
-                print(self.qTxtLegendName %(printVal[2], printVal[0]) + self.qTxtDefault %printVal[1])
-            elif processType == 'getLabelX':
-                print(self.qTxtLabelName %'x' + self.qTxtDefault %printVal)
-            elif processType == 'getLabelY':
-                print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
-            elif processType == 'getLabelZ':
-                print(self.qTxtLabelName %'z' + self.qTxtDefault %printVal)
-            elif processType == 'getTitleName':
-                if printVal[0] == True: # print main title
-                    print(self.qTxtMainTitleName + self.qTxtDefault %printVal[1])
-                else:
-                    print(self.qTxtTitleName + self.qTxtDefault %printVal[1])
-
+            self.printText_question(printType, printVal)
         elif printType == self.printFailure:
-            if processType in 'plotType':
-                print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minPlotType, self.maxPlotType) + self.fTxtDefault %printVal)
-            elif processType == 'fetchInputData':
-                print(self.fTxtNotValid + self.fTxtDefault %printVal)
-            elif processType == 'fetchColX':
-                print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minColNum, self.numData - 1))
-            elif processType == 'fetchColY':
-                print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtNoMoreYData + self.qTxtDataFromFunction)
-            elif processType == 'fetchColZ':
-                print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
-            elif processType in ['getFuncXFromUser', 'numOfPlots']:
-                print(self.fTxtNotValid + self.fTxtTypeIntOrFloat + self.fTxtDefault %printVal)
-            elif processType in 'getFuncYFromUser':
-                print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'x**2')
-            elif processType in 'getFuncZFromUser':
-                print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'y**2')
-            elif processType in 'selectDelimeter':
-                print(self.fTxtNotValid + self.fTxtDelLength + self.fTxtDefault %printVal)
-            elif processType in 'checkNumXAxis':
-                print(self.fTxtNotValid + self.fTxtNumXAxes %(self.defaultNumXAxis, self.maxNumXAxis) + self.fTxtDefault %self.defaultNumXAxis)
-            elif processType in 'fetchXAxisColNum':
-                print(self.fTxtNotValid + self.fTxtNumXAxes %(0, self.numData - 1) + self.fTxtDefault % 0)
-            elif processType in 'checkMultiGraph' or processType in 'checkMultiXAxis' or processType == 'checkThreeDGraph' or processType == 'checkThirdAxis':
-                print(self.fTxtNotValid + self.qTxtSelectYN + self.fTxtDefault %printVal)
-
+            self.printText_failure(printType, printVal)
         elif printType == self.printSuccess:
-            if processType == 'plotType':   
-                print(self.yTxtPlotType %(printVal))
-            if processType == 'numOfPlots':   
-                print(self.yTxtNumOfPlots %printVal)
-            elif processType == 'fetchInputData':
-                print(self.yTxtFileName %printVal)
-            elif processType == 'fetchColX':
-                print(self.yTxtFetchCol %('x', printVal))
-            elif processType == 'fetchColY':
-                print(self.yTxtFetchCol %('y', printVal))
-            elif processType == 'fetchColZ':
-                print(self.yTxtFetchCol %('z', printVal))
-            elif processType in 'getFuncXFromUser':
-                print(self.yTxtDataFromFunction %('x', printVal))
-            elif processType in 'getFuncYFromUser':
-                print(self.yTxtDataFromFunction %('y', printVal))
-            elif processType in 'getFuncZFromUser':
-                print(self.yTxtDataFromFunction %('z', printVal))
-            elif processType == 'selectDelimeter':
-                print(self.yTxtDelimeter %printVal)
-            elif processType == 'checkMultiGraph':
-                print(self.yTxtMultiGraph %printVal)
-            elif processType == 'checkMultiXAxis':
-                print(self.yTxtMultiXAxis %printVal)
-            elif processType == 'checkNumXAxis':
-                print(self.yTxtNumXAxis %printVal)
-            elif processType == 'fetchXAxisColNum':
-                print(self.yTxtFetchXAxisColNum %printVal)
-            elif processType == 'checkThreeDGraph':
-                print(self.yTxtThreeDGraph %printVal)
-            elif processType == 'checkThirdAxis':
-                print(self.yTxtThirdAxis %printVal)
-            elif processType == 'getLegendNames':
-                print(self.yTxtLegendName %printVal)
-            elif processType == 'getLabelX':
-                print(self.yTxtLabelName %('X', printVal))
-            elif processType == 'getLabelY':
-                print(self.yTxtLabelName %('Y', printVal))
-            elif processType == 'getLabelZ':
-                print(self.yTxtLabelName %('Z', printVal))
-            elif processType == 'getTitleName':
-                print(self.yTxtTitleName %printVal)
+            self.printText_success(printType, printVal)
         return 0
             
     # =============================== Validate input data given by the user
-    def checkUserInput(self, input, processType):
-        if processType == 'fetchColY' and input == '':
+    def checkUserInput(self, input):
+        if self.processType == 'fetchColY' and input == '': # return default y column from csv if user pressed Enter
             input = self.defaultFetchColY
         try: 
-            if processType in ['plotType', 'binResolution', 'checkNumXAxis', 'fetchXAxisColNum', 'numOfPlots']: # prevFuncName[i][3] is 1st prev. function name, prevFuncName[i+1][3] is 2nd most prev. func. name, etc.
+            if self.processType in ['plotType', 'binResolution', 'checkNumXAxis', 'fetchXAxisColNum', 'numOfPlots']: # prevFuncName[i][3] is 1st prev. function name, prevFuncName[i+1][3] is 2nd most prev. func. name, etc.
                 val = float(input)
-                if processType == "plotType": # if fetchDataInfo() called, check whether user input is within defined range
+                if self.processType == "plotType": # if fetchDataInfo() called, check whether user input is within defined range
                     if not (self.minPlotType <= int(input) <= self.maxPlotType):
                         raise ValueError # not correct way to use exception errors
-                elif processType == "checkNumXAxis": 
+                elif self.processType == "checkNumXAxis": 
                     if not (self.defaultNumXAxis <= int(input) <= self.maxNumXAxis):
                         raise ValueError # not correct way to use exception errors
-                elif processType == "fetchXAxisColNum":
+                elif self.processType == "fetchXAxisColNum":
                     if not (0 <= val <= self.numData - 1):
                         raise ValueError # not correct way to use exception errors
-            elif processType == 'fetchInputData':
+            elif self.processType == 'fetchInputData':
                 if input in ['s', 'S']:
                     pass
                 elif not self.inputFileFinder(input) is True:
                     raise ValueError
-            elif processType in ['fetchColX', 'fetchColY', 'fetchColZ']:
-                if processType in ['fetchColY', 'fetchColZ'] and not input in ['f', 'F']:
+            elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ']:
+                if self.processType in ['fetchColY', 'fetchColZ'] and not input in ['f', 'F']:
                     input = int(input)
-                if (input in ['f', 'F']) or (processType is 'fetchColX' and self.yDataCounter > 0 and input in ['q', 'Q']):
+                if (input in ['f', 'F']) or (self.processType is 'fetchColX' and self.yDataCounter > 0 and input in ['q', 'Q']):
                     pass
                 elif not self.minColNum <= int(input) <= self.numData - 1: 
                     raise ValueError
-                elif processType in ['fetchColY', 'fetchColZ'] and (len(self.data[input]) != len(self.data[self.fetchColX[-1]])):
+                elif self.processType in ['fetchColY', 'fetchColZ'] and (len(self.data[input]) != len(self.data[self.fetchColX[-1]])):
                     raise ValueError
-            elif processType == 'selectDelimeter':
+            elif self.processType == 'selectDelimeter':
                 if len(input) > 1: # delimeter length cannot be > 1
                     raise ValueError
-            elif (processType == 'checkMultiGraph' or processType == 'checkMultiXAxis' or processType == 'checkThreeDGraph' or processType == 'checkThirdAxis') and not (input in ['y', 'Y', 'n', 'N']):
+            elif (self.processType == 'checkMultiGraph' or self.processType == 'checkMultiXAxis' or self.processType == 'checkThreeDGraph' or self.processType == 'checkThirdAxis') and not (input in ['y', 'Y', 'n', 'N']):
                 raise ValueError
-            elif processType == 'getFuncXFromUser':
+            elif self.processType == 'getFuncXFromUser':
                 val = float(input)
-            elif processType == 'getFuncYFromUser':
+            elif self.processType == 'getFuncYFromUser':
                 x = np.array(self.data[self.fetchColX[-1]])
                 val = eval(input)
-            elif processType == 'getFuncZFromUser':
+            elif self.processType == 'getFuncZFromUser':
                 x = np.array(self.data[self.fetchColX[-1]])
                 y = np.array(self.data[self.fetchColY[-1]])
                 val = eval(input)
@@ -526,366 +542,427 @@ Please make sure that x and y data sizes match! """
         return True
     
     # =============================== Accept input data given by the user
-    def acceptUserInput(self, default, processType):
+    def acceptUserInput(self, default):
         while True: 
             userInput = input()
             self.check_quit(userInput) 
-            checkedInput = self.checkUserInput(userInput, processType) 
+            checkedInput = self.checkUserInput(userInput) 
             if userInput == '':
-                if processType in ['fetchColY', 'fetchColZ'] and checkedInput == False:
-                    self.printText(self.printFailure, default, processType) # x, y, z data sizes do not match
+                if self.processType in ['fetchColY', 'fetchColZ'] and checkedInput == False:
+                    self.printText(self.printFailure, default) # x, y, z data sizes do not match
+                elif self.processType in ['getFuncYFromUser']:
+                    userInput = np.array(self.data[self.fetchColX[-1]]) ** 2 # update default Y with given x input from user 
+                    break
                 else:
                     userInput = default
                     break
             elif checkedInput is True: # DON'T USE 'checkedInput == True' or 'checkedInput', it will mess up the code. Check this out: https://stackoverflow.com/questions/9494404/use-of-true-false-and-none-as-return-values-in-python-functions
-                if (processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['y', 'Y']):
+                if (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['y', 'Y']):
                     userInput = True
-                elif (processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['n', 'N']):
+                elif (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['n', 'N']):
                     userInput = False
-                elif processType in ['getFuncXFromUser', 'binResolution', 'checkNumXAxis']:
+                elif self.processType in ['getFuncXFromUser', 'binResolution', 'checkNumXAxis']:
                     userInput = float(userInput)
-                elif processType in ['fetchXAxisColNum', 'numOfPlots']:
+                elif self.processType in ['fetchXAxisColNum', 'numOfPlots']:
                     userInput = int(userInput)
-                elif processType in ['fetchColX', 'fetchColY', 'fetchColZ']:
+                elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ']:
                     if userInput in ['f', 'F', 'q', 'Q']:
                         pass
                     else:
                         userInput = int(userInput)
-                elif processType == 'getFuncYFromUser':
+                elif self.processType == 'getFuncYFromUser':
                     x = np.array(self.data[self.fetchColX[-1]])
                     userInput = eval(userInput)
-                elif processType == 'getFuncZFromUser':
-                    x = np.array(self.data[self.fetchColX[-1]])
+                elif self.processType == 'getFuncZFromUser':
+                    x = np.array(self.data[self.fetchColX[-1]]) # define "x" and "y" as arrays to be able to evaluate string input function from user in two lines below
                     y = np.array(self.data[self.fetchColY[-1]])
                     userInput = eval(userInput)
                 break
             else:
-                self.printText(self.printFailure, default, processType)
+                self.printText(self.printFailure, default)
         return userInput
+    
+    # =============================== Convert rows to cols in input data from csv
+    def transposeData(self):
+        self.data = list(map(list, zip(*self.data))) # transpose the self.data: rows -> columns
+        self.numData = len(self.data)
+       
+    # =============================== Fetch default label names from csv file
+    def fetchDefLabels(self, plots): 
+        # Update default label names if labels are given in the input file
+        if not (self.data[0][0].isdigit()): # only check one of the first-row entries. If one of them is not a number, then the other first-row entries should be the same
+            for i in range(self.numData):
+                self.data[i][0] = self.data[i][0] if self.data[i][0] != '' else 'blank'
+                self.defaultLabels.append(self.data[i][0])
+            config.defaultLegendNames = self.defaultLabels
             
+            # Delete labels from input data
+            for i in range(self.numData):
+                del self.data[i][0]
+    
+    # =============================== Convert input data into float
+    def convDataToFloat(self): 
+        # convert input data to float 
+        for i in range(self.numData):
+            self.data[i] = [x for x in self.data[i] if len(x.strip()) > 0]
+        for i in range(self.numData): # iterate over each column    
+            for j in range(len(self.data[i])):
+                try:
+                    self.data[i][j] = float(self.data[i][j])
+                except ValueError: 
+                    print(self.fInputDataNotValid)
+                    sys.exit(0)
+    
     # =============================== Fetch input data from csv 
     def fetchInputData(self):
-        with open(config.defaultInputDir + os.sep + self.inputFile, 'r', encoding = config.defaultEncoding) as csvfile:
+        # open csv file
+        with open(config.defaultInputDir + os.sep + self.inputFile, 'r', encoding = config.defaultEncoding) as csvfile: 
             plots = csv.reader(csvfile, delimiter = self.delimeter)
-            
-            # Fetch the self.data from each row
+            # Fetch data from each row
             for row in plots:
                 self.data.append(row)
-            
-            
-            self.data = list(map(list, zip(*self.data))) # transpose the self.data: rows -> columns
-            
-            self.numData = len(self.data)
-            
-            # Update default label names if labels are given in the input file
-            if not (self.data[0][0].isdigit()): # only check one of the first-row entries. If one of them is not a number, then the other first-row entries should be the same
-                for i in range(self.numData):
-                    self.data[i][0] = self.data[i][0] if self.data[i][0] != '' else 'blank'
-                    self.defaultLabels.append(self.data[i][0])
-                config.defaultLegendNames = self.defaultLabels
-                
-                # Delete labels
-                for i in range(self.numData):
-                    del self.data[i][0]
-            
-            # convert input self.data to float 
-            for i in range(self.numData):
-                self.data[i] = [x for x in self.data[i] if len(x.strip()) > 0]
-            for i in range(self.numData): # iterate over each column    
-               for j in range(len(self.data[i])):
-                    try:
-                        self.data[i][j] = float(self.data[i][j])
-                    except ValueError: 
-                        print(self.fInputDataNotValid)
-                        sys.exit(0)
-                    
-    # =============================== User Interactions             
-    def main(self): 
+            self.transposeData()
+            self.fetchDefLabels(plots)
+            self.convDataToFloat()
+    
+    # =============================== Ask input file name from user      
+    def askInputFileName(self):
         # Get input file name from user
-        processType = 'fetchInputData'
-        self.printText(self.printQuestion, config.defaultInputFile, processType)
-        self.inputFile = self.acceptUserInput(config.defaultInputFile, processType)
+        self.printText(self.printQuestion, config.defaultInputFile)
+        self.inputFile = self.acceptUserInput(config.defaultInputFile)
         if not self.inputFile in ['s', 'S']:
-            self.printText(self.printSuccess, self.inputFile, processType)
-            # Get self.delimeter type from user
-            processType = 'selectDelimeter'
-            self.printText(self.printQuestion, config.defaultDelimeter, processType)
-            self.delimeter = self.acceptUserInput(config.defaultDelimeter, processType)
-            self.printText(self.printSuccess, self.delimeter, processType)
+            self.printText(self.printSuccess, self.inputFile)
+            self.askCsvDelimeter()
             self.fetchInputData() # Fetch self.data from .csv file
         else:
             self.csvData = False
-        # Get self.delimeter type from user
-        processType = 'numOfPlots'
-        self.printText(self.printQuestion, self.defaultNumOfPlots, processType)
-        self.numOfPlots = self.acceptUserInput(self.defaultNumOfPlots, processType)
-        self.printText(self.printSuccess, self.numOfPlots, processType)
+            
+    # =============================== Ask csv delimeter from user      
+    def askCsvDelimeter(self):
+        # Get delimeter type from user
+        self.processType = 'selectDelimeter'
+        self.printText(self.printQuestion, config.defaultDelimeter)
+        self.delimeter = self.acceptUserInput(config.defaultDelimeter)
+        self.printText(self.printSuccess, self.delimeter)
         
-        
-        self.initiatePlotter() # Initiate the plotter class
-        self.plotPyt.prepPlot(self.numOfPlots) # prepare the plot environment
-        
+    # =============================== Ask number of plots from user   
+    def askNumOfPlots(self):
+        # Ask num of plots type from user
+        self.processType = 'numOfPlots'
+        self.printText(self.printQuestion, self.defaultNumOfPlots)
+        self.numOfPlots = self.acceptUserInput(self.defaultNumOfPlots)
+        self.printText(self.printSuccess, self.numOfPlots)
+       
+    # =============================== Reinitialize some variables  
+    def main_reinitializeVars(self):
+        # Reinitialize some vars
+        self.yDataCounter = 0
         self.thirdAxis = False
+        self.threeD = False
         self.fetchColX = []
         self.fetchColY = []
         self.fetchColZ = []
         self.legendName = []
-        for i in range(self.numOfPlots):
-            # Select plot type
-            processType = 'plotType'
-            printVal = [i + 1, config.defaultPlotSelect]
-            self.printText(self.printQuestion, printVal, processType)
-            self.plotSelect = self.acceptUserInput(config.defaultPlotSelect, processType)
-            if not self.plotSelect == config.defaultPlotSelect:
-                self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
-            self.printText(self.printSuccess, self.plotSelect, processType)
-            
-            self.threeD = True if self.plotSelect is '3d' else False
-            
-            while True:
-                if self.csvData:
-                    # Fetch data of x-axis
-                    processType = 'fetchColX'
-                    printVal = [self.yDataCounter, self.defaultFetchColX]
-                    self.printText(self.printQuestion, printVal, processType)
-                    self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX, processType))
-                    if not self.fetchColX[-1] in ['f', 'F', 'q', 'Q']:
-                        self.printText(self.printSuccess, self.fetchColX, processType)
-                        if self.plotSelect in ['cdf', 'histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
-                            break
-                    if self.fetchColX[-1] in ['f', 'F']:
-                        self.fetchColX.pop()
-                        self.fetchXFunc = True    
-                        self.fetchXFunc2 = True 
-                    elif self.fetchColX[-1] in ['q', 'Q']:
-                        self.fetchColX.pop()
-                        break
-                
-                    # Fetch data of y-axis
-                    if self.fetchXFunc is False:
-                        if self.plotSelect != 'box': # no need for y-axis data for bar plot
-                            processType = 'fetchColY'
-                            self.printText(self.printQuestion, self.defaultFetchColY, processType)
-                            self.fetchColY.append(self.acceptUserInput(self.defaultFetchColY, processType))
-                            if self.fetchColY[-1] in ['f', 'F']:
-                                self.fetchColY.pop()
-                                self.fetchYFunc = True
-                                self.fetchYFunc2 = True
-                            else:
-                                self.printText(self.printSuccess, self.fetchColY, processType)
-                        
-                        if self.plotSelect == '3d':
-                            processType = 'fetchColZ'
-                            self.printText(self.printQuestion, self.defaultFetchColZ, processType)
-                            self.fetchColZ.append(self.acceptUserInput(self.defaultFetchColZ, processType))
-                            if self.fetchColZ[-1] in ['f', 'F']:
-                                self.fetchColZ.pop()
-                                self.fetchZFunc = True
-                                self.fetchZFunc2 = True
-                            else:
-                                self.printText(self.printSuccess, self.fetchColZ, processType)
-                                
-                if not self.csvData or self.fetchXFunc or self.fetchYFunc or self.fetchZFunc: # generate data from function
-                    if not processType in ['fetchColY', 'fetchColZ']:
-                        processType = 'getFuncXFromUser'
-                        if self.yDataCounter >= 1 and not self.csvData: 
-                            print("Please type [qQ] if you don't want to plot more data in this graph or type any other key to continue")
-                            userInput = input()
-                            if userInput in ['q', 'Q']:
-                                break
-                        printVal = [self.yDataCounter, self.minX, self.maxX, self.resX]
-                        self.printText(self.printQuestion, printVal, processType)
-                        print("Min. x: ")
-                        self.minX = self.acceptUserInput(self.defaultMinX, processType)
-                        if self.minX in ['q', 'Q']:
-                            break
-                        print("Max. x: ")
-                        self.maxX = self.acceptUserInput(self.defaultMaxX, processType)
-                        print("Res. x: ")
-                        self.resX = self.acceptUserInput(self.defaultResX, processType)
-                        self.x = np.arange(self.minX, self.maxX, self.resX)
-                        self.printText(self.printSuccess, self.x, processType)
-                        self.data.append(self.x)
-                        self.fetchColX.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-                        if self.plotSelect in ['cdf', 'histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
-                            break
-                            
-                        if self.fetchColX[-1] in ['q', 'Q']:
-                            self.fetchColX.pop()
-                            if (self.plotSelect is '3d' and self.yDataCounter < 2):
-                                print(f"{Fore.RED}You need to enter at least 2 data sets in order to plot 3D plot")
-                            else:
-                                break
-                                
-                    
+        
+    # =============================== Ask plot type from user      
+    def askPlotType(self, i):
+        # Select plot type
+        self.processType = 'plotType'
+        printVal = [i + 1, config.defaultPlotSelect]
+        self.printText(self.printQuestion, printVal)
+        self.plotSelect = self.acceptUserInput(config.defaultPlotSelect)
+        if not self.plotSelect == config.defaultPlotSelect:
+            self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
+        self.printText(self.printSuccess, self.plotSelect)
+        self.threeD = True if self.plotSelect is '3d' else False
+        
+    # =============================== Ask x-axis csv data from user      
+    def askXData_csv(self):
+        self.processType = 'fetchColX'
+        printVal = [self.yDataCounter, self.defaultFetchColX]
+        self.printText(self.printQuestion, printVal)
+        self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
+        if not self.fetchColX[-1] in ['f', 'F', 'q', 'Q']:
+            self.printText(self.printSuccess, self.fetchColX)
+            if self.plotSelect in ['cdf', 'histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
+                return True
+        if self.fetchColX[-1] in ['f', 'F']:
+            self.fetchColX.pop()
+            self.fetchXFunc = True    
+            self.fetchXFunc2 = True 
+        elif self.fetchColX[-1] in ['q', 'Q']:
+            self.fetchColX.pop()
+            return True
+        return False
+     
+    # =============================== Ask y- and z-axis csv data from user      
+    def askYZData_csv(self):
+        if self.fetchXFunc is False:
+            if self.plotSelect != 'box': # no need for y-axis data for bar plot
+                self.processType = 'fetchColY'
+                self.printText(self.printQuestion, self.defaultFetchColY)
+                self.fetchColY.append(self.acceptUserInput(self.defaultFetchColY))
+                if self.fetchColY[-1] in ['f', 'F']:
+                    self.fetchColY.pop()
                     self.fetchYFunc = True
                     self.fetchYFunc2 = True
-                    if self.plotSelect != 'box' and processType != 'fetchColZ': # no need for y-axis data for bar plot
-                        processType = 'getFuncYFromUser'
-                        printVal = 'x**2'
-                        self.printText(self.printQuestion, printVal, processType)
-                        print("y(x): ")
-                        self.y = self.acceptUserInput(self.defaultY, processType)
-                        self.printText(self.printSuccess, self.y, processType)
-                        self.data.append(self.y)
-                        self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-                    
+                else:
+                    self.printText(self.printSuccess, self.fetchColY)
+            if self.plotSelect == '3d':
+                self.processType = 'fetchColZ'
+                self.printText(self.printQuestion, self.defaultFetchColZ)
+                self.fetchColZ.append(self.acceptUserInput(self.defaultFetchColZ))
+                if self.fetchColZ[-1] in ['f', 'F']:
+                    self.fetchColZ.pop()
                     self.fetchZFunc = True
                     self.fetchZFunc2 = True
-                    if self.plotSelect == '3d':
-                        processType = 'getFuncZFromUser'
-                        printVal = 'y**2'
-                        self.printText(self.printQuestion, printVal, processType)
-                        print("z(x, y): ")
-                        self.z = self.acceptUserInput(self.defaultZ, processType)
-                        self.printText(self.printSuccess, self.z, processType)
-                        self.data.append(self.z)
-                        self.fetchColZ.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-
-                self.yDataCounter += 1
-                
-                # Fetch legend name
-                processType = 'getLegendNames'
-                if self.plotSelect == 'box':
-                    if not self.csvData or self.fetchXFunc:
-                        printVal = [i, config.defaultXLabel, 'xtick']
-                        self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(config.defaultXLabel, processType))
-                    else:
-                        printVal = [i, self.defaultLabels[self.fetchColX[-1]], 'xtick']
-                        self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]], processType))
-                    self.printText(self.printSuccess, self.legendName, processType)
-                elif self.plotSelect == '3d': 
-                    if not self.csvData or self.fetchZFunc:
-                        printVal = [i, config.defaultZLabel, 'legend']
-                        self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(config.defaultZLabel, processType))
-                    else:
-                        printVal = [i, self.defaultLabels[self.fetchColZ[-1]], 'legend']
-                        self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]], processType))
-                    self.printText(self.printSuccess, self.legendName, processType)
                 else:
-                    if not self.csvData or self.fetchYFunc:
-                        printVal = [i, config.defaultYLabel, 'legend']
-                        self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(config.defaultYLabel, processType))
-                    else:
-                        printVal = [i, self.defaultLabels[self.fetchColY[-1]], 'legend']
-                        self.printText(self.printQuestion, printVal, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]], processType))
-                    self.printText(self.printSuccess, self.legendName, processType)
-                self.fetchXFunc = False
-                self.fetchYFunc = False
-                self.fetchZFunc = False
-            
-            # Check 3rd axis
-            if self.plotSelect in ['line', 'scatter'] and self.yDataCounter == 2:
-                processType = 'checkThirdAxis'
-                self.printText(self.printQuestion, self.defaultThirdAxis, processType)
-                self.thirdAxis = self.acceptUserInput(self.defaultThirdAxis, processType)
-                self.printText(self.printSuccess, self.thirdAxis, processType)
-                
-            # Fetch x-label
-            processType = 'getLabelX'
-            if self.plotSelect == 'box':
-                self.printText(self.printQuestion, config.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                self.xLabel = (self.acceptUserInput(config.defaultXLabel, processType))
+                    self.printText(self.printSuccess, self.fetchColZ)
+                    
+    # =============================== Ask x-axis func data from user      
+    def askXData_func(self):
+        if not self.processType in ['fetchColY', 'fetchColZ']:
+            self.processType = 'getFuncXFromUser'
+            if self.yDataCounter >= 1 and not self.csvData: 
+                print("Please type [qQ] if you don't want to plot more data in this graph or type any other key to continue")
+                userInput = input()
+                if userInput in ['q', 'Q']:
+                    return True
+            printVal = [self.yDataCounter, self.minX, self.maxX, self.resX]
+            self.printText(self.printQuestion, printVal)
+            print("Min. x: ")
+            self.minX = self.acceptUserInput(self.defaultMinX)
+            if self.minX in ['q', 'Q']:
+                return True
+            print("Max. x: ")
+            self.maxX = self.acceptUserInput(self.defaultMaxX)
+            print("Res. x: ")
+            self.resX = self.acceptUserInput(self.defaultResX)
+            self.x = np.arange(self.minX, self.maxX, self.resX)
+            self.printText(self.printSuccess, self.x)
+            self.data.append(self.x)
+            self.fetchColX.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+            if self.plotSelect in ['cdf', 'histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
+                return True
+            if self.fetchColX[-1] in ['q', 'Q']:
+                self.fetchColX.pop()
+                if (self.plotSelect is '3d' and self.yDataCounter < 2):
+                    print(f"{Fore.RED}You need to enter at least 2 data sets in order to plot 3D plot")
+                else:
+                    return True
+            return False
+        
+    # =============================== Ask y-axis func data from user      
+    def askYData_func(self):
+        self.fetchYFunc = True
+        self.fetchYFunc2 = True
+        if self.plotSelect != 'box' and self.processType != 'fetchColZ': # no need for y-axis data for bar plot
+            self.processType = 'getFuncYFromUser'
+            printVal = 'x**2'
+            self.printText(self.printQuestion, printVal)
+            print("y(x): ")
+            self.y = self.acceptUserInput(self.defaultY)
+            self.printText(self.printSuccess, self.y)
+            self.data.append(self.y)
+            self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+           
+    # =============================== Ask z-axis func data from user      
+    def askZData_func(self):
+        self.fetchZFunc = True
+        self.fetchZFunc2 = True
+        if self.plotSelect == '3d':
+            self.processType = 'getFuncZFromUser'
+            printVal = 'y**2'
+            self.printText(self.printQuestion, printVal)
+            print("z(x, y): ")
+            self.z = self.acceptUserInput(self.defaultZ)
+            self.printText(self.printSuccess, self.z)
+            self.data.append(self.z)
+            self.fetchColZ.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+    
+    # =============================== Ask legend names of fetched data from user      
+    def askLegendNames(self, i):
+        # Fetch legend name(s)
+        self.processType = 'getLegendNames'
+        if self.plotSelect == 'box':
+            if not self.csvData or self.fetchXFunc:
+                printVal = [i, config.defaultXLabel, 'xtick']
+                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+                self.legendName.append(self.acceptUserInput(config.defaultXLabel))
             else:
-                if not self.csvData or self.fetchXFunc2:
-                    self.printText(self.printQuestion, config.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                    self.xLabel = (self.acceptUserInput(config.defaultXLabel, processType))
-                else:
-                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]], processType) 
-                    self.xLabel = self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]], processType)
-                self.printText(self.printSuccess, self.xLabel, processType)
+                printVal = [i, self.defaultLabels[self.fetchColX[-1]], 'xtick']
+                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+                self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
+            self.printText(self.printSuccess, self.legendName)
+        elif self.plotSelect == '3d': 
+            if not self.csvData or self.fetchZFunc:
+                printVal = [i, config.defaultZLabel, 'legend']
+                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+                self.legendName.append(self.acceptUserInput(config.defaultZLabel))
+            else:
+                printVal = [i, self.defaultLabels[self.fetchColZ[-1]], 'legend']
+                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+                self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]]))
+            self.printText(self.printSuccess, self.legendName)
+        else:
+            if not self.csvData or self.fetchYFunc:
+                printVal = [i, config.defaultYLabel, 'legend']
+                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+                self.legendName.append(self.acceptUserInput(config.defaultYLabel))
+            else:
+                printVal = [i, self.defaultLabels[self.fetchColY[-1]], 'legend']
+                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+                self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]]))
+            self.printText(self.printSuccess, self.legendName)
+        self.fetchXFunc = False
+        self.fetchYFunc = False
+        self.fetchZFunc = False
+    
+    # =============================== Ask user if 3rd axis to be enabled in graph
+    def ask3rdAxis(self):
+        # Check 3rd axis
+        if self.plotSelect in ['line', 'scatter'] and self.yDataCounter == 2:
+            self.processType = 'checkThirdAxis'
+            self.printText(self.printQuestion, self.defaultThirdAxis)
+            self.thirdAxis = self.acceptUserInput(self.defaultThirdAxis)
+            self.printText(self.printSuccess, self.thirdAxis)
             
-            if (self.plotSelect == 'histogram'):
-                processType = 'binResolution'
-                self.printText(self.printQuestion, self.defaultBinRes, processType)
-                self.binRes = self.acceptUserInput(self.defaultBinRes, processType)
-                self.printText(self.printSuccess, self.binRes, processType)
-                    
-            if self.plotSelect == 'cdf':
-                self.yLabel = config.cdfDefaultLabel
-            elif self.plotSelect == 'histogram':
-                self.yLabel = config.histDefaultLabel
-            elif self.plotSelect == 'box':
-                processType = 'getLabelY'
+    # =============================== Ask x-axis label name from user
+    def askXLabel(self):
+        # Fetch x-label
+        self.processType = 'getLabelX'
+        if self.plotSelect == 'box':
+            self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
+            self.xLabel = (self.acceptUserInput(config.defaultXLabel))
+        else:
+            if not self.csvData or self.fetchXFunc2:
+                self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
+                self.xLabel = (self.acceptUserInput(config.defaultXLabel))
+            else:
+                self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
+                self.xLabel = self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]])
+            self.printText(self.printSuccess, self.xLabel)
+    
+    # =============================== Ask bin resolution for histogram graphs from user
+    def askBinRes(self):
+        if (self.plotSelect == 'histogram'):
+            self.processType = 'binResolution'
+            self.printText(self.printQuestion, self.defaultBinRes)
+            self.binRes = self.acceptUserInput(self.defaultBinRes)
+            self.printText(self.printSuccess, self.binRes)
+    
+    # =============================== Ask y- and z-axis label names from user
+    def askYZLabel(self):
+        if self.plotSelect == 'cdf':
+            self.yLabel = config.cdfDefaultLabel
+        elif self.plotSelect == 'histogram':
+            self.yLabel = config.histDefaultLabel
+        elif self.plotSelect == 'box':
+            self.processType = 'getLabelY'
+            if not self.csvData or self.fetchYFunc2:
+                self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
+                self.yLabel = (self.acceptUserInput(config.defaultXLabel)) # fetch x label to the y-axis
+            else:
+                self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
+                self.yLabel = (self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
+            self.printText(self.printSuccess, self.yLabel)
+        
+        if not self.plotSelect in ['cdf', 'histogram', 'box']:
+            # Fetch y-label
+            self.processType = 'getLabelY'
+            if not self.thirdAxis:
                 if not self.csvData or self.fetchYFunc2:
-                    self.printText(self.printQuestion, config.defaultXLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                    self.yLabel = (self.acceptUserInput(config.defaultXLabel, processType)) # fetch x label to the y-axis
+                    self.printText(self.printQuestion, config.defaultYLabel) # send i instead of legend name to be able to print dataset # in printText()
+                    self.yLabel = self.acceptUserInput(config.defaultYLabel)
                 else:
-                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]], processType) 
-                    self.yLabel = (self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]], processType))
-                self.printText(self.printSuccess, self.yLabel, processType)
-            
-            if not self.plotSelect in ['cdf', 'histogram', 'box']:
-                # Fetch y-label
-                processType = 'getLabelY'
-                
-                if not self.thirdAxis:
+                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]]) 
+                    self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]])
+                self.printText(self.printSuccess, self.yLabel)
+            else:
+                # Fetch y-label for the 3rd axis
+                for j in range(2):
                     if not self.csvData or self.fetchYFunc2:
-                        self.printText(self.printQuestion, config.defaultYLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.yLabel = self.acceptUserInput(config.defaultYLabel, processType)
+                        self.printText(self.printQuestion, config.defaultYLabel) # send j instead of legend name to be able to print dataset # in printText()
+                        self.yLabel2 = self.acceptUserInput(config.defaultYLabel) # fetch x label to the y-axis
                     else:
-                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]], processType) 
-                        self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]], processType)
-                    self.printText(self.printSuccess, self.yLabel, processType)
+                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-2 + j]]) 
+                        self.yLabel2 = self.acceptUserInput(self.defaultLabels[self.fetchColY[-2 + j]])
+                    self.printText(self.printSuccess, self.yLabel2)
+            if self.plotSelect == '3d':
+                # set z-axis label
+                self.processType = 'getLabelZ'
+                if not self.csvData or self.fetchZFunc2:
+                    self.printText(self.printQuestion, config.defaultZLabel) # send i instead of legend name to be able to print dataset # in printText()
+                    self.zLabel = self.acceptUserInput(config.defaultZLabel)
                 else:
-                    # Fetch y-label for the 3rd axis
-                    for j in range(2):
-                        if not self.csvData or self.fetchYFunc2:
-                            self.printText(self.printQuestion, config.defaultYLabel, processType) # send j instead of legend name to be able to print dataset # in printText()
-                            self.yLabel2 = self.acceptUserInput(config.defaultYLabel, processType) # fetch x label to the y-axis
-                        else:
-                            self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-2 + j]], processType) 
-                            self.yLabel2 = self.acceptUserInput(self.defaultLabels[self.fetchColY[-2 + j]], processType)
-                        self.printText(self.printSuccess, self.yLabel2, processType)
-                
-                
-                if self.plotSelect == '3d':
-                    # set z-axis label
-                    processType = 'getLabelZ'
-                    if not self.csvData or self.fetchZFunc2:
-                        self.printText(self.printQuestion, config.defaultZLabel, processType) # send i instead of legend name to be able to print dataset # in printText()
-                        self.zLabel = self.acceptUserInput(config.defaultZLabel, processType)
+                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColZ[-1]]) 
+                    self.zLabel = self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]])
+                self.printText(self.printSuccess, self.zLabel)
+            self.fetchXFunc2 = False
+            self.fetchYFunc2 = False
+            self.fetchZFunc2 = False
+    
+    # =============================== Ask subplot title name from user
+    def askSubplotTitle(self):
+        if self.numOfPlots > 1: 
+            # Fetch title name from user
+            self.processType = 'getTitleName'
+            mainTitle = False
+            printVar = [mainTitle, config.defaultTitle]
+            self.printText(self.printQuestion, printVar) 
+            self.title = self.acceptUserInput(config.defaultTitle)
+            self.printText(self.printSuccess, self.title)
+    
+    # =============================== Ask main title name from user
+    def askMainTitle(self):
+        self.processType = 'getTitleName'
+        mainTitle = True
+        printVar = [mainTitle, config.defaultTitle]
+        self.printText(self.printQuestion, printVar) 
+        self.title = self.acceptUserInput(config.defaultTitle)
+        self.printText(self.printSuccess, self.title)
+        
+    # =============================== User Interactions             
+    def main(self): 
+        self.processType = 'fetchInputData'
+        self.askInputFileName()
+        self.askNumOfPlots()
+        self.initiatePlotter() # Initiate the plotter class
+        self.plotPyt.prepPlot(self.numOfPlots) # prepare the plot environment
+        self.main_reinitializeVars()
+        # main plot loop
+        for i in range(self.numOfPlots):
+            self.askPlotType(i)
+            # data generation loop
+            while True:
+                if self.csvData:
+                    # Ask data of x-axis from user
+                    if self.askXData_csv():
+                        break
                     else:
-                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColZ[-1]], processType) 
-                        self.zLabel = self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]], processType)
-                    self.printText(self.printSuccess, self.zLabel, processType)
-                    
-                self.fetchXFunc2 = False
-                self.fetchYFunc2 = False
-                self.fetchZFunc2 = False
-            
-            if self.numOfPlots > 1: 
-                    # Fetch title name from user
-                    processType = 'getTitleName'
-                    mainTitle = False
-                    printVar = [mainTitle, config.defaultTitle]
-                    self.printText(self.printQuestion, printVar, processType) 
-                    self.title = self.acceptUserInput(config.defaultTitle, processType)
-                    self.printText(self.printSuccess, self.title, processType)
+                        pass
+                    self.askYZData_csv()
+                if not self.csvData or self.fetchXFunc or self.fetchYFunc or self.fetchZFunc: # generate data from function
+                    if self.askXData_func():
+                        break
+                    else:
+                        pass   
+                    self.askYData_func()
+                    self.askZData_func()
+                self.yDataCounter += 1
+                self.askLegendNames(i)
+            self.ask3rdAxis()
+            self.askXLabel()
+            self.askBinRes()
+            self.askYZLabel()
+            self.askSubplotTitle()
             plotCounter = i
             self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
             self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.yLabel2, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter)
-            self.yDataCounter = 0
-            self.fetchColX = []
-            self.fetchColY = []
-            self.fetchColZ = []
-            self.legendName = []
-            self.threeD = False
-            self.thirdAxis = False   
+            self.main_reinitializeVars() 
             
         # Fetch title name from user
-        processType = 'getTitleName'
-        mainTitle = True
-        printVar = [mainTitle, config.defaultTitle]
-        self.printText(self.printQuestion, printVar, processType) 
-        self.title = self.acceptUserInput(config.defaultTitle, processType)
-        self.printText(self.printSuccess, self.title, processType)
+        self.askMainTitle()
         self.plotPyt.showPlot(self.title, self.numOfPlots)
             
        
