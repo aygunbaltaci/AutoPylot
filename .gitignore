@@ -1,10 +1,8 @@
-basePics
 libraryFiles
 myapp
 logs/**
 inputCsvFiles/highResData.csv
 inputCsvFiles/lowResData.csv
-inputCsvFiles/plotMaps.csv
-plotFromCsv_final.py
 nearestPtInterpolator.py
-plotMaps.py
+*.png
+*.svg
