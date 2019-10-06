@@ -3,14 +3,14 @@
 ![PythonPlotter](supportedPlots.png)
 
 The PythonPlotter is an automized tool to provide a plotting platform with many features based on python matplotlib library. Whether you have sets of data or math functions to be plotted, this program can be utilized to plot your graphs without needing to write a python program. 
-PythonPlotter takes csv file as input and provides the plots by asking questions to the user. It is a user-interactive program to provide the highest level of flexibility to the user. Also, *config.py* allows user to flexibly set up certain parameters for the program. 
+PythonPlotter takes csv file as input and provides the desired plots. It is a user-interactive program to provide the highest level of flexibility to the user. Also, *config.py* allows user to flexibly set up certain configuration parameters for the program. 
 Resulting plot is saved in the *logs/* directory. 
 
 
 ## Features
 - No need for programming to generate plots. Simply give your input data or math function to PythonPlotter and plot your data. 
-- Subplots are supported
-- Supported plot types: bar, box, cdf, histogram, line, scatter, line+scatter, 3D line
+- Subplots are supported.
+- Supported plot types: **bar, box, cdf, histogram, line, scatter, line+scatter** and **3D line**.
 	- Flexibility of selecting any plot type for each subplot.
 - Provide your input data either via csv file (delimeter type can be specified in the program) or generate x-axis based on *numpy.arange()* and create y-axis functions with *numpy.* or *math.* libraries.
 - Flexibly enter your x- and y-axis labels, legend names, (sub)plot titles, etc.
@@ -30,7 +30,7 @@ Installation commamnds are given for Ubuntu (tested on Ubuntu 18.04).
 
 > sudo apt install python3-matplotlib python3-tk
 
-**Csv, numpy,colorama, tinker**
+**Csv, numpy,colorama**
 
 > pip3 install numpy colorama
 
