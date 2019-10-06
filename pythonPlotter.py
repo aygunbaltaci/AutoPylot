@@ -8,7 +8,7 @@ import numpy as np
 import math
 import os
 import sys
-import inspect
+# import inspect
 from colorama import Fore, Back, Style, init # colored output on the terminal
 from datetime import datetime
 import tkinter
@@ -61,7 +61,7 @@ Please turn on your X-server first and then hit [enter]"""
         self.guest.yaxis.label.set_color(self.colors[self.color_y2])
     
     # =============================== Show the plot
-    def plotLabeling(self, xLabel, yLabel, yLabel2, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter):
+    def plotLabeling(self, xLabel, yLabel, yLabel2, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter, plotType):
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat, dpi = config.dpi)
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel, size = config.axisLabelSize)
         self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel, size = config.axisLabelSize)
@@ -72,7 +72,7 @@ Please turn on your X-server first and then hit [enter]"""
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
             self.host[self.figColCnt, self.figRowCnt].title.set_size(config.axisLabelSize)
-        if not thirdAxis:
+        if not thirdAxis and not plotType in {'box', 'cdf', 'histogram'}: # cdf and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
             plt.legend()
         
         # logic to place subplots in the right location
@@ -958,7 +958,7 @@ Please make sure that x and y data sizes match! """
             self.askSubplotTitle()
             plotCounter = i
             self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
-            self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.yLabel2, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter)
+            self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.yLabel2, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter, self.plotSelect)
             self.main_reinitializeVars() 
             
         # Fetch title name from user
