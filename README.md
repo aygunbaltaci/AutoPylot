@@ -44,7 +44,7 @@ The PythonPlotter will ask you questions to generate your plots. Answer to the q
 
 ![Flow Diagram of PythonPlotter](flowDiagram.png)
 
-## Description of Flow Diagram
+## Description of the Flow Diagram
 - **Data from CSV file?** and **Name of the CSV file=**: Enter the csv file name of your input data (locate it in *logs/* directory or just skip this step if you will not use data file for your plots. You may also just copy/paste your data into *plotFromCsv.csv*
 - **Delimeter of CSV File**: Enter the delimeter type of the CSV file. Default is *,*: 
 - **Number of (sub)plots**: Enter the number of (sub)plots you want to plot
@@ -66,7 +66,7 @@ The PythonPlotter will ask you questions to generate your plots. Answer to the q
 - **Label name of y-axis**: Type the label name for the y-axis of your plot. 
 - **Label name of z-axis**: Type the label name for the z-axis of your plot. This option pops up only if selected plot type is 3D.  
 - **All subplots completed?**: PythonPlotter will keep looping and keep asking the questions above until the number of subplots which is defined by user is reached. 
-- **Main title name of the graph?**: Enter the main title name of your plots. 
+- **Main title name of the graph**: Enter the main title name of your plots. 
 
 Furthermore, please check out *config.py* where you will find further options to modify your plotting settings. 
 Please report the bugs so that I can improve the program. Also, expect to run into bugs as this is currently the first version of the program and I need feedbacks to improve the program. Thanks!
