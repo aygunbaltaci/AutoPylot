@@ -1,4 +1,4 @@
-#!/usr/bin/python3.6
+#!/usr/bin/env python3
 
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -8,7 +8,6 @@ import numpy as np
 import math
 import os
 import sys
-# import inspect
 from colorama import Fore, Back, Style, init # colored output on the terminal
 from datetime import datetime
 import tkinter
@@ -964,7 +963,6 @@ Please make sure that x and y data sizes match! """
         # Fetch title name from user
         self.askMainTitle()
         self.plotPyt.showPlot(self.title, self.numOfPlots)
-            
        
     # =============================== Initiate and Run the PlotPython Class
     def initiatePlotter(self):
