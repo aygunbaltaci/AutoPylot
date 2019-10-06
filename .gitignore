@@ -4,5 +4,4 @@ logs/**
 inputCsvFiles/highResData.csv
 inputCsvFiles/lowResData.csv
 nearestPtInterpolator.py
-*.png
 *.svg
