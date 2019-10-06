@@ -45,28 +45,28 @@ The PythonPlotter will ask you questions to generate your plots. Answer to the q
 ![Flow Diagram of PythonPlotter](flowDiagram.png)
 
 ## Description of Flow Diagram
--**Data from CSV file?** and **Name of the CSV file=**: Enter the csv file name of your input data (locate it in *logs/* directory or just skip this step if you will not use data file for your plots. You may also just copy/paste your data into *plotFromCsv.csv*
--**Delimeter of CSV File**: Enter the delimeter type of the CSV file. Default is *,*: 
--**Number of (sub)plots**: Enter the number of (sub)plots you want to plot
--**Plot Type**: Select your desired plot type (just enter the corresponding plot type number. )
--**Fetch data of x-axis from CSV or derive function?**: Although you added a CSV file as input, you may still derive data by function. Thus, you can select whether you want to fetch a data from your CSV file or just derive a function. 
--**Minimum value of x-axis**: Minimum value for the range of x-axis.
--**Maximum value of x-axis**: Maximum value for the range of x-axis.
--**Resolution of x-axis**: Resolution value for the range of x-axis.
--**y(x)**: Enter the function for y-axis (based on *x*). You may utilize *numpy.* as well as *math.* libraries or just simple python math expressions. 
--**z(x, y)**: Enter the function for z-axis (based on *x* and *y*). You may utilize *numpy.* as well as *math.* libraries or just simple python math expressions. This option pops up only if selected plot type is 3D. 
--**Select column number of x-axis**: Enter the column number of your csv file which should be used for x-axis in the plot. 
--**Select column number of y-axis**: Enter the column number of your csv file which should be used for y-axis in the plot. 
--**Select column number of z-axis**: Enter the column number of your csv file which should be used for z-axis in the plot. This option pops up only if selected plot type is 3D. 
--**Legend name of data**: Enter the legend name for your input data.
--**More data to be plotted?**: After entering legend name, the program will ask you whether you want to plot another set of data in the same graph. 
--**Enable 3rd-axis?**: If you used two different data sets in scatter, line or line+scatter okit types, then the program will ask you whether you want to enable the 2-nd y-axis on the plot. 
--**Label name of x-axis**: Type the label name for the x-axis of your plot. 
--**Bin size of histogram**: If selected plot type is histogram, PythonPlotter will ask you to enter the bin size of your plot, which will determine the resolution of the plot. 
--**Label name of y-axis**: Type the label name for the y-axis of your plot. 
--**Label name of z-axis**: Type the label name for the z-axis of your plot. This option pops up only if selected plot type is 3D.  
--**All subplots completed?**: PythonPlotter will keep looping and keep asking the questions above until the number of subplots which is defined by user is reached. 
--**Main title name of the graph?**: Enter the main title name of your plots. 
+- **Data from CSV file?** and **Name of the CSV file=**: Enter the csv file name of your input data (locate it in *logs/* directory or just skip this step if you will not use data file for your plots. You may also just copy/paste your data into *plotFromCsv.csv*
+- **Delimeter of CSV File**: Enter the delimeter type of the CSV file. Default is *,*: 
+- **Number of (sub)plots**: Enter the number of (sub)plots you want to plot
+- **Plot Type**: Select your desired plot type (just enter the corresponding plot type number. )
+- **Fetch data of x-axis from CSV or derive function?**: Although you added a CSV file as input, you may still derive data by function. Thus, you can select whether you want to fetch a data from your CSV file or just derive a function. 
+- **Minimum value of x-axis**: Minimum value for the range of x-axis.
+- **Maximum value of x-axis**: Maximum value for the range of x-axis.
+- **Resolution of x-axis**: Resolution value for the range of x-axis.
+- **y(x)**: Enter the function for y-axis (based on *x*). You may utilize *numpy.* as well as *math.* libraries or just simple python math expressions. 
+- **z(x, y)**: Enter the function for z-axis (based on *x* and *y*). You may utilize *numpy.* as well as *math.* libraries or just simple python math expressions. This option pops up only if selected plot type is 3D. 
+- **Select column number of x-axis**: Enter the column number of your csv file which should be used for x-axis in the plot. 
+- **Select column number of y-axis**: Enter the column number of your csv file which should be used for y-axis in the plot. 
+- **Select column number of z-axis**: Enter the column number of your csv file which should be used for z-axis in the plot. This option pops up only if selected plot type is 3D. 
+- **Legend name of data**: Enter the legend name for your input data.
+- **More data to be plotted?**: After entering legend name, the program will ask you whether you want to plot another set of data in the same graph. 
+- **Enable 3rd-axis?**: If you used two different data sets in scatter, line or line+scatter okit types, then the program will ask you whether you want to enable the 2-nd y-axis on the plot. 
+- **Label name of x-axis**: Type the label name for the x-axis of your plot. 
+- **Bin size of histogram**: If selected plot type is histogram, PythonPlotter will ask you to enter the bin size of your plot, which will determine the resolution of the plot. 
+- **Label name of y-axis**: Type the label name for the y-axis of your plot. 
+- **Label name of z-axis**: Type the label name for the z-axis of your plot. This option pops up only if selected plot type is 3D.  
+- **All subplots completed?**: PythonPlotter will keep looping and keep asking the questions above until the number of subplots which is defined by user is reached. 
+- **Main title name of the graph?**: Enter the main title name of your plots. 
 
 Furthermore, please check out *config.py* where you will find further options to modify your plotting settings. 
 Please report the bugs so that I can improve the program. Also, expect to run into bugs as this is currently the first version of the program and I need feedbacks to improve the program. Thanks!
