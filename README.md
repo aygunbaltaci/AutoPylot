@@ -1,6 +1,6 @@
 # Python Plotter
 
-![Alt text](supportedPlots.png?raw=true "PythonPlotter")
+![Screenshot](supportedPlots.png "PythonPlotter")
 
 This program is an automized tool to provide a plotting platform with many features based on python matplotlib library. Whether you have sets of data or math functions to be plotted, this program can be utilized to plot your graphs without needing to write a python program. 
 The program takes csv file as input and provides the plots by asking questions to the user. It is a user-interactive program to provide the highest level of flexibility to the user. Also, *config.py* allows user to flexibly set up certain parameters for the program. 
@@ -42,7 +42,7 @@ Simply run the program.
 
 The program will ask you questions to generate your plots. Answer to the questions accordingly and check out the flow diagram and its explanation below to better understand how the program works. 
 
-![Alt text](flowDiagram.png?raw=true "Flow Diagram of PythonPlotter")
+![Screenshot](flowDiagram.png "Flow Diagram of PythonPlotter")
 
 ## Description of Flow Diagram
 	
