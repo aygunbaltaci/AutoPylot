@@ -77,3 +77,4 @@ Please report the bugs so that I can improve the program. Also, expect to run in
 3. Multi-color box plots
 4. Improve the x-axis offset of the input data in histogram plots
 5. Slider tabs for function-based plots 
+6. Error bar support for line plots

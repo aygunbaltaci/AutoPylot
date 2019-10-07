@@ -60,12 +60,12 @@ Please turn on your X-server first and then hit [enter]"""
         self.guest.yaxis.label.set_color(self.colors[self.color_y2])
     
     # =============================== Show the plot
-    def plotLabeling(self, xLabel, yLabel, yLabel2, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter, plotType):
+    def plotLabeling(self, xLabel, yLabel, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter, plotType):
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat, dpi = config.dpi)
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel, size = config.axisLabelSize)
-        self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel, size = config.axisLabelSize)
+        self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel[0], size = config.axisLabelSize)
         if thirdAxis:
-            self.guest.set_ylabel(yLabel2, size = config.axisLabelSize)
+            self.guest.set_ylabel(yLabel[1], size = config.axisLabelSize)
         if threeD: 
             self.host[self.figColCnt, self.figRowCnt].set_zlabel(zLabel, size = config.axisLabelSize)
         if numOfPlots > 1:
@@ -113,6 +113,7 @@ Please turn on your X-server first and then hit [enter]"""
             boxData = []
             for i in range(numData):
                 boxData.append(data[colNumX[i]])
+            self.fig.canvas.draw()
             self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1)
             self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
         elif plotType == 'cdf':
@@ -169,7 +170,8 @@ Please turn on your X-server first and then hit [enter]"""
             # padding and scaling options for z-axis
             self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
             self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
-        self.padAndScale()
+        if not plotType in {'box'}: # function below messes up the ticknames of box plots. To be investigated.
+            self.padAndScale()
         
 ###################### USER INTERACTIONS
 class userInteractions:
@@ -204,8 +206,7 @@ class userInteractions:
         self.threeD = self.defaultThreeD
         self.legendName = []
         self.xLabel = config.defaultXLabel
-        self.yLabel = config.defaultYLabel
-        self.yLabel2 = config.defaultYLabel
+        self.yLabel = []
         self.zLabel = config.defaultZLabel
         self.title = config.defaultTitle
         self.minX = self.defaultMinX
@@ -229,6 +230,7 @@ class userInteractions:
         self.fetchXFunc2 = False
         self.fetchYFunc2 = False
         self.fetchZFunc2 = False
+        self.thirdAxisLabel = False
         self.plotPyt = None
         self.numData = 0
 
@@ -400,7 +402,12 @@ Please make sure that x and y data sizes match! """
         elif self.processType == 'getLabelX':
             print(self.qTxtLabelName %'x' + self.qTxtDefault %printVal)
         elif self.processType == 'getLabelY':
-            print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
+            if not self.thirdAxisLabel:
+                print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
+                self.thirdAxisLabel = True
+            else: # 3rd-axis enabled
+                print(self.qTxtLabelName %'2nd y' + self.qTxtDefault %printVal)
+                self.thirdAxisLabel = False
         elif self.processType == 'getLabelZ':
             print(self.qTxtLabelName %'z' + self.qTxtDefault %printVal)
         elif self.processType == 'getTitleName':
@@ -877,16 +884,15 @@ Please make sure that x and y data sizes match! """
                     self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]]) 
                     self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]])
                 self.printText(self.printSuccess, self.yLabel)
-            else:
-                # Fetch y-label for the 3rd axis
+            else: # Fetch y-label for the 3rd axis
                 for j in range(2):
                     if not self.csvData or self.fetchYFunc2:
                         self.printText(self.printQuestion, config.defaultYLabel) # send j instead of legend name to be able to print dataset # in printText()
-                        self.yLabel2 = self.acceptUserInput(config.defaultYLabel) # fetch x label to the y-axis
+                        self.yLabel.append(self.acceptUserInput(config.defaultYLabel)) # fetch x label to the y-axis
                     else:
                         self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-2 + j]]) 
-                        self.yLabel2 = self.acceptUserInput(self.defaultLabels[self.fetchColY[-2 + j]])
-                    self.printText(self.printSuccess, self.yLabel2)
+                        self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-2 + j]]))
+                    self.printText(self.printSuccess, self.yLabel)
             if self.plotSelect == '3d':
                 # set z-axis label
                 self.processType = 'getLabelZ'
@@ -957,7 +963,7 @@ Please make sure that x and y data sizes match! """
             self.askSubplotTitle()
             plotCounter = i
             self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
-            self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.yLabel2, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter, self.plotSelect)
+            self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter, self.plotSelect)
             self.main_reinitializeVars() 
             
         # Fetch title name from user
