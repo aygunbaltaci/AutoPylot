@@ -71,8 +71,8 @@ Please turn on your X-server first and then hit [enter]"""
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
             self.host[self.figColCnt, self.figRowCnt].title.set_size(config.axisLabelSize)
-        if not thirdAxis and not plotType in {'box', 'cdf', 'histogram'}: # cdf and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
-            plt.legend()
+        if not plotType in {'box', 'cdf', 'histogram'}: # box, cdf and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
+            self.host[self.figColCnt, self.figRowCnt].legend(loc = config.legendLoc)
         
         # logic to place subplots in the right location
         if plotCounter % 2 == 0:
@@ -113,7 +113,6 @@ Please turn on your X-server first and then hit [enter]"""
             boxData = []
             for i in range(numData):
                 boxData.append(data[colNumX[i]])
-            self.fig.canvas.draw()
             self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1)
             self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
         elif plotType == 'cdf':
@@ -142,7 +141,7 @@ Please turn on your X-server first and then hit [enter]"""
                 else:
                     p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[self.color_y2], label = legendName[1]) 
                 lines = [p1, p2]
-                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines])
+                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
             else:
                 for i in range(numData):
@@ -156,7 +155,7 @@ Please turn on your X-server first and then hit [enter]"""
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                 p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[self.color_y2], label = legendName[1])             
                 lines = [p1, p2]
-                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines])
+                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
             else:
                 for i in range(numData):
@@ -860,17 +859,17 @@ Please make sure that x and y data sizes match! """
     # =============================== Ask y- and z-axis label names from user
     def askYZLabel(self):
         if self.plotSelect == 'cdf':
-            self.yLabel = config.cdfDefaultLabel
+            self.yLabel.append(config.cdfDefaultLabel)
         elif self.plotSelect == 'histogram':
-            self.yLabel = config.histDefaultLabel
+            self.yLabel.append(config.histDefaultLabel)
         elif self.plotSelect == 'box':
             self.processType = 'getLabelY'
             if not self.csvData or self.fetchYFunc2:
                 self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
-                self.yLabel = (self.acceptUserInput(config.defaultXLabel)) # fetch x label to the y-axis
+                self.yLabel.append(self.acceptUserInput(config.defaultXLabel)) # fetch x label to the y-axis
             else:
                 self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
-                self.yLabel = (self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
+                self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
             self.printText(self.printSuccess, self.yLabel)
         
         if not self.plotSelect in ['cdf', 'histogram', 'box']:
@@ -879,10 +878,10 @@ Please make sure that x and y data sizes match! """
             if not self.thirdAxis:
                 if not self.csvData or self.fetchYFunc2:
                     self.printText(self.printQuestion, config.defaultYLabel) # send i instead of legend name to be able to print dataset # in printText()
-                    self.yLabel = self.acceptUserInput(config.defaultYLabel)
+                    self.yLabel.append(self.acceptUserInput(config.defaultYLabel))
                 else:
                     self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]]) 
-                    self.yLabel = self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]])
+                    self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]]))
                 self.printText(self.printSuccess, self.yLabel)
             else: # Fetch y-label for the 3rd axis
                 for j in range(2):
