@@ -71,7 +71,7 @@ Please turn on your X-server first and then hit [enter]"""
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
             self.host[self.figColCnt, self.figRowCnt].title.set_size(config.axisLabelSize)
-        if not plotType in {'box', 'cdf', 'histogram'}: # box, cdf and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
+        if not plotType in {'box', 'cdf', 'histogram'} and not thirdAxis: # box, cdf and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
             self.host[self.figColCnt, self.figRowCnt].legend(loc = config.legendLoc)
         
         # logic to place subplots in the right location
@@ -166,6 +166,8 @@ Please turn on your X-server first and then hit [enter]"""
             self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
             for i in range(numData):
                 self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]],  label = legendName[i])
+            self.host[self.figColCnt, self.figRowCnt].azim = config.threeD_azimDegree
+            self.host[self.figColCnt, self.figRowCnt].elev = config.threeD_elevDegree
             # padding and scaling options for z-axis
             self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
             self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
@@ -401,12 +403,12 @@ Please make sure that x and y data sizes match! """
         elif self.processType == 'getLabelX':
             print(self.qTxtLabelName %'x' + self.qTxtDefault %printVal)
         elif self.processType == 'getLabelY':
-            if not self.thirdAxisLabel:
-                print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
-                self.thirdAxisLabel = True
-            else: # 3rd-axis enabled
+            if self.thirdAxis == True and self.thirdAxisLabel == True: 
                 print(self.qTxtLabelName %'2nd y' + self.qTxtDefault %printVal)
                 self.thirdAxisLabel = False
+            print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
+            if self.plotSelect in {'line', 'scatter', 'line+scatter'}:
+                self.thirdAxisLabel = True
         elif self.processType == 'getLabelZ':
             print(self.qTxtLabelName %'z' + self.qTxtDefault %printVal)
         elif self.processType == 'getTitleName':
@@ -668,6 +670,7 @@ Please make sure that x and y data sizes match! """
         self.fetchColY = []
         self.fetchColZ = []
         self.legendName = []
+        self.yLabel = []
         
     # =============================== Ask plot type from user      
     def askPlotType(self, i):

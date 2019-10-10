@@ -71,8 +71,15 @@ The PythonPlotter will ask you questions to generate your plots. Answer to the q
 Furthermore, please check out *config.py* where you will find further options to modify your plotting settings. 
 Please report the bugs so that I can improve the program. Also, expect to run into bugs as this is currently the first version of the program and I need feedbacks to improve the program. Thanks!
 
+## How to Add a New Feature to PythonPlotter? (To be Improved)
+To add a new plot type: 
+1. Add the name of your new plot type to the list *self.plotTypes*
+2. Add the required plotting functions into the function *mainPlotter()*
+3. If you need to define special type of requirements from user input, please check out the functions *checkUserInput()* and *acceptUserInput()*
+4. Check out other functions inside the class *userInteractions* in order to aligm user inputs to the requirements of your plot type.
+
 ## Features to be Added in the Future:
-1. Surface and wired 3D plots
+1. Surface and wired 3D plots along with colorbars
 2. Heat map plots
 3. Multi-color box plots
 4. Improve the x-axis offset of the input data in histogram plots
