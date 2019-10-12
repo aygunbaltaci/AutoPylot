@@ -18,11 +18,9 @@ init(autoreset = True) # turn off colors after each print()
 class plotPython:
     # =============================== Initializer / Instance attributes
     def __init__(self):
-        self.colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#bcbd22', '#17becf'] # blue, orange, green, red, purple, brown, pink, dark gray, light green, cyan. Check out https://matplotlib.org/3.1.0/users/dflt_style_changes.html
+        self.colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'] # blue, orange, green, red, purple, brown, pink, dark gray, light green, cyan. Check out https://matplotlib.org/3.1.0/users/dflt_style_changes.html
         self.lineTypes = ['-', '--', '-.', '.']
         self.plotFuncName = ''
-        self.color_y1 = 0 
-        self.color_y2 = 1 
         self.figRowCnt = 0
         self.figColCnt = 0
         self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -52,12 +50,12 @@ Please turn on your X-server first and then hit [enter]"""
     # =============================== Color the axes
     def axisColoring(self):
         # color the axes of the plot. For now, it is implemented only for 3-axis 2D graphs. TO BE EXTENDED!
-        self.host[self.figColCnt, self.figRowCnt].spines['left'].set_color(self.colors[self.color_y1])
-        self.host[self.figColCnt, self.figRowCnt].tick_params(axis='y', colors=self.colors[self.color_y1])
-        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[self.color_y1])
-        self.guest.spines['right'].set_color(self.colors[self.color_y2])
-        self.guest.tick_params(axis='y', colors=self.colors[self.color_y2])
-        self.guest.yaxis.label.set_color(self.colors[self.color_y2])
+        self.host[self.figColCnt, self.figRowCnt].spines['left'].set_color(self.colors[config.color_line1])
+        self.host[self.figColCnt, self.figRowCnt].tick_params(axis='y', colors=self.colors[config.color_line1])
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[config.color_line1])
+        self.guest.spines['right'].set_color(self.colors[config.color_line2])
+        self.guest.tick_params(axis='y', colors=self.colors[config.color_line2])
+        self.guest.yaxis.label.set_color(self.colors[config.color_line2])
     
     # =============================== Show the plot
     def plotLabeling(self, xLabel, yLabel, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter, plotType):
@@ -129,17 +127,18 @@ Please turn on your X-server first and then hit [enter]"""
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
             self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, align = 'left')  
             plt.xticks(self.bins[:-1])
-        elif plotType in ['line', 'line + scatter']:
+        elif plotType in ['line', 'line+scatter']:
             if thirdAxis:
                 if plotType == 'line':
-                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[self.color_y1], label = legendName[0])  
+                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.color_line1], label = legendName[0])  
                 else:
-                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[self.color_y1], label = legendName[0])  
+                    p1, p3, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[config.color_line1], label = legendName[0])    
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                 if plotType == 'line':
-                    p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], self.colors[self.color_y2], label = legendName[1])             
+                    p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], self.colors[config.color_line2], label = legendName[1])   
+                    
                 else:
-                    p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[self.color_y2], label = legendName[1]) 
+                    p2, p4, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[config.color_line2], label = legendName[1]) 
                 lines = [p1, p2]
                 self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
@@ -151,9 +150,9 @@ Please turn on your X-server first and then hit [enter]"""
                         self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], '-o', label = legendName[i])
         elif plotType == 'scatter':
             if thirdAxis:
-                p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[self.color_y1], label = legendName[0])  
+                p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.color_line1], label = legendName[0])  
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[self.color_y2], label = legendName[1])             
+                p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[config.color_line2], label = legendName[1])             
                 lines = [p1, p2]
                 self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
@@ -185,7 +184,7 @@ class userInteractions:
         self.printSuccess = 's'
         self.defaultLabels = [] 
         self.data = []
-        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line', 'scatter', 'line + scatter', '3d']
+        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line', 'scatter', 'line+scatter', '3d']
         self.printVars = []
         self.minPlotType = 1
         self.maxPlotType = len(self.plotTypes) 
@@ -201,6 +200,9 @@ class userInteractions:
         self.defaultY = self.defaultX ** 2
         self.defaultZ = self.defaultY ** 2
         self.printWelcomeTxt = True
+        self.prevPlotSelect = ''
+        self.plotSelect = ''
+        self.counter_acceptUserInput = 0
        
         # Set default values
         self.thirdAxis = self.defaultThirdAxis
@@ -299,7 +301,8 @@ and then re-run the program"""
         self.fTxtTypeBetween = """
 Please type between [%d] and [%d]. """
         self.fTxtTypeIntOrFloat = """
-Please type an integer or float. """
+Please type an integer or float. 
+Make sure that Max. x > Min. x and Res. x > 0"""
         self.fTxtTypeCorrFormula = """
 Please type a valid formula or function from 
 numpy (np.*) or math (math.*) libraries. \n\n """
@@ -403,12 +406,14 @@ Please make sure that x and y data sizes match! """
         elif self.processType == 'getLabelX':
             print(self.qTxtLabelName %'x' + self.qTxtDefault %printVal)
         elif self.processType == 'getLabelY':
-            if self.thirdAxis == True and self.thirdAxisLabel == True: 
+            if self.thirdAxis == True and self.thirdAxisLabel == True and self.prevPlotSelect == self.plotSelect: 
                 print(self.qTxtLabelName %'2nd y' + self.qTxtDefault %printVal)
                 self.thirdAxisLabel = False
-            print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
-            if self.plotSelect in {'line', 'scatter', 'line+scatter'}:
-                self.thirdAxisLabel = True
+            else:
+                print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
+                if self.plotSelect in {'line', 'scatter', 'line+scatter'}:
+                    self.thirdAxisLabel = True
+                    self.prevPlotSelect = self.plotSelect
         elif self.processType == 'getLabelZ':
             print(self.qTxtLabelName %'z' + self.qTxtDefault %printVal)
         elif self.processType == 'getTitleName':
@@ -537,6 +542,17 @@ Please make sure that x and y data sizes match! """
                 raise ValueError
             elif self.processType == 'getFuncXFromUser':
                 val = float(input)
+                #if self.processType == 'getFuncXFromUser':
+                if self.counter_acceptUserInput == 0: 
+                    self.x_min = val
+                elif self.counter_acceptUserInput == 1:
+                    if val <= self.x_min: # avoid maximum value of x-axis to be smaller that minimum value of x-axis.
+                        return False
+                elif self.counter_acceptUserInput == 2 and val <= 0: # avoid resolution value of x-axis to be less or equal than 0.
+                    return False
+                self.counter_acceptUserInput += 1
+                if self.counter_acceptUserInput == 3:
+                    self.counter_acceptUserInput = 0
             elif self.processType == 'getFuncYFromUser':
                 x = np.array(self.data[self.fetchColX[-1]])
                 val = eval(input)
