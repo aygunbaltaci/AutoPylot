@@ -41,6 +41,7 @@ Simply run the program.
 > ./pythonPlotter.py
 
 The PythonPlotter will ask you questions to generate your plots. Answer to the questions accordingly. Check out the flow diagram and its explanation below to better understand how the program works. You may press *[Enter]* to answer to the questions with default values and you may exit the program at any phase by typing *[exit]||[EXIT]||[quit]||[QUIT]*.
+Please note that the generated graph might seem misaligned on the GUI. Please check the saved figure in *logs/* directory for the actual output.
 
 ![Flow Diagram of PythonPlotter](flowDiagram.png)
 

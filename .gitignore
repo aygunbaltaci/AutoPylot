@@ -1,6 +1,7 @@
 libraryFiles
 myapp
-logs/**
-inputCsvFiles/**
+logs/*.pdf
+inputCsvFiles/highResData.csv
+inputCsvFiles/lowResData.csv
 nearestPtInterpolator.py
 *.svg
