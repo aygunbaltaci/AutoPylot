@@ -106,12 +106,14 @@ Please turn on your X-server first and then hit [enter]"""
         # Main if clause for plots
         if plotType == 'bar':
             for i in range(numData):
-                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], label = legendName[i]) 
+                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i]) 
         elif plotType == 'box':
             boxData = []
             for i in range(numData):
                 boxData.append(data[colNumX[i]])
-            self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1)
+            self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1, patch_artist = True, boxprops = dict(facecolor = self.colors[config.lineColors[0]], 
+            color = self.colors[config.lineColors[1]]), capprops = dict(color = self.colors[config.lineColors[2]]), whiskerprops = dict(color = self.colors[config.lineColors[3]]), 
+            flierprops = dict(color = self.colors[config.lineColors[4]], markeredgecolor = self.colors[config.lineColors[5]]), medianprops = dict(color = self.colors[config.lineColors[6]]))
             self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
         elif plotType == 'cdf':
             bin_edges_list = [] 
@@ -122,49 +124,49 @@ Please turn on your X-server first and then hit [enter]"""
             counts, bin_edges = np.histogram(data[colNumX[0]], bins = bins, density = False) # Use histogram function to bin data
             counts = counts.astype(float) / data_size
             cdfData = np.cumsum(counts)
-            self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData) 
+            self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[0]]) 
         elif plotType == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
-            self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, align = 'left')  
+            self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left')  
             plt.xticks(self.bins[:-1])
         elif plotType in ['line', 'line+scatter']:
             if thirdAxis:
                 if plotType == 'line':
-                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.color_line1], label = legendName[0])  
+                    p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.lineColors[0]], label = legendName[0])  
                 else:
-                    p1, p3, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[config.color_line1], label = legendName[0])    
+                    p1, p3, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[config.lineColors[0]], label = legendName[0])    
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                 if plotType == 'line':
-                    p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], self.colors[config.color_line2], label = legendName[1])   
+                    p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], self.colors[config.lineColors[1]], label = legendName[1])   
                     
                 else:
-                    p2, p4, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[config.color_line2], label = legendName[1]) 
+                    p2, p4, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[config.lineColors[1]], label = legendName[1]) 
                 lines = [p1, p2]
                 self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
             else:
                 for i in range(numData):
                     if plotType == 'line':
-                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
+                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
                     else:
-                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], '-o', label = legendName[i])
+                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], '-o', self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
         elif plotType == 'scatter':
             if thirdAxis:
-                p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.color_line1], label = legendName[0])  
+                p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.lineColors[0]], label = legendName[0])  
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[config.color_line2], label = legendName[1])             
+                p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[config.lineColors[1]], label = legendName[1])             
                 lines = [p1, p2]
                 self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
             else:
                 for i in range(numData):
-                    self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], label = legendName[i])
+                    self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
         elif plotType == '3d':
             self.host[self.figColCnt, self.figRowCnt].axis('off')
             numOfRow = 2 if numOfPlots > 1 else 1
             self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
             for i in range(numData):
-                self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]],  label = legendName[i])
+                self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
             self.host[self.figColCnt, self.figRowCnt].azim = config.threeD_azimDegree
             self.host[self.figColCnt, self.figRowCnt].elev = config.threeD_elevDegree
             # padding and scaling options for z-axis
@@ -505,6 +507,12 @@ Please make sure that x and y data sizes match! """
             self.printText_success(printType, printVal)
         return 0
             
+    # =============================== Incrementer to accept correct values for xmin, xmax and xres in x-axis of function plots
+    def adjust_xInput_func(self): 
+        self.counter_acceptUserInput += 1
+        if self.counter_acceptUserInput == 3:
+            self.counter_acceptUserInput = 0
+    
     # =============================== Validate input data given by the user
     def checkUserInput(self, input):
         if self.processType == 'fetchColY' and input == '': # return default y column from csv if user pressed Enter
@@ -542,7 +550,6 @@ Please make sure that x and y data sizes match! """
                 raise ValueError
             elif self.processType == 'getFuncXFromUser':
                 val = float(input)
-                #if self.processType == 'getFuncXFromUser':
                 if self.counter_acceptUserInput == 0: 
                     self.x_min = val
                 elif self.counter_acceptUserInput == 1:
@@ -550,9 +557,7 @@ Please make sure that x and y data sizes match! """
                         return False
                 elif self.counter_acceptUserInput == 2 and val <= 0: # avoid resolution value of x-axis to be less or equal than 0.
                     return False
-                self.counter_acceptUserInput += 1
-                if self.counter_acceptUserInput == 3:
-                    self.counter_acceptUserInput = 0
+                self.adjust_xInput_func()
             elif self.processType == 'getFuncYFromUser':
                 x = np.array(self.data[self.fetchColX[-1]])
                 val = eval(input)
@@ -578,6 +583,12 @@ Please make sure that x and y data sizes match! """
                     break
                 else:
                     userInput = default
+                    if self.processType == 'getFuncXFromUser':
+                        if self.counter_acceptUserInput == 0:
+                            self.x_min = default
+                        elif self.counter_acceptUserInput == 1: 
+                            self.x_max = default
+                        self.adjust_xInput_func()
                     break
             elif checkedInput is True: # DON'T USE 'checkedInput == True' or 'checkedInput', it will mess up the code. Check this out: https://stackoverflow.com/questions/9494404/use-of-true-false-and-none-as-return-values-in-python-functions
                 if (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['y', 'Y']):
