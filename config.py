@@ -6,7 +6,7 @@ figDimX = 19.2 # save the figure in 1920x1080 format
 figDimY = 10.8
 dpi = 100 # figure resolution
 shareX = False # Have the x-axes of the plots in the same scale. Valid inputs: True, False, 'col', 'row' 
-shareY = True # Have the y-axes of the plots in the same scale. Valid inputs: True, False, 'col', 'row'
+shareY = False # Have the y-axes of the plots in the same scale. Valid inputs: True, False, 'col', 'row'
 scaleX = 'linear' # Scale of x-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
 scaleY = 'linear' # Scale of y-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
 scaleZ = 'linear' # Scale of z-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
@@ -32,6 +32,6 @@ defaultXLabel = 'x' # Default x-axis label name
 defaultYLabel = 'y' # Default y-axis label name
 defaultZLabel = 'z' # Default z-axis label name 
 defaultTitle = 'title' # Default title name
-histDefaultLabel = 'Frequency of Occurence' # Default y-axis label name of histogram plots
+histDefaultLabel = 'Number of Occurence' # Default y-axis label name of histogram plots
 cdfDefaultLabel = 'CDF (%)' # Default y-axis label name of CDF plots
  

@@ -3,7 +3,7 @@
 ![PythonPlotter](supportedPlots.png)
 
 The PythonPlotter is an automized tool to provide a plotting platform with many features based on python matplotlib library. Whether you have sets of data or math functions to be plotted, this program can be utilized to plot your graphs without needing to write a python program. 
-PythonPlotter takes csv file as input and provides the desired plots. It is a user-interactive program to provide the highest level of flexibility to the user. Also, *config.py* allows user to flexibly set up certain configuration parameters for the program. 
+PythonPlotter takes either a csv file or a function as input and provides the desired plots. It is a user-interactive program to provide the highest level of flexibility to the user. Also, *config.py* allows user to flexibly set up certain configuration parameters for the program. 
 Resulting plot is saved in the *logs/* directory. 
 
 
@@ -83,6 +83,6 @@ To add a new plot type:
 1. Surface and wired 3D plots along with colorbars
 2. Heat map plots
 3. Multi-color box plots
-4. Improve the x-axis offset of the input data in histogram plots
-5. Slider tabs for function-based plots 
+4. Slider tabs for function-based plots 
+5. Bar graphs with one data per sample
 6. Error bar support for line plots
