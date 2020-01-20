@@ -3,6 +3,8 @@
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import pandas as pd
+import seaborn as sns
 import csv
 import numpy as np
 import math
@@ -18,11 +20,12 @@ init(autoreset = True) # turn off colors after each print()
 class plotPython:
     # =============================== Initializer / Instance attributes
     def __init__(self):
-        self.colors = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'] # blue, orange, green, red, purple, brown, pink, dark gray, light green, cyan. Check out https://matplotlib.org/3.1.0/users/dflt_style_changes.html
+        self.colors = ['steelblue', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf'] # blue, orange, green, red, purple, brown, pink, dark gray, light green, cyan. Check out https://matplotlib.org/3.1.0/users/dflt_style_changes.html
         self.lineTypes = ['-', '--', '-.', '.']
         self.plotFuncName = ''
         self.figRowCnt = 0
         self.figColCnt = 0
+        self.numOfRow = 0
         self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.fTxtNoXServer = f"""
 {Fore.RED}Your X-server is not running, cannot plot the graph.
@@ -32,11 +35,12 @@ Please turn on your X-server first and then hit [enter]"""
     def prepPlot(self, numOfPlots): 
         exitLoop = False
         while True:
-            try: 
-                numOfRow = 2 if numOfPlots > 1 else 1
-                self.fig, self.host = plt.subplots(math.ceil(numOfPlots / numOfRow), numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
-                if numOfPlots != 1 and numOfPlots % 2 == 1: # turn off the axes of last unused plot, because there is leftover plot in when total plots are oddW
-                    self.host[int(numOfPlots / 2), 1].axis('off')
+            try:   
+                self.numOfRow = config.plotsPerRow if numOfPlots > 1 else 1
+                self.fig, self.host = plt.subplots(math.ceil(numOfPlots / self.numOfRow), self.numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
+                if numOfPlots != 1 and numOfPlots % self.numOfRow != 0: # turn off the axes of last unused plot, because there is leftover plot in when total plots are odd
+                    for i in range(numOfPlots % self.numOfRow, self.numOfRow):
+                        self.host[int(numOfPlots / self.numOfRow), i].axis('off')
                 exitLoop = True
             except tkinter._tkinter.TclError: # fail if X-server not running
                 print(self.fTxtNoXServer)
@@ -57,7 +61,7 @@ Please turn on your X-server first and then hit [enter]"""
         self.guest.tick_params(axis='y', colors=self.colors[config.color_line2])
         self.guest.yaxis.label.set_color(self.colors[config.color_line2])
     
-    # =============================== Show the plot
+    # =============================== Label the plot
     def plotLabeling(self, xLabel, yLabel, zLabel, thirdAxis, threeD, title, numOfPlots, plotCounter, plotType):
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat, dpi = config.dpi)
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel, size = config.axisLabelSize)
@@ -69,23 +73,23 @@ Please turn on your X-server first and then hit [enter]"""
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
             self.host[self.figColCnt, self.figRowCnt].title.set_size(config.axisLabelSize)
-        if not plotType in {'box', 'cdf', 'histogram'} and not thirdAxis: # box, cdf and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
+        if not plotType in {'box', 'histogram'} and not thirdAxis: # box and hist plots do not have legend. thirdAxis has its own way of generating legends (e.g. line #159) 
             self.host[self.figColCnt, self.figRowCnt].legend(loc = config.legendLoc)
         
         # logic to place subplots in the right location
-        if plotCounter % 2 == 0:
-            self.figRowCnt += 1
-        else:
+        if (plotCounter + 1) % self.numOfRow == 0:
             self.figColCnt += 1
-            self.figRowCnt -= 1
-        
+            self.figRowCnt -= (self.numOfRow - 1)
+        else:
+            self.figRowCnt += 1
+            
+    # =============================== Show the plot
     def showPlot(self, title, numOfPlots):
-        
         self.fig.suptitle(title, size = config.titleLabelSize) # Main title
         # leave some space between subplots
         if numOfPlots >= 2: 
             self.fig.subplots_adjust(hspace = config.subplots_hSpace)
-
+            
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat, dpi = config.dpi) # save fig to logs dir
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
@@ -100,14 +104,17 @@ Please turn on your X-server first and then hit [enter]"""
         self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX)
         self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY)
         
-    # =============================== Plotter function
-    def mainPlotter(self, plotCounter, numOfPlots, plotType, numData, colNumX, colNumY, colNumZ, legendName, binRes, thirdAxis, data):
+        # set x- and y-tick font sizes
+        self.host[self.figColCnt, self.figRowCnt].tick_params(axis = 'x', labelsize = config.xTickSize)
+        self.host[self.figColCnt, self.figRowCnt].tick_params(axis = 'y', labelsize = config.yTickSize)
         
+    # =============================== Plotter function
+    def mainPlotter(self, plotCounter, numOfPlots, plotSelect, plotPlotSelect, numData, colNumX, colNumY, colNumZ, colNumE, legendName, binRes, thirdAxis, data):
         # Main if clause for plots
-        if plotType == 'bar':
+        if plotSelect == 'bar':
             for i in range(numData):
                 self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i]) 
-        elif plotType == 'box':
+        elif plotSelect == 'box':
             boxData = []
             for i in range(numData):
                 boxData.append(data[colNumX[i]])
@@ -115,53 +122,81 @@ Please turn on your X-server first and then hit [enter]"""
             color = self.colors[config.lineColors[1]]), capprops = dict(color = self.colors[config.lineColors[2]]), whiskerprops = dict(color = self.colors[config.lineColors[3]]), 
             flierprops = dict(color = self.colors[config.lineColors[4]], markeredgecolor = self.colors[config.lineColors[5]]), medianprops = dict(color = self.colors[config.lineColors[6]]))
             self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
-        elif plotType == 'cdf':
-            bin_edges_list = [] 
-            cdfData = []
-            data_size = len(data[colNumX[0]]) # taken from: https://stackoverflow.com/questions/24575869/read-file-and-plot-cdf-in-python
-            data_set = sorted(set(data[colNumX[0]]))
-            bins = np.append(data_set, data_set[-1] + 1)
-            counts, bin_edges = np.histogram(data[colNumX[0]], bins = bins, density = False) # Use histogram function to bin data
-            counts = counts.astype(float) / data_size
-            cdfData = np.cumsum(counts)
-            self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[0]]) 
-        elif plotType == 'histogram':
+        elif plotSelect == 'cdf':
+            for i in range(numData):
+                bin_edges_list = [] 
+                cdfData = []
+                data_size = len(data[colNumX[i]]) # taken from: https://stackoverflow.com/questions/24575869/read-file-and-plot-cdf-in-python
+                data_set = sorted(set(data[colNumX[i]]))
+                bins = np.append(data_set, data_set[-1] + 1)
+                counts, bin_edges = np.histogram(data[colNumX[i]], bins = bins, density = False) # Use histogram function to bin data
+                counts = counts.astype(float) / data_size
+                cdfData = np.cumsum(counts)
+                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], label = legendName[i]) 
+                #self.host[self.figColCnt, self.figRowCnt].set_xscale('log')
+        elif plotSelect == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
             self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left')  
             plt.xticks(self.bins[:-1])
-        elif plotType in ['line', 'line+scatter']:
-            if thirdAxis:
-                if plotType == 'line':
+        elif plotSelect in ['line/scatter/line+scatter']:
+            if thirdAxis: # 3rd-axis enabled
+                if plotPlotSelect[0] == 1: # line plot
                     p1, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.lineColors[0]], label = legendName[0])  
-                else:
-                    p1, p3, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-o', self.colors[config.lineColors[0]], label = legendName[0])    
+                elif plotPlotSelect[0] == 2: # scatter plot
+                    p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.lineColors[0]], label = legendName[0])  
+                elif plotPlotSelect[0] == 3: # line+scatter plot
+                    p1, p3, = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], '-x', self.colors[config.lineColors[0]], label = legendName[0])    
+                elif plotPlotSelect[0] == 4: # line plot w/ errorbar
+                    p1, = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], fmt='-', c = self.colors[config.lineColors[1]], label = legendName[0])
+                elif plotPlotSelect[0] == 5: # scatter plot w/ errorbar
+                    p1, = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], fmt='o', c = self.colors[config.lineColors[1]], label = legendName[0])
+                else: # line+scatter plot w/ errorbar
+                    p1, p3, = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], fmt='o', c = self.colors[config.lineColors[1]], label = legendName[0])
                 self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                if plotType == 'line':
+                if plotPlotSelect[0] == 1: # line plot
                     p2, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], self.colors[config.lineColors[1]], label = legendName[1])   
-                    
-                else:
-                    p2, p4, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-o', self.colors[config.lineColors[1]], label = legendName[1]) 
+                elif plotPlotSelect[0] == 2: # scatter plot
+                    p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[config.lineColors[1]], label = legendName[1])  
+                elif plotPlotSelect[0] == 3: # line+scatter plot
+                    p2, p4, = self.guest.plot(data[colNumX[1]], data[colNumY[1]], '-x', self.colors[config.lineColors[1]], label = legendName[1]) 
+                elif plotPlotSelect[0] == 4: # line plot w/ errorbar
+                    p2, = self.guest.errorbar(data[colNumX[1]], data[colNumY[1]], yerr = data[colNumE[1]], fmt='-', c = self.colors[config.lineColors[1]], label = legendName[1]) 
+                elif plotPlotSelect[0] == 5: # scatter plot w/ errorbar
+                    p2, = self.guest.errorbar(data[colNumX[1]], data[colNumY[1]], yerr = data[colNumE[1]], fmt='o', c = self.colors[config.lineColors[1]], label = legendName[1]) 
+                else: # # line+scatter plot w/ errorbar
+                    p2, p4, = self.guest.errorbar(data[colNumX[1]], data[colNumY[1]], yerr = data[colNumE[1]], fmt='-x', c = self.colors[config.lineColors[1]], label = legendName[1]) 
                 lines = [p1, p2]
                 self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
                 self.axisColoring()
             else:
                 for i in range(numData):
-                    if plotType == 'line':
+                    if plotPlotSelect[i] == 1: # line plot
                         self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
-                    else:
+                    elif plotPlotSelect[i] == 2: # scatter plot
+                        self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+                    elif plotPlotSelect[i] == 3: # line+scatter plot
                         self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], '-o', self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
-        elif plotType == 'scatter':
-            if thirdAxis:
-                p1 = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.lineColors[0]], label = legendName[0])  
-                self.guest = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                p2 = self.guest.scatter(data[colNumX[1]], data[colNumY[1]], c = self.colors[config.lineColors[1]], label = legendName[1])             
-                lines = [p1, p2]
-                self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = config.legendLoc)
-                self.axisColoring()
-            else:
-                for i in range(numData):
-                    self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
-        elif plotType == '3d':
+                    elif plotPlotSelect[i] == 4: # line plot w/ errorbar
+                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='-', c = self.colors[config.lineColors[i % len(config.lineColors)]] , label = legendName[i])
+                        '''
+                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+                        a = np.array(data[colNumY[i]])
+                        b = np.array(data[colNumE[i]])
+                        c = np.array(data[colNumX[i]])
+                        
+                        errMinus  = np.subtract(a,b)#[a_i - b_i for a_i, b_i in zip(data[colNumY[i]], data[colNumE[i]])]
+                        errPlus = np.add(a,b)#[a_i + b_i for a_i, b_i in zip(data[colNumY[i]], data[colNumE[i]])]
+                        
+                        errMinus = list(map(int, errMinus))
+                        errPlus = list(map(int, errPlus))
+                        c = list(map(int, c))
+                        self.host[self.figColCnt, self.figRowCnt].fill_between(c, errMinus, errPlus, self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+                        '''
+                    elif plotPlotSelect[i] == 5: # scatter plot w/ errorbar
+                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='o', c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+                    else: # line+scatter plot w/ errorbar
+                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='-o', c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+        elif plotSelect == '3d':
             self.host[self.figColCnt, self.figRowCnt].axis('off')
             numOfRow = 2 if numOfPlots > 1 else 1
             self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
@@ -172,7 +207,14 @@ Please turn on your X-server first and then hit [enter]"""
             # padding and scaling options for z-axis
             self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
             self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
-        if not plotType in {'box'}: # function below messes up the ticknames of box plots. To be investigated.
+        elif plotSelect == 'seaborn line':
+            for i in range(numData):
+                self.host[self.figColCnt, self.figRowCnt] = sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+        elif plotSelect == 'seaborn regression':
+            for i in range(numData):
+                self.host[self.figColCnt, self.figRowCnt] = sns.regplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+
+        if not plotSelect in {'box', 'cdf'}: # function below (?) messes up the ticknames of box plots. To be investigated.
             self.padAndScale()
         
 ###################### USER INTERACTIONS
@@ -186,10 +228,13 @@ class userInteractions:
         self.printSuccess = 's'
         self.defaultLabels = [] 
         self.data = []
-        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line', 'scatter', 'line+scatter', '3d']
+        self.df = []
+        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line/scatter/line+scatter', '3d', 'seaborn line', 'seaborn regression']
         self.printVars = []
         self.minPlotType = 1
+        self.minPlotPlotType = 1
         self.maxPlotType = len(self.plotTypes) 
+        self.maxPlotPlotType = 6
         self.defaultMinX = 1
         self.defaultMaxX = 100
         self.defaultResX = 1
@@ -198,13 +243,18 @@ class userInteractions:
         self.defaultFetchColX = 0
         self.defaultFetchColY = 1
         self.defaultFetchColZ = 2
+        self.defaultFetchErrorBar = 2
         self.defaultX = np.arange(float(self.defaultMinX), float(self.defaultMaxX), float(self.defaultResX))
         self.defaultY = self.defaultX ** 2
         self.defaultZ = self.defaultY ** 2
+        self.defaultE = np.random.random_sample(len(self.defaultX))
         self.printWelcomeTxt = True
         self.prevPlotSelect = ''
         self.plotSelect = ''
+        self.plotPlotSelect = []
         self.counter_acceptUserInput = 0
+        self.moreData = False
+        self.defaultErrorBar = False
        
         # Set default values
         self.thirdAxis = self.defaultThirdAxis
@@ -220,10 +270,12 @@ class userInteractions:
         self.x = self.defaultX
         self.y = self.defaultY
         self.z = self.defaultZ
+        self.e = self.defaultE
         self.maxNumXAxis = 0 # I don't know whether this is a right value to take, might cause errors. DOUBLE CHECK
         self.fetchColX = []
         self.fetchColY = []
         self.fetchColZ = []
+        self.fetchColE = []
         self.minColNum = 0
         self.yDataCounter = 0
         self.numOfPlots = self.defaultNumOfPlots
@@ -236,6 +288,7 @@ class userInteractions:
         self.fetchYFunc2 = False
         self.fetchZFunc2 = False
         self.thirdAxisLabel = False
+        self.errorBar = []
         self.plotPyt = None
         self.numData = 0
 
@@ -249,6 +302,17 @@ Enter the name of your data file (located in the same directory of program)."""
 GRAPH #: %d
 
 What type of graph do you want to plot? \nOptions:"""
+        self.qTxtTypeOfPlotPlot = """
+Select the plot type for this data set: 
+
+1. Line
+2. Scatter
+3. Line+Scatter
+4. Line w/ ErrorBar
+5. Scatter w/ ErrorBar
+6. Line+Scatter w/ ErrorBar
+
+Enter the number of the plot [1-6]:"""
         self.qTxtDefault = f"""
 Just hit [{Fore.YELLOW}enter{Fore.WHITE}] for default: ({Fore.CYAN}%s{Fore.WHITE})\n\n"""
         self.qTxtSelectYN = f"""
@@ -261,15 +325,15 @@ If you want to derive data ONLY from a function, you may skip this part by typin
 If you want to derive data from a function, please type [{Fore.YELLOW}fF{Fore.WHITE}] \n\n"""
         self.qTxtFetchCol = """
 What is the column number in your input data for %s-axis?"""
-        self.qTxtNoMoreYData = f"""
-{Fore.WHITE}If you don't want to plot more data in this graph, please type [{Fore.YELLOW}qQ{Fore.WHITE}]"""
+        self.qTxtFetchErrorCol = """
+What is the column number of errorbar data?"""
+        self.qTxtMoreData = f"""
+{Fore.WHITE} Do you want to add more dataset to the plot? [{Fore.YELLOW}y/N{Fore.WHITE}]"""
         self.qTxtMinMaxResX = f"""
 Please enter the min, max. and resolution of x-axis."""
         self.qTxtEnterFormula = f"""
 Enter the formula %s(%s). You may type 
 {Fore.YELLOW}numpy (np.*){Fore.WHITE} and {Fore.YELLOW}math (math.*) {Fore.WHITE}functions in your formula."""
-        self.qTxtDelimeter = f"""
-What is the delimeter?. E.g, type [{Fore.YELLOW},{Fore.WHITE}] to separate data with commas. """
         self.qTxtBinResolution = f"""
 What is the bin resolution for dataset {Fore.CYAN}%d{Fore.WHITE}? (e.g. resolution of your data)"""
         self.qTxtMultiGraph = f"""
@@ -291,7 +355,7 @@ What is the label name of %s-axis? """
         self.qTxtTitleName = """
 What is the title name of the subplot? """
         self.qTxtMainTitleName = """
-What is the main title name of the graph? """ 
+What is the main title name of the graph? """
         self.fTxtDefault = f"""
 Just hit [{Fore.YELLOW}enter{Fore.RED}] for default: ({Fore.CYAN}%s{Fore.RED})\n\n"""
         self.fTxtNotValid = f"""
@@ -308,8 +372,6 @@ Make sure that Max. x > Min. x and Res. x > 0"""
         self.fTxtTypeCorrFormula = """
 Please type a valid formula or function from 
 numpy (np.*) or math (math.*) libraries. \n\n """
-        self.fTxtDelLength = """
-Delimeter length cannot be > 1. """
         self.fTxtNumXAxes = f"""
 Please enter a number between {Fore.YELLOW}%d{Fore.WHITE} and {Fore.YELLOW}%d{Fore.WHITE} """
         self.fTxtDataSizeNoMatch = """
@@ -322,10 +384,10 @@ Please make sure that x and y data sizes match! """
 {Fore.GREEN}Your input file: {Fore.CYAN}%s {Fore.GREEN}is found. """
         self.yTxtFetchCol= f"""
 {Fore.GREEN}Selected column for %s-axis: {Fore.CYAN}%s """
+        self.yTxtEFetchCol= f"""
+{Fore.GREEN}Selected column for errorbar: {Fore.CYAN}%s """
         self.yTxtDataFromFunction = f"""
 {Fore.GREEN}Your inputs are accepted: \n\n %s: {Fore.CYAN}%s"""
-        self.yTxtDelimeter = f"""
-{Fore.GREEN}Selected delimeter is: ({Fore.CYAN}%s{Fore.GREEN}) """
         self.yTxtMultiGraph = f"""
 {Fore.GREEN}Multiple graphs enabled: {Fore.CYAN}%r """
         self.yTxtMultiXAxis = f"""
@@ -367,6 +429,10 @@ Please make sure that x and y data sizes match! """
             for i in range(len(self.plotTypes)):
                 print("%d. %s," %(i + 1, self.plotTypes[i]))
             print(self.qTxtDefault %printVal[1])
+        elif self.processType == 'plotPlotType':
+            print(self.qTxtTypeOfPlotPlot + self.qTxtDefault %printVal)
+        elif self.processType == 'moreData':
+            print(self.qTxtMoreData + self.qTxtDefault %printVal)
         elif self.processType == 'fetchInputData':
             print(self.qTxtFileName + self.qTxtDefault %printVal + self.qTxtSkipCsvDataFetch)
         elif self.processType == 'numOfPlots':
@@ -375,11 +441,13 @@ Please make sure that x and y data sizes match! """
             if printVal[0] == 0: # first run, do not ask whether user want to plot any more data
                 print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction)
             else:
-                print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction + self.qTxtNoMoreYData)
+                print(self.qTxtFetchCol %'x' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDefault %printVal[1] + self.qTxtDataFromFunction)
         elif self.processType == 'fetchColY':
             print(self.qTxtFetchCol %'y'+ self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
         elif self.processType == 'fetchColZ':
             print(self.qTxtFetchCol %'z' + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
+        elif self.processType == 'fetchErrorBar':
+            print(self.qTxtFetchErrorCol + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
         elif self.processType == 'getFuncXFromUser':
             if printVal[0] == 0: # first run, do not ask whether user want to plot any more data
                 print(self.qTxtMinMaxResX + self.qTxtDefault %printVal[1:])
@@ -387,8 +455,8 @@ Please make sure that x and y data sizes match! """
             print(self.qTxtEnterFormula %('y', 'x') + self.qTxtDefault %printVal)
         elif self.processType == 'getFuncZFromUser':
             print(self.qTxtEnterFormula %('z', 'x, y')+ self.qTxtDefault %printVal)
-        elif self.processType == 'selectDelimeter':
-            print(self.qTxtDelimeter + self.qTxtDefault %printVal)
+        elif self.processType == 'getFuncEFromUser':
+            print(self.qTxtEnterFormula %('e', 'x') + self.qTxtDefault %printVal)
         elif self.processType == 'binResolution':
             print(self.qTxtBinResolution %printVal + self.qTxtDefault %self.defaultBinRes)
         elif self.processType == 'checkMultiGraph':
@@ -428,22 +496,28 @@ Please make sure that x and y data sizes match! """
     def printText_failure(self, printType, printVal):
         if self.processType in 'plotType':
             print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minPlotType, self.maxPlotType) + self.fTxtDefault %printVal)
+        elif self.processType in 'plotPlotType':
+            print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minPlotPlotType, self.maxPlotPlotType) + self.fTxtDefault %printVal)
+        elif self.processType == 'moreData':
+            print(self.fTxtNotValid + self.qTxtSelectYN + self.fTxtDefault %printVal)
         elif self.processType == 'fetchInputData':
             print(self.fTxtNotValid + self.fTxtDefault %printVal)
         elif self.processType == 'fetchColX':
             print(self.fTxtNotValid + self.fTxtTypeBetween %(self.minColNum, self.numData - 1))
         elif self.processType == 'fetchColY':
-            print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtNoMoreYData + self.qTxtDataFromFunction)
+            print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
         elif self.processType == 'fetchColZ':
             print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1) + self.qTxtDataFromFunction)
+        elif self.processType == 'fetchErrorBar':
+            print(self.fTxtNotValid + self.fTxtDataSizeNoMatch + self.fTxtTypeBetween %(self.minColNum, self.numData - 1))
         elif self.processType in ['getFuncXFromUser', 'numOfPlots']:
             print(self.fTxtNotValid + self.fTxtTypeIntOrFloat + self.fTxtDefault %printVal)
         elif self.processType in 'getFuncYFromUser':
             print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'x**2')
         elif self.processType in 'getFuncZFromUser':
             print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'y**2')
-        elif self.processType in 'selectDelimeter':
-            print(self.fTxtNotValid + self.fTxtDelLength + self.fTxtDefault %printVal)
+        elif self.processType in 'getFuncEFromUser':
+            print(self.fTxtNotValid + self.fTxtTypeCorrFormula + self.fTxtDefault %'np.random.random_sample(x)')
         elif self.processType in 'checkNumXAxis':
             print(self.fTxtNotValid + self.fTxtNumXAxes %(self.defaultNumXAxis, self.maxNumXAxis) + self.fTxtDefault %self.defaultNumXAxis)
         elif self.processType in 'fetchXAxisColNum':
@@ -455,7 +529,9 @@ Please make sure that x and y data sizes match! """
     def printText_success(self, printType, printVal):
         if self.processType == 'plotType':   
             print(self.yTxtPlotType %(printVal))
-        if self.processType == 'numOfPlots':   
+        elif self.processType == 'plotPlotType':   
+            print(self.yTxtPlotType %(printVal))
+        elif self.processType == 'numOfPlots':   
             print(self.yTxtNumOfPlots %printVal)
         elif self.processType == 'fetchInputData':
             print(self.yTxtFileName %printVal)
@@ -465,14 +541,16 @@ Please make sure that x and y data sizes match! """
             print(self.yTxtFetchCol %('y', printVal))
         elif self.processType == 'fetchColZ':
             print(self.yTxtFetchCol %('z', printVal))
+        elif self.processType == 'fetchErrorBar':
+            print(self.yTxtEFetchCol %printVal)
         elif self.processType in 'getFuncXFromUser':
             print(self.yTxtDataFromFunction %('x', printVal))
         elif self.processType in 'getFuncYFromUser':
             print(self.yTxtDataFromFunction %('y', printVal))
         elif self.processType in 'getFuncZFromUser':
             print(self.yTxtDataFromFunction %('z', printVal))
-        elif self.processType == 'selectDelimeter':
-            print(self.yTxtDelimeter %printVal)
+        elif self.processType in 'getFuncEFromUser':
+            print(self.yTxtDataFromFunction %('e', printVal))
         elif self.processType == 'checkMultiGraph':
             print(self.yTxtMultiGraph %printVal)
         elif self.processType == 'checkMultiXAxis':
@@ -518,15 +596,18 @@ Please make sure that x and y data sizes match! """
         if self.processType == 'fetchColY' and input == '': # return default y column from csv if user pressed Enter
             input = self.defaultFetchColY
         try: 
-            if self.processType in ['plotType', 'binResolution', 'checkNumXAxis', 'fetchXAxisColNum', 'numOfPlots']: # prevFuncName[i][3] is 1st prev. function name, prevFuncName[i+1][3] is 2nd most prev. func. name, etc.
+            if self.processType in ['plotType', 'plotPlotType', 'binResolution', 'checkNumXAxis', 'fetchXAxisColNum', 'numOfPlots']: # prevFuncName[i][3] is 1st prev. function name, prevFuncName[i+1][3] is 2nd most prev. func. name, etc.
                 val = float(input)
-                if self.processType == "plotType": # if fetchDataInfo() called, check whether user input is within defined range
+                if self.processType == 'plotType': # if fetchDataInfo() called, check whether user input is within defined range
                     if not (self.minPlotType <= int(input) <= self.maxPlotType):
                         raise ValueError # not correct way to use exception errors
-                elif self.processType == "checkNumXAxis": 
+                elif self.processType == 'plotPlotType':
+                    if not (self.minPlotPlotType <= int(input) <= self.maxPlotPlotType):
+                        raise ValueError # not correct way to use exception errors
+                elif self.processType == 'checkNumXAxis': 
                     if not (self.defaultNumXAxis <= int(input) <= self.maxNumXAxis):
                         raise ValueError # not correct way to use exception errors
-                elif self.processType == "fetchXAxisColNum":
+                elif self.processType == 'fetchXAxisColNum':
                     if not (0 <= val <= self.numData - 1):
                         raise ValueError # not correct way to use exception errors
             elif self.processType == 'fetchInputData':
@@ -534,19 +615,16 @@ Please make sure that x and y data sizes match! """
                     pass
                 elif not self.inputFileFinder(input) is True:
                     raise ValueError
-            elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ']:
-                if self.processType in ['fetchColY', 'fetchColZ'] and not input in ['f', 'F']:
+            elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ', 'fetchErrorBar']:
+                if self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and not input in ['f', 'F']:
                     input = int(input)
-                if (input in ['f', 'F']) or (self.processType is 'fetchColX' and self.yDataCounter > 0 and input in ['q', 'Q']):
+                if (input in ['f', 'F']) or (self.processType is 'fetchColX' and self.yDataCounter > 0):
                     pass
                 elif not self.minColNum <= int(input) <= self.numData - 1: 
                     raise ValueError
-                elif self.processType in ['fetchColY', 'fetchColZ'] and (len(self.data[input]) != len(self.data[self.fetchColX[-1]])):
+                elif self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and (len(self.data[input]) != len(self.data[self.fetchColX[-1]])):
                     raise ValueError
-            elif self.processType == 'selectDelimeter':
-                if len(input) > 1: # delimeter length cannot be > 1
-                    raise ValueError
-            elif (self.processType == 'checkMultiGraph' or self.processType == 'checkMultiXAxis' or self.processType == 'checkThreeDGraph' or self.processType == 'checkThirdAxis') and not (input in ['y', 'Y', 'n', 'N']):
+            elif (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis', 'moreData']) and not (input in ['y', 'Y', 'n', 'N']):
                 raise ValueError
             elif self.processType == 'getFuncXFromUser':
                 val = float(input)
@@ -558,7 +636,7 @@ Please make sure that x and y data sizes match! """
                 elif self.counter_acceptUserInput == 2 and val <= 0: # avoid resolution value of x-axis to be less or equal than 0.
                     return False
                 self.adjust_xInput_func()
-            elif self.processType == 'getFuncYFromUser':
+            elif self.processType in ['getFuncYFromUser', 'getFuncEFromUser']:
                 x = np.array(self.data[self.fetchColX[-1]])
                 val = eval(input)
             elif self.processType == 'getFuncZFromUser':
@@ -576,10 +654,10 @@ Please make sure that x and y data sizes match! """
             self.check_quit(userInput) 
             checkedInput = self.checkUserInput(userInput) 
             if userInput == '':
-                if self.processType in ['fetchColY', 'fetchColZ'] and checkedInput == False:
+                if self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and checkedInput == False:
                     self.printText(self.printFailure, default) # x, y, z data sizes do not match
-                elif self.processType in ['getFuncYFromUser']:
-                    userInput = np.array(self.data[self.fetchColX[-1]]) ** 2 # update default Y with given x input from user 
+                elif self.processType in ['getFuncYFromUser', 'getFuncEFromUser']:
+                    userInput = np.array(self.data[self.fetchColX[-1]]) ** 2 if self.processType == 'getFuncYFromUser' else np.array(np.random.random_sample(len(self.data[self.fetchColX[-1]])))  # update default Y or errorbar with given x input from user 
                     break
                 else:
                     userInput = default
@@ -591,20 +669,20 @@ Please make sure that x and y data sizes match! """
                         self.adjust_xInput_func()
                     break
             elif checkedInput is True: # DON'T USE 'checkedInput == True' or 'checkedInput', it will mess up the code. Check this out: https://stackoverflow.com/questions/9494404/use-of-true-false-and-none-as-return-values-in-python-functions
-                if (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['y', 'Y']):
+                if (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis', 'moreData']) and (userInput in ['y', 'Y']):
                     userInput = True
-                elif (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis']) and (userInput in ['n', 'N']):
+                elif (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'checkThirdAxis', 'moreData']) and (userInput in ['n', 'N']):
                     userInput = False
                 elif self.processType in ['getFuncXFromUser', 'binResolution', 'checkNumXAxis']:
                     userInput = float(userInput)
                 elif self.processType in ['fetchXAxisColNum', 'numOfPlots']:
                     userInput = int(userInput)
-                elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ']:
-                    if userInput in ['f', 'F', 'q', 'Q']:
+                elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ', 'fetchErrorBar']:
+                    if userInput in ['f', 'F']:
                         pass
                     else:
                         userInput = int(userInput)
-                elif self.processType == 'getFuncYFromUser':
+                elif self.processType in ['getFuncYFromUser', 'getFuncEFromUser']:
                     x = np.array(self.data[self.fetchColX[-1]])
                     userInput = eval(userInput)
                 elif self.processType == 'getFuncZFromUser':
@@ -620,7 +698,7 @@ Please make sure that x and y data sizes match! """
     def transposeData(self):
         self.data = list(map(list, zip(*self.data))) # transpose the self.data: rows -> columns
         self.numData = len(self.data)
-       
+        
     # =============================== Fetch default label names from csv file
     def fetchDefLabels(self, plots): 
         # Update default label names if labels are given in the input file
@@ -628,7 +706,6 @@ Please make sure that x and y data sizes match! """
             for i in range(self.numData):
                 self.data[i][0] = self.data[i][0] if self.data[i][0] != '' else 'blank'
                 self.defaultLabels.append(self.data[i][0])
-            config.defaultLegendNames = self.defaultLabels
             
             # Delete labels from input data
             for i in range(self.numData):
@@ -651,7 +728,7 @@ Please make sure that x and y data sizes match! """
     def fetchInputData(self):
         # open csv file
         with open(config.defaultInputDir + os.sep + self.inputFile, 'r', encoding = config.defaultEncoding) as csvfile: 
-            plots = csv.reader(csvfile, delimiter = self.delimeter)
+            plots = csv.reader(csvfile, delimiter = config.defaultDelimeter)
             # Fetch data from each row
             for row in plots:
                 self.data.append(row)
@@ -666,18 +743,9 @@ Please make sure that x and y data sizes match! """
         self.inputFile = self.acceptUserInput(config.defaultInputFile)
         if not self.inputFile in ['s', 'S']:
             self.printText(self.printSuccess, self.inputFile)
-            self.askCsvDelimeter()
             self.fetchInputData() # Fetch self.data from .csv file
         else:
             self.csvData = False
-            
-    # =============================== Ask csv delimeter from user      
-    def askCsvDelimeter(self):
-        # Get delimeter type from user
-        self.processType = 'selectDelimeter'
-        self.printText(self.printQuestion, config.defaultDelimeter)
-        self.delimeter = self.acceptUserInput(config.defaultDelimeter)
-        self.printText(self.printSuccess, self.delimeter)
         
     # =============================== Ask number of plots from user   
     def askNumOfPlots(self):
@@ -711,49 +779,53 @@ Please make sure that x and y data sizes match! """
         self.printText(self.printSuccess, self.plotSelect)
         self.threeD = True if self.plotSelect is '3d' else False
         
+    # =============================== Ask plot type for each data set from user if line/scatter/line+scatter plot selected
+    def askPlotPlotType(self):
+        # Select plot type
+        self.processType = 'plotPlotType'
+        printVal = [config.defaultPlotPlotSelect]
+        self.printText(self.printQuestion, printVal)
+        self.plotPlotSelect.append(int(self.acceptUserInput(config.defaultPlotPlotSelect)))
+        self.errorBar.append(True) if self.plotPlotSelect[-1] > 3 else self.errorBar.append(False) # Enable/disable errorBar
+        self.printText(self.printSuccess, self.plotPlotSelect)
+    
+    # =============================== Ask whether user want to add more data to the plot
+    def askMoreData(self):
+        self.processType = 'moreData'
+        printVal = [config.defaultMoreData]
+        self.printText(self.printQuestion, printVal)
+        self.moreData = self.acceptUserInput(config.defaultMoreData)
+        return self.moreData
+        
     # =============================== Ask x-axis csv data from user      
     def askXData_csv(self):
         self.processType = 'fetchColX'
         printVal = [self.yDataCounter, self.defaultFetchColX]
         self.printText(self.printQuestion, printVal)
         self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
-        if not self.fetchColX[-1] in ['f', 'F', 'q', 'Q']:
+        if not self.fetchColX[-1] in ['f', 'F']:
             self.printText(self.printSuccess, self.fetchColX)
-            if self.plotSelect in ['cdf', 'histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
+            if self.plotSelect in ['histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
                 return True
         if self.fetchColX[-1] in ['f', 'F']:
             self.fetchColX.pop()
             self.fetchXFunc = True    
             self.fetchXFunc2 = True 
-        elif self.fetchColX[-1] in ['q', 'Q']:
-            self.fetchColX.pop()
-            return True
         return False
      
-    # =============================== Ask y- and z-axis csv data from user      
-    def askYZData_csv(self):
+    # =============================== Ask y-, z-axis and errorbar csv data from user      
+    def askYZEData_csv(self):
         if self.fetchXFunc is False:
-            if self.plotSelect != 'box': # no need for y-axis data for bar plot
+            if not self.plotSelect in ['box', 'cdf', 'histogram']: # no need for y-axis data for bar plot
                 self.processType = 'fetchColY'
-                self.printText(self.printQuestion, self.defaultFetchColY)
-                self.fetchColY.append(self.acceptUserInput(self.defaultFetchColY))
-                if self.fetchColY[-1] in ['f', 'F']:
-                    self.fetchColY.pop()
-                    self.fetchYFunc = True
-                    self.fetchYFunc2 = True
-                else:
-                    self.printText(self.printSuccess, self.fetchColY)
+                self.fetchCol_YZE(self.processType)
+                if self.plotSelect == 'line/scatter/line+scatter' and self.errorBar[-1] == True: 
+                    self.processType = 'fetchErrorBar'
+                    self.fetchCol_YZE(self.processType)
             if self.plotSelect == '3d':
                 self.processType = 'fetchColZ'
-                self.printText(self.printQuestion, self.defaultFetchColZ)
-                self.fetchColZ.append(self.acceptUserInput(self.defaultFetchColZ))
-                if self.fetchColZ[-1] in ['f', 'F']:
-                    self.fetchColZ.pop()
-                    self.fetchZFunc = True
-                    self.fetchZFunc2 = True
-                else:
-                    self.printText(self.printSuccess, self.fetchColZ)
-                    
+                self.fetchCol_YZE(self.processType)
+        
     # =============================== Ask x-axis func data from user      
     def askXData_func(self):
         if not self.processType in ['fetchColY', 'fetchColZ']:
@@ -777,7 +849,7 @@ Please make sure that x and y data sizes match! """
             self.printText(self.printSuccess, self.x)
             self.data.append(self.x)
             self.fetchColX.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-            if self.plotSelect in ['cdf', 'histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
+            if self.plotSelect in ['histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
                 return True
             if self.fetchColX[-1] in ['q', 'Q']:
                 self.fetchColX.pop()
@@ -788,18 +860,16 @@ Please make sure that x and y data sizes match! """
             return False
         
     # =============================== Ask y-axis func data from user      
-    def askYData_func(self):
+    def askYEData_func(self):
+        print(self.errorBar[-1])
         self.fetchYFunc = True
         self.fetchYFunc2 = True
-        if self.plotSelect != 'box' and self.processType != 'fetchColZ': # no need for y-axis data for bar plot
+        if not self.plotSelect in ['box', 'cdf', 'histogram'] and self.processType != 'fetchColZ': # no need for y-axis data for bar plot
             self.processType = 'getFuncYFromUser'
-            printVal = 'x**2'
-            self.printText(self.printQuestion, printVal)
-            print("y(x): ")
-            self.y = self.acceptUserInput(self.defaultY)
-            self.printText(self.printSuccess, self.y)
-            self.data.append(self.y)
-            self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+            self.fetchFunc_YE(self.processType)
+            if (self.plotSelect == 'line/scatter/line+scatter' and self.errorBar[-1] == True):
+                self.processType = 'getFuncEFromUser'
+                self.fetchFunc_YE(self.processType)
            
     # =============================== Ask z-axis func data from user      
     def askZData_func(self):
@@ -819,35 +889,20 @@ Please make sure that x and y data sizes match! """
     def askLegendNames(self, i):
         # Fetch legend name(s)
         self.processType = 'getLegendNames'
-        if self.plotSelect == 'box':
-            if not self.csvData or self.fetchXFunc:
-                printVal = [i, config.defaultXLabel, 'xtick']
-                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(config.defaultXLabel))
-            else:
-                printVal = [i, self.defaultLabels[self.fetchColX[-1]], 'xtick']
-                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
+        if self.plotSelect in ['box', 'cdf']:
+            printVal = [i, config.defaultLegendNames[i], 'xtick']
+            self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+            self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             self.printText(self.printSuccess, self.legendName)
         elif self.plotSelect == '3d': 
-            if not self.csvData or self.fetchZFunc:
-                printVal = [i, config.defaultZLabel, 'legend']
-                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(config.defaultZLabel))
-            else:
-                printVal = [i, self.defaultLabels[self.fetchColZ[-1]], 'legend']
-                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]]))
+            printVal = [i, config.defaultLegendNames[i], 'legend']
+            self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+            self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             self.printText(self.printSuccess, self.legendName)
         else:
-            if not self.csvData or self.fetchYFunc:
-                printVal = [i, config.defaultYLabel, 'legend']
-                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(config.defaultYLabel))
-            else:
-                printVal = [i, self.defaultLabels[self.fetchColY[-1]], 'legend']
-                self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
-                self.legendName.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]]))
+            printVal = [i, config.defaultLegendNames[i], 'legend']
+            self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
+            self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             self.printText(self.printSuccess, self.legendName)
         self.fetchXFunc = False
         self.fetchYFunc = False
@@ -856,7 +911,7 @@ Please make sure that x and y data sizes match! """
     # =============================== Ask user if 3rd axis to be enabled in graph
     def ask3rdAxis(self):
         # Check 3rd axis
-        if self.plotSelect in ['line', 'scatter'] and self.yDataCounter == 2:
+        if self.plotSelect in ['line/scatter/line+scatter'] and self.yDataCounter == 2:
             self.processType = 'checkThirdAxis'
             self.printText(self.printQuestion, self.defaultThirdAxis)
             self.thirdAxis = self.acceptUserInput(self.defaultThirdAxis)
@@ -956,6 +1011,50 @@ Please make sure that x and y data sizes match! """
         self.title = self.acceptUserInput(config.defaultTitle)
         self.printText(self.printSuccess, self.title)
         
+    # =============================== Logic to fetch column number for y-, z-axis and errorbars 
+    def fetchCol_YZE(self, processType):
+        self.processType = processType
+        if processType == 'fetchColY':
+            self.printText(self.printQuestion, self.defaultFetchColY)
+            self.fetchColY.append(self.acceptUserInput(self.defaultFetchColY))
+        elif processType == 'fetchColZ':
+            self.printText(self.printQuestion, self.defaultFetchColZ)
+            self.fetchColZ.append(self.acceptUserInput(self.defaultFetchColZ))
+        else: # processType == 'fetchErrorBar':
+            self.printText(self.printQuestion, self.defaultFetchErrorBar)
+            self.fetchColE.append(self.acceptUserInput(self.defaultFetchErrorBar))
+        if (processType in ['fetchColY', 'fetchErrorBar']) and (self.fetchColY[-1] or self.fetchColE[-1]) in ['f', 'F']:
+            self.fetchColY.pop() if processType == 'fetchColY' else self.fetchColE.pop()
+            self.fetchYFunc = True
+            self.fetchYFunc2 = True
+        elif processType == 'fetchColZ' and self.fetchColZ[-1] in ['f', 'F']:
+            self.fetchColZ.pop()
+            self.fetchZFunc = True
+            self.fetchZFunc2 = True
+        else:
+            if processType == 'fetchColY':
+                self.printText(self.printSuccess, self.fetchColY) 
+            elif processType == 'fetchColZ':
+                self.printText(self.printSuccess, self.fetchColZ) 
+            else:
+                self.printText(self.printSuccess, self.fetchColE) 
+            
+    # =============================== Logic to fetch function for y-axis and errorbars 
+    def fetchFunc_YE(self, processType):
+        printVal = 'x**2' if processType == 'getFuncYFromUser' else 'np.random.random_sample(x)'
+        self.printText(self.printQuestion, printVal)
+        print("y(x): ") if processType == 'getFuncYFromUser' else 'e(x)'
+        if processType == 'getFuncYFromUser':
+            self.y = self.acceptUserInput(self.defaultY)
+            self.printText(self.printSuccess, self.y)
+            self.data.append(self.y)
+            self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+        else: # errorbar function
+            self.e = self.acceptUserInput(self.defaultE)
+            self.printText(self.printSuccess, self.e)
+            self.data.append(self.e)
+            self.fetchColE.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+            
     # =============================== User Interactions             
     def main(self): 
         self.processType = 'fetchInputData'
@@ -968,30 +1067,30 @@ Please make sure that x and y data sizes match! """
         for i in range(self.numOfPlots):
             self.askPlotType(i)
             # data generation loop
+            dataPlotCnt = 0 # count num of data plot per graph
             while True:
+                if self.yDataCounter != 0:
+                    if not self.askMoreData():
+                        break
+                if self.plotSelect == 'line/scatter/line+scatter':
+                    self.askPlotPlotType()
                 if self.csvData:
-                    # Ask data of x-axis from user
-                    if self.askXData_csv():
-                        break
-                    else:
-                        pass
-                    self.askYZData_csv()
+                    self.askXData_csv()
+                    self.askYZEData_csv()
                 if not self.csvData or self.fetchXFunc or self.fetchYFunc or self.fetchZFunc: # generate data from function
-                    if self.askXData_func():
-                        break
-                    else:
-                        pass   
-                    self.askYData_func()
+                    self.askXData_func()
+                    self.askYEData_func()
                     self.askZData_func()
                 self.yDataCounter += 1
-                self.askLegendNames(i)
+                self.askLegendNames(dataPlotCnt)
+                dataPlotCnt =+ 1
             self.ask3rdAxis()
             self.askXLabel()
             self.askBinRes()
             self.askYZLabel()
             self.askSubplotTitle()
             plotCounter = i
-            self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
+            self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.plotPlotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, self.thirdAxis, self.data) # TODO: Why do I send self.numOfPlots???
             self.plotPyt.plotLabeling(self.xLabel, self.yLabel, self.zLabel, self.thirdAxis, self.threeD, self.title, self.numOfPlots, plotCounter, self.plotSelect)
             self.main_reinitializeVars() 
             
