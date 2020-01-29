@@ -14,6 +14,7 @@ from colorama import Fore, Back, Style, init # colored output on the terminal
 from datetime import datetime
 import tkinter
 import config
+import mplRC
 init(autoreset = True) # turn off colors after each print()
 
 ###################### PLOTTER
@@ -37,16 +38,7 @@ Please turn on your X-server first and then hit [enter]"""
     # =============================== Prepare the plot
     def prepPlot(self, numOfPlots): 
         exitLoop = False
-        
-        # Say, "the default sans-serif font is COMIC SANS", taken from: http://jonathansoma.com/lede/data-studio/matplotlib/changing-fonts-in-matplotlib/
-        #mpl.rcParams['font.DejaVu Sans'] = "MS Reference Sans Serif"
-        # Then, "ALWAYS use sans-serif fonts"
-        #mpl.rcParams['font.family'] = "sans-serif"
-        mpl.rc('font',**{'family':'Times New Roman'})#,'serif':['Times new Roman']})
-        #mpl.rc('text', usetex=True)
-        params = {'legend.fontsize': config.legendFontSize,
-          'legend.handlelength': 2}
-        plt.rcParams.update(params)
+        plt.rcParams.update(mplRC.parameters)
         
         while True:
             try:   
@@ -1312,6 +1304,7 @@ Please make sure that x and y data sizes match! """
         
         if not self.plotSelect in ['cdf', 'histogram', 'box']:
             # Fetch y-label
+            config.multipleAxis = True if self.yDataCounter > 1 else False
             self.processType = 'getLabelY'
             if not config.multipleAxis:
                 if not self.csvData or self.fetchYFunc2:
