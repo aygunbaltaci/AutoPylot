@@ -125,7 +125,7 @@ parameters = {
 ## The font.size property is the default font size for text, given in pts.
 ## 10 pt is the standard value.
 
-'font.family'         : 'sans-serif',
+'font.family'         : 'serif',
 #'font.style'          : normal,
 #'font.variant'        : normal,
 #'font.weight'         : normal,
@@ -137,7 +137,7 @@ parameters = {
 ## small, medium, large, x-large, xx-large, larger, or smaller
 #'font.size'           : 10.0,
 #'font.serif'          : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif,
-#'font.sans-serif'     : DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif,
+'font.sans-serif'     : 'Bitstream Vera Sans', # DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif,
 #'font.cursive'        : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive,
 #'font.fantasy'        : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, xkcd, fantasy,
 #'font.monospace'      : DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace,
@@ -146,7 +146,7 @@ parameters = {
 ## text properties used by text.Text.  See
 ## http://matplotlib.org/api/artist_api.html#module-matplotlib.text for more
 ## information on text properties
-#'text.color'          : black,
+'text.color'          : 'grey',
 
 #### LaTeX customizations. See http://wiki.scipy.org/Cookbook/Matplotlib/UsingTex
 #'text.usetex'        : False,  ## use latex for all text handling. The following fonts
@@ -217,19 +217,19 @@ parameters = {
 ## default face and edge color, default tick sizes,
 ## default fontsizes for ticklabels, and so on.  See
 ## http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
-#'axes.facecolor'      : white,   ## axes background color
-#'axes.edgecolor'      : black,   ## axes edge color
-#'axes.linewidth'      : 0.8,     ## edge linewidth
-#'axes.grid'           : False,   ## display grid or not
+'axes.facecolor'      : 'whitesmoke',   ## axes background color
+'axes.edgecolor'      : 'grey',   ## axes edge color
+'axes.linewidth'      : 0.5,     ## edge linewidth
+'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
 #'axes.grid.which'     : major,   ## gridlines at major, minor or both ticks
 #'axes.titlesize'      : large,   ## fontsize of the axes title
 #'axes.titleweight'    : normal,  ## font weight of title
 #'axes.titlepad'       : 6.0,     ## pad between axes and title in points
-#'axes.labelsize'      : medium,  ## fontsize of the x any y labels
-#'axes.labelpad'       : 4.0,     ## space between label and axis
-#'axes.labelweight'    : normal,  ## weight of the x and y labels
-#'axes.labelcolor'     : black,
+'axes.labelsize'      : 24,  ## fontsize of the x any y labels
+'axes.labelpad'       : 8.0,     ## space between label and axis
+'axes.labelweight'    : 'normal',  ## weight of the x and y labels
+'axes.labelcolor'     : 'grey',
 #'axes.axisbelow'      : line,    ## draw axis gridlines and ticks below
                                ## patches (True); above patches but below
                                ## lines ('line'); or above all (False)
@@ -252,10 +252,10 @@ parameters = {
                                          ## will be used when it can remove
                                          ## at least this number of significant
                                          ## digits from tick labels.
-#'axes.spines.left'   : True,   ## display axis spines
-#'axes.spines.bottom' : True,
-#'axes.spines.top'    : True,
-#'axes.spines.right'  : True,
+'axes.spines.left'   : True,   ## display axis spines
+'axes.spines.bottom' : True,
+'axes.spines.top'    : False,
+'axes.spines.right'  : False,
 #'axes.unicode_minus'  : True,    ## use unicode for the minus symbol
                                ## rather than hyphen.  See
                                ## http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
@@ -301,8 +301,8 @@ parameters = {
 #'xtick.minor.width'    : 0.6,    ## minor tick width in points
 #'xtick.major.pad'     : 3.5,    ## distance to major tick label in points
 #'xtick.minor.pad'     : 3.4,    ## distance to the minor tick label in points
-#'xtick.color'          : black,  ## color of the tick labels
-#'xtick.labelsize'      : medium, ## fontsize of the tick labels
+'xtick.color'          : 'grey',  ## color of the tick labels
+'xtick.labelsize'      : 24, ## fontsize of the tick labels
 #'xtick.direction'      : out,    ## direction: in, out, or inout
 #'xtick.minor.visible'  : False,  ## visibility of minor ticks on x-axis
 #'xtick.major.top'      : True,   ## draw x axis top major ticks
@@ -321,8 +321,8 @@ parameters = {
 #'ytick.minor.width'    : 0.6,    ## minor tick width in points
 #'ytick.major.pad'      : 3.5,    ## distance to major tick label in points
 #'ytick.minor.pad'      : 3.4,    ## distance to the minor tick label in points
-#'ytick.color'          : black,  ## color of the tick labels
-#'ytick.labelsize'      : medium, ## fontsize of the tick labels
+'ytick.color'          : 'grey',  ## color of the tick labels
+'ytick.labelsize'      : 24, ## fontsize of the tick labels
 #'ytick.direction'      : out,    ## direction: in, out, or inout
 #'ytick.minor.visible'  : False,  ## visibility of minor ticks on y-axis
 #'ytick.major.left'     : True,   ## draw y axis left major ticks
@@ -332,24 +332,24 @@ parameters = {
 #'ytick.alignment'      : center_baseline, ## alignment of yticks
 
 #### GRIDS
-#'grid.color'       :   b0b0b0,    ## grid color
+'grid.color'       :   'palegoldenrod',    ## grid color
 #'grid.linestyle'   :   -,         ## solid
-#'grid.linewidth'   :   0.8,       ## in points
-#'grid.alpha'       :   1.0,       ## transparency, between 0.0 and 1.0
+'grid.linewidth'   :   0.1,       ## in points
+#'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
 
 #### Legend
-#'legend.loc'           : best,
+'legend.loc'           : 'best',
 #'legend.frameon'       : True,     ## if True, draw the legend on a background patch
-#'legend.framealpha'    : 0.8,      ## legend patch transparency
+'legend.framealpha'    : 0.7,      ## legend patch transparency
 #'legend.facecolor'     : inherit,  ## inherit from axes.facecolor; or color spec
 #'legend.edgecolor'     : 0.8,      ## background patch boundary color
 #'legend.fancybox'      : True,     ## if True, use a rounded box for the
                                  ## legend background, else a rectangle
-#'legend.shadow'        : False,    ## if True, give background a shadow effect
+'legend.shadow'        : True,    ## if True, give background a shadow effect
 #'legend.numpoints'     : 1,        ## the number of marker points in the legend line
 #'legend.scatterpoints' : 1,       ## number of scatter points
 #'legend.markerscale'   : 1.0,      ## the relative size of legend markers vs. original
-'legend.fontsize'      : 'medium',
+'legend.fontsize'      : 12,
 #'legend.title_fontsize'    : None ## None sets to the same as the default axes.
 ## Dimensions as fraction of fontsize:
 #'legend.borderpad'     : 0.4,      ## border whitespace
@@ -362,11 +362,11 @@ parameters = {
 
 #### FIGURE
 ## See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
-#'figure.titlesize' : large,      ## size of the figure title (Figure.suptitle())
-#'figure.titleweight' : normal,   ## weight of the figure title
+'figure.titlesize' : 28,      ## size of the figure title (Figure.suptitle())
+'figure.titleweight' : 'bold',   ## weight of the figure title
 #'figure.figsize'   : 6.4, 4.8,   ## figure size in inches
-#'figure.dpi'       : 100,        ## figure dots per inch
-#'figure.facecolor' : white,      ## figure facecolor
+'figure.dpi'       : 100,        ## figure dots per inch
+#'figure.facecolor' : 'white',      ## figure facecolor
 #'figure.edgecolor' : white,      ## figure edgecolor
 #'figure.frameon' : True,         ## enable figure frame
 #'figure.max_open_warning' : 20,  ## The maximum number of figures to open through
@@ -379,7 +379,7 @@ parameters = {
 #'figure.subplot.top'     : 0.88,   ## the top of the subplots of the figure
 #'figure.subplot.wspace'  : 0.2,    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
-#'figure.subplot.hspace'  : 0.2,    ## the amount of height reserved for space between subplots,
+'figure.subplot.hspace'  : 0.5,    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout
@@ -522,8 +522,8 @@ parameters = {
 #'keymap.quit_all' : W, cmd+W, Q,       ## close all figures
 #'keymap.grid' : g,                     ## switching on/off major grids in current axes
 #'keymap.grid_minor' : G,               ## switching on/off minor grids in current axes
-#'keymap.yscale' : l,                   ## toggle scaling of y-axes ('log'/'linear')
-#'keymap.xscale' : k, L,                ## toggle scaling of x-axes ('log'/'linear')
+'keymap.yscale' : 'linear',                   ## toggle scaling of y-axes ('log'/'linear')
+'keymap.xscale' : 'linear',                ## toggle scaling of x-axes ('log'/'linear')
 #'keymap.all_axes' : a,                 ## enable all axes
 #'keymap.copy' : ctrl+c, cmd+c,         ## Copy figure to clipboard
 
@@ -550,6 +550,7 @@ parameters = {
 #'animation.convert_args':,           ## Additional arguments to pass to convert
 #'animation.embed_limit' : 20.0,      ## Limit, in MB, of size of base64 encoded
                                    ## animation in HTML (i.e. IPython notebook)
+##### Additional configs
 }
 
 #### MATPLOTLIBRC FORMAT
