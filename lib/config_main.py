@@ -22,13 +22,13 @@ scatterErrPlot_lineStyle = 'o' # line style of "scatter plot w/ errorbar". Accep
 lineErrPlot_lineStyle = '-' # line style of "line plot w/ errorbar". Acceptable inputs: 'o', '-o', '-x', '--', '-'
 lineScatErrPlot_lineStyle = '-x' # line style of "line+scatter plot w/ errorbar". Acceptable inputs: 'o', '-o', '-x', '--', '-'
 lineWidth = [3, 1, 1, 1, 1, 1, 1, 1, 1, 1] # line width of line plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-lineColors = [0, 3, 2, 4, 9, 1, 7, 8, 5, 6] # Color order for lines in the plot. 0: blue, 1: orange, 2: green, 3: red, 4: purple, 5: brown, 6: pink, 7: dark grey, 8: light green, 9: cyan. ADD MORE COLOR CODES TO "self.colors[]" in pythonPlotter.py if you need more color options for your plot!
+lineColors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # Color order for lines in the plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors[]" in plotFuncs.py if you need more color options for your plot!
 yLimThreshold = 25 # Valid iff 'multipleAxis = True'. Extra values to add to the y limits of additional y-axes.
 alpha = 0.5 # Transparency level of line plots
 
 ############ Default Value Definitions for Output Figure
 multipleAxis = True # to enable multiple y-axes on each plot
-axisOffset = 0.15 # Valid iff 'multipleAxis = True'. y-axes offset value
+axisOffset = 0.1 # Valid iff 'multipleAxis = True'. y-axes offset value
 defaultPlotSelect = 'line/scatter/line+scatter' # default plot type to be used
 defaultPlotPlotSelect = 1 # 1: line, 2: scatter, 3: line+scatter. If user selects line/scatter/line+scatter plot type, then the default plot type to be used for each data set in the plot
 defaultLegendNames = ['Data Rate (kbps)', 'UAV-RC Distance (m)', 'UAV Height (m)', 'legend4', 'legend5', 'legend6', 'legend7', 'legend8', 'legend9', 'legend10'] # Default legend names

@@ -125,7 +125,7 @@ parameters = {
 ## The font.size property is the default font size for text, given in pts.
 ## 10 pt is the standard value.
 
-'font.family'         : 'serif',
+#'font.family'         : 'serif',
 #'font.style'          : normal,
 #'font.variant'        : normal,
 #'font.weight'         : normal,
@@ -137,10 +137,10 @@ parameters = {
 ## small, medium, large, x-large, xx-large, larger, or smaller
 #'font.size'           : 10.0,
 #'font.serif'          : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif,
-'font.sans-serif'     : 'Bitstream Vera Sans', # DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif,
+#'font.sans-serif'     : 'Avant Garde', # DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif,
 #'font.cursive'        : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive,
 #'font.fantasy'        : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, xkcd, fantasy,
-#'font.monospace'      : DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace,
+'font.monospace'      : 'Computer Modern Typewriter', #DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace,
 
 #### TEXT
 ## text properties used by text.Text.  See
@@ -223,8 +223,8 @@ parameters = {
 'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
 #'axes.grid.which'     : major,   ## gridlines at major, minor or both ticks
-#'axes.titlesize'      : large,   ## fontsize of the axes title
-#'axes.titleweight'    : normal,  ## font weight of title
+'axes.titlesize'      : 24,   ## fontsize of the axes title
+'axes.titleweight'    : 'bold',  ## font weight of title
 #'axes.titlepad'       : 6.0,     ## pad between axes and title in points
 'axes.labelsize'      : 24,  ## fontsize of the x any y labels
 'axes.labelpad'       : 8.0,     ## space between label and axis
@@ -255,7 +255,7 @@ parameters = {
 'axes.spines.left'   : True,   ## display axis spines
 'axes.spines.bottom' : True,
 'axes.spines.top'    : False,
-'axes.spines.right'  : False,
+'axes.spines.right'  : True,
 #'axes.unicode_minus'  : True,    ## use unicode for the minus symbol
                                ## rather than hyphen.  See
                                ## http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
@@ -332,7 +332,7 @@ parameters = {
 #'ytick.alignment'      : center_baseline, ## alignment of yticks
 
 #### GRIDS
-'grid.color'       :   'palegoldenrod',    ## grid color
+'grid.color'       :   'white',    ## grid color
 #'grid.linestyle'   :   -,         ## solid
 'grid.linewidth'   :   0.1,       ## in points
 #'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
@@ -379,7 +379,7 @@ parameters = {
 #'figure.subplot.top'     : 0.88,   ## the top of the subplots of the figure
 #'figure.subplot.wspace'  : 0.2,    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
-'figure.subplot.hspace'  : 0.5,    ## the amount of height reserved for space between subplots,
+'figure.subplot.hspace'  : 0.8,    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout

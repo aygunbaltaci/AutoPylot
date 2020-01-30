@@ -96,8 +96,9 @@ class userInteractions:
         
         # Print messages
         self.qTxtFileName = f"""
-\n\n{Back.BLUE}PYTHON3 PLOTTER{Back.BLACK}\n\n
-Type [{Fore.YELLOW}exit{Fore.WHITE} || {Fore.YELLOW}EXIT{Fore.WHITE} || {Fore.YELLOW}quit{Fore.WHITE} || {Fore.YELLOW}QUIT{Fore.WHITE}] to terminate the program at any step.
+\n\n{Back.BLUE}PYTHON3 PLOTTER{Back.BLACK}
+Plot your data without writing scripts!  
+Type [{Fore.YELLOW}exit{Fore.WHITE} || {Fore.YELLOW}EXIT{Fore.WHITE} || {Fore.YELLOW}quit{Fore.WHITE} || {Fore.YELLOW}QUIT{Fore.WHITE}] to terminate the program at any step. \n 
 
 Enter the name of your data file (located in the same directory of program)."""
         self.qTxtTypeOfPlot = """
@@ -1068,8 +1069,8 @@ Please make sure that x and y data sizes match! """
                         self.printText(self.printQuestion, config.defaultYLabel) # send j instead of legend name to be able to print dataset # in printText()
                         self.yLabel.append(self.acceptUserInput(config.defaultYLabel)) # fetch x label to the y-axis
                     else:
-                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-2 + j]]) 
-                        self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-2 + j]]))
+                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[j]]) 
+                        self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[j]]))
                     if self.yLabel in self.undoCommands:
                         self.nextFunc = 'askBinRes'
                         self.yLabel.pop()
@@ -1150,7 +1151,6 @@ Please make sure that x and y data sizes match! """
                         if self.nextFunc == 'askPlotType':
                             self.askPlotType(i)
                             print("progress c: %s" %self.nextFunc)
-                            dataPlotCnt = 0 # count num of data plot per graph
                             if self.prevCallFunc_askPlotType: # go back to askNumOfPlots
                                 break
                             # data generation loop
@@ -1180,9 +1180,8 @@ Please make sure that x and y data sizes match! """
                                         self.askZData_func()
                                         print("progress h: %s" %self.nextFunc)
                                 if self.nextFunc == 'askLegendNames':
-                                    self.askLegendNames(dataPlotCnt)
+                                    self.askLegendNames(self.yDataCounter - 1)
                                     print("progress i: %s, y data counter: %d" %(self.nextFunc, self.yDataCounter))
-                                dataPlotCnt =+ 1
                         elif self.nextFunc == 'askXLabel':
                             self.askXLabel()
                             print("progress k: %s" %self.nextFunc)
