@@ -410,7 +410,7 @@ Please make sure that x and y data sizes match! """
             elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ', 'fetchErrorBar']:
                 if self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and not input in ['f', 'F']:
                     input = int(input)
-                if (input in ['f', 'F']) or (self.processType is 'fetchColX' and self.yDataCounter > 0):
+                if (input in ['f', 'F']) or (self.processType == 'fetchColX' and self.yDataCounter > 0):
                     pass
                 elif not self.minColNum <= int(input) <= self.numData - 1: 
                     raise ValueError
@@ -581,7 +581,7 @@ Please make sure that x and y data sizes match! """
             if not self.plotSelect == config.defaultPlotSelect:
                 self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
             self.printText(self.printSuccess, self.plotSelect)
-            self.threeD = True if self.plotSelect is '3d' else False
+            self.threeD = True if self.plotSelect == '3d' else False
             if self.plotSelect == 'line/scatter/line+scatter':
                 self.nextFunc = 'askPlotPlotType'
             else:
@@ -616,6 +616,7 @@ Please make sure that x and y data sizes match! """
         printVal = [self.yDataCounter, self.defaultFetchColX]
         self.printText(self.printQuestion, printVal)
         self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
+        if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter += 1
         if self.fetchColX[-1] in self.undoCommands:
             if self.prevCallFunc_plotPlotType: 
                 self.nextFunc = 'askPlotType'
@@ -625,6 +626,7 @@ Please make sure that x and y data sizes match! """
                 self.plotPlotSelect.pop()
                 self.errorBar.pop()
             self.fetchColX.pop()
+            if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter -= 1
         else:
             if not self.fetchColX[-1] in ['f', 'F'] or not self.nextFunc == 'minX':
                 self.nextFunc = 'askYZEData_csv'
@@ -646,6 +648,8 @@ Please make sure that x and y data sizes match! """
                 if self.plotSelect == 'line/scatter/line+scatter' and self.errorBar[-1] == True: 
                     self.processType = 'fetchErrorBar'
                     self.fetchCol_YZE(self.processType)
+            else:
+                self.nextFunc = 'askLegendNames'
             if self.plotSelect == '3d':
                 self.processType = 'fetchColZ'
                 self.fetchCol_YZE(self.processType)
@@ -661,7 +665,6 @@ Please make sure that x and y data sizes match! """
             self.printText(self.printQuestion, self.defaultFetchColY)
             self.fetchColY.append(self.acceptUserInput(self.defaultFetchColY))
             self.yDataCounter += 1
-            print("I AM AT FETCHCOL_YZE")
             if self.fetchColY[-1] in self.undoCommands:
                 self.nextFunc = 'askXData_csv'
                 self.fetchColX.pop()
@@ -766,11 +769,12 @@ Please make sure that x and y data sizes match! """
                 self.printText(self.printSuccess, self.x)
                 self.data.append(self.x)
                 self.fetchColX.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+                if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter += 1
                 if self.plotSelect in ['histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
                     return True
                 if self.fetchColX[-1] in ['q', 'Q']:
                     self.fetchColX.pop()
-                    if (self.plotSelect is '3d' and self.yDataCounter < 2):
+                    if (self.plotSelect == '3d' and self.yDataCounter < 2):
                         print(f"{Fore.RED}You need to enter at least 2 data sets in order to plot 3D plot")
                     else:
                         return True
@@ -801,7 +805,6 @@ Please make sure that x and y data sizes match! """
                 self.data.append(self.y)
                 self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
                 self.yDataCounter += 1
-                print("I AM AT FETCHFUNC_YZE")
             else:
                 self.nextFunc = 'resX'
                 self.resX = self.defaultResX
@@ -860,8 +863,8 @@ Please make sure that x and y data sizes match! """
     def askLegendNames(self, i):
         # Fetch legend name(s)
         self.processType = 'getLegendNames'
-        if self.plotSelect in ['box', 'cdf']:
-            printVal = [i, config.defaultLegendNames[i], 'xtick']
+        if self.plotSelect in ['box']:
+            printVal = [i + 1, config.defaultLegendNames[i], 'xtick']
             self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
             self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             if self.legendName[-1] in self.undoCommands:
@@ -885,7 +888,7 @@ Please make sure that x and y data sizes match! """
                 self.nextFunc = 'askMoreData'
                 self.printText(self.printSuccess, self.legendName)
         elif self.plotSelect == '3d': 
-            printVal = [i, config.defaultLegendNames[i], 'legend']
+            printVal = [i + 1, config.defaultLegendNames[i], 'legend']
             self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
             self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             if self.legendName[-1] in self.undoCommands:
@@ -908,7 +911,7 @@ Please make sure that x and y data sizes match! """
                 self.nextFunc = 'askMoreData'
                 self.printText(self.printSuccess, self.legendName)
         else:
-            printVal = [i, config.defaultLegendNames[i], 'legend']
+            printVal = [i + 1, config.defaultLegendNames[i], 'legend']
             self.printText(self.printQuestion, printVal) # send i instead of legend name to be able to print dataset # in printText()
             self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             if self.legendName[-1] in self.undoCommands:
@@ -1007,6 +1010,7 @@ Please make sure that x and y data sizes match! """
         
     # =============================== Ask y- and z-axis label names from user
     def askYZLabel(self):
+        if self.plotSelect in ['cdf', 'histogram', 'box']: config.multipleAxis = False
         if self.plotSelect == 'cdf':
             self.yLabel.append(config.cdfDefaultLabel)
             if self.yLabel[-1] in self.undoCommands:
@@ -1176,7 +1180,6 @@ Please make sure that x and y data sizes match! """
                                         self.askYEData_func()
                                         print("progress g: %s" %self.nextFunc)
                                     if self.nextFunc == 'askZData_func':
-                                        print("I am hereeee")
                                         self.askZData_func()
                                         print("progress h: %s" %self.nextFunc)
                                 if self.nextFunc == 'askLegendNames':

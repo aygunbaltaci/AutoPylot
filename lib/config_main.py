@@ -27,7 +27,7 @@ yLimThreshold = 25 # Valid iff 'multipleAxis = True'. Extra values to add to the
 alpha = 0.5 # Transparency level of line plots
 
 ############ Default Value Definitions for Output Figure
-multipleAxis = True # to enable multiple y-axes on each plot
+multipleAxis = False # to enable multiple y-axes on each plot
 axisOffset = 0.1 # Valid iff 'multipleAxis = True'. y-axes offset value
 defaultPlotSelect = 'line/scatter/line+scatter' # default plot type to be used
 defaultPlotPlotSelect = 1 # 1: line, 2: scatter, 3: line+scatter. If user selects line/scatter/line+scatter plot type, then the default plot type to be used for each data set in the plot

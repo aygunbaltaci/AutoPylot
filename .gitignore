@@ -1,6 +1,8 @@
 libraryFiles
 myapp
 logs/*.pdf
+logs/*.png
+logs/*.jpg
 inputCsvFiles/highResData.csv
 inputCsvFiles/lowResData.csv
 nearestPtInterpolator.py

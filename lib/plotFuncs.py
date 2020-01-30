@@ -82,6 +82,7 @@ Please turn on your X-server first and then hit [enter]"""
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat)
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel)
         self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel[0])
+        print("Config multiaxis: %s" %config.multipleAxis)
         if config.multipleAxis:
             for i in range(numData - 1):
                 self.guest[i].set_ylabel(yLabel[i + 1])
@@ -139,7 +140,7 @@ Please turn on your X-server first and then hit [enter]"""
                 counts, bin_edges = np.histogram(data[colNumX[i]], bins = bins, density = False) # Use histogram function to bin data
                 counts = counts.astype(float) / data_size
                 cdfData = np.cumsum(counts)
-                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
+                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], lineWidth = config.lineWidth[0], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
                 #self.host[self.figColCnt, self.figRowCnt].set_xscale('log')
         elif plotSelect == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)

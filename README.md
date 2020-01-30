@@ -86,3 +86,7 @@ To add a new plot type:
 4. Slider tabs for function-based plots 
 5. Bar graphs with one data per sample
 6. Error bar support for line plots
+
+## Known Bugs: 
+*TypeError: Cannot cast array data from dtype('int64') to dtype('int32') according to the rule 'safe'*: This error pops up when seaborn library version 0.10.0 is used. A quick solution is to downgrade seaborn to 0.9.0: 
+> pip3 install seaborn==0.9.0
