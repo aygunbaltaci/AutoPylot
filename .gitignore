@@ -1,9 +1,7 @@
-libraryFiles
 myapp
-logs/*.pdf
-logs/*.png
-logs/*.jpg
-inputCsvFiles/highResData.csv
-inputCsvFiles/lowResData.csv
-nearestPtInterpolator.py
+logs/*
+lib/__pycache__
+!logs/placeholder.txt
+inputCsvFiles/*
+!inputCsvFiles/plotFromCsv.csv
 *.svg
