@@ -1105,20 +1105,20 @@ Please make sure that x and y data sizes match! """
             self.fetchZFunc2 = False
             
     # =============================== Ask subplot title name from user
-    def askSubplotTitle(self):
+    def askSubplotTitle(self, i):
         if self.numOfPlots > 1: 
             # Fetch title name from user
             self.processType = 'getTitleName'
             mainTitle = False
-            printVar = [mainTitle, config.defaultTitle]
+            printVar = [mainTitle, config.defaultSubTitleNames[i]]
             self.printText(self.printQuestion, printVar) 
-            self.title = self.acceptUserInput(config.defaultTitle)
+            self.title = self.acceptUserInput(config.defaultSubTitleNames[i])
             if not self.title in self.undoCommands:
                 self.nextFunc = 'subplotDone'
                 self.printText(self.printSuccess, self.title)
             else:
                 self.nextFunc = 'askYZLabel'
-                self.title = config.defaultTitle
+                self.title = config.defaultSubTitleNames[i]
                 if self.plotSelect == '3d':
                     self.zLabel = 'z'
                 else:
@@ -1195,7 +1195,7 @@ Please make sure that x and y data sizes match! """
                             self.askYZLabel()
                             print("progress m: %s" %self.nextFunc)
                         elif self.nextFunc == 'askSubplotTitle':
-                            self.askSubplotTitle()
+                            self.askSubplotTitle(i)
                             print("progress n: %s" %self.nextFunc)
                             plotCounter = i
                         elif self.nextFunc == 'subplotDone': 

@@ -24,6 +24,7 @@ class plotPython:
         self.figColCnt = 0
         self.numOfRow = 0
         self.plotCounter = 0
+        self.oneColSpecPlt = False
         self.guest = []
         self.linesSum = None
         self.labelsSum = None
@@ -41,10 +42,22 @@ Please turn on your X-server first and then hit [enter]"""
         while True:
             try:   
                 self.numOfRow = config.plotsPerRow if numOfPlots > 1 else 1
-                self.fig, self.host = plt.subplots(math.ceil(numOfPlots / self.numOfRow), self.numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
-                if numOfPlots != 1 and numOfPlots % self.numOfRow != 0: # turn off the axes of last unused plot, because there is leftover plot in when total plots are odd
-                    for i in range(numOfPlots % self.numOfRow, self.numOfRow):
-                        self.host[int(numOfPlots / self.numOfRow), i].axis('off')
+                if (config.plotsPerRow == 1 and numOfPlots > 1) and config.oneColSpecPlt:
+                    self.numOfRow = 2
+                    self.oneColSpecPlt = True
+                else:
+                    self.oneColSpecPlt = False
+
+                if not self.oneColSpecPlt:
+                    self.fig, self.host = plt.subplots(math.ceil(numOfPlots / self.numOfRow), self.numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
+                    if numOfPlots != 1 and numOfPlots % self.numOfRow != 0: # turn off the axes of last unused plot, because there is leftover plot in when total plots are odd
+                        for i in range(numOfPlots % self.numOfRow, self.numOfRow):
+                            self.host[int(numOfPlots / self.numOfRow), i].axis('off')
+                else:
+                    self.fig, self.host = plt.subplots(numOfPlots, self.numOfRow, sharex = config.shareX, sharey = config.shareY, figsize = (config.figDimX, config.figDimY), squeeze = False)
+                    for i in range(numOfPlots):
+                        self.host[i, 1].remove()
+
                 exitLoop = True
             except tkinter._tkinter.TclError: # fail if X-server not running
                 print(self.fTxtNoXServer)
@@ -67,18 +80,18 @@ Please turn on your X-server first and then hit [enter]"""
     def axisColoring(self, numData):
         # color the axes of the plot. For now, it is implemented only for 3-axis 2D graphs. TO BE EXTENDED!
         axisOffset = 1
-        self.host[self.figColCnt, self.figRowCnt].spines['left'].set_color(self.colors[config.lineColors[0]])
-        self.host[self.figColCnt, self.figRowCnt].tick_params(axis = 'y', colors = self.colors[config.lineColors[0]])
         self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[config.lineColors[0]])
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_alpha(config.alpha)
         for i in range(numData - 1):
-            self.guest[i].spines['right'].set_color(self.colors[config.lineColors[i + 1]])
             self.guest[i].spines['right'].set_position(("axes", axisOffset))
-            self.guest[i].tick_params(axis='y', colors = self.colors[config.lineColors[i + 1]])
             self.guest[i].yaxis.label.set_color(self.colors[config.lineColors[i + 1]])
+            self.guest[i].yaxis.label.set_alpha(config.alpha)
             axisOffset += config.axisOffset
     
     # =============================== Label the plot
     def plotConfigs(self, xLabel, yLabel, zLabel, threeD, title, numOfPlots, plotCounter, plotType, numData):
+        if plotCounter == 1: # delete it
+            self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 250)
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat)
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel)
         self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel[0])
@@ -102,15 +115,21 @@ Please turn on your X-server first and then hit [enter]"""
             plt.subplots_adjust(top = 0.9, bottom = 0.2)
             
         # logic to place subplots in the right location
-        if (plotCounter + 1) % self.numOfRow == 0:
-            self.figColCnt += 1
-            self.figRowCnt -= (self.numOfRow - 1)
+        if not self.oneColSpecPlt:
+            if (plotCounter + 1) % self.numOfRow == 0:
+                self.figColCnt += 1
+                self.figRowCnt -= (self.numOfRow - 1)
+            else:
+                self.figRowCnt += 1
         else:
-            self.figRowCnt += 1
+            self.figColCnt += 1
             
     # =============================== Show the plot
     def showPlot(self, title, numOfPlots):
-        self.fig.suptitle(title) # Main title
+        if not self.oneColSpecPlt:
+            self.fig.suptitle(title) # Main title
+        else:
+            self.fig.suptitle(title, x = config.oneColSpecPlt_loc_xTitle) # Main title
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat) # save fig to logs dir
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
@@ -140,8 +159,8 @@ Please turn on your X-server first and then hit [enter]"""
                 counts, bin_edges = np.histogram(data[colNumX[i]], bins = bins, density = False) # Use histogram function to bin data
                 counts = counts.astype(float) / data_size
                 cdfData = np.cumsum(counts)
-                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], lineWidth = config.lineWidth[0], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
-                #self.host[self.figColCnt, self.figRowCnt].set_xscale('log')
+                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], lineWidth = config.lineWidth[0], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) # delete linewidth
+                self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
         elif plotSelect == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
             self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left', alpha = config.alpha)  
@@ -191,7 +210,6 @@ Please turn on your X-server first and then hit [enter]"""
                     lines2, labels2 = self.guest[j].get_legend_handles_labels()
                     linesSum += lines2
                     labelsSum += labels2
-                #self.host[self.figColCnt, self.figRowCnt].legend(lines, [l.get_label() for l in lines], loc = 'best')
                 self.guest[j].legend(linesSum, labelsSum)
                 self.axisColoring(numData)
             else:

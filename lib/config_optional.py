@@ -5,6 +5,7 @@
 # REMOVE comma from the very last used parameter at the end of dictionary
 # ADD () for entries with multiple values. E.g. 'figure.figsize'   : (6.4, 4.8)
 # ADD '' for string entries. E.g. 'patch.edgecolor'        : 'black'
+fontColor = '#404040' # dark grey
 parameters = {
 #'lines.linewidth'   : 1.5,     ## line width in points
 #'lines.linestyle'   : -,       ## solid line
@@ -37,7 +38,7 @@ parameters = {
 #'patch.facecolor'        : C0,
 #'patch.edgecolor'        : black,   ## if forced, or patch is not filled
 #'patch.force_edgecolor'  : False,   ## True to always use edgecolor
-#'patch.antialiased'      : True,    ## render patches in antialiased (no jaggies)
+'patch.antialiased'      : True,    ## render patches in antialiased (no jaggies)
 
 #### HATCHES
 #'hatch.color'    : black,
@@ -140,16 +141,16 @@ parameters = {
 #'font.sans-serif'     : 'Avant Garde', # DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif,
 #'font.cursive'        : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive,
 #'font.fantasy'        : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, xkcd, fantasy,
-'font.monospace'      : 'Computer Modern Typewriter', #DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace,
+#'font.monospace'      : 'Computer Modern Typewriter', #DejaVu Sans Mono, Bitstream Vera Sans Mono, Computer Modern Typewriter, Andale Mono, Nimbus Mono L, Courier New, Courier, Fixed, Terminal, monospace,
 
 #### TEXT
 ## text properties used by text.Text.  See
 ## http://matplotlib.org/api/artist_api.html#module-matplotlib.text for more
 ## information on text properties
-'text.color'          : 'grey',
+'text.color'          : fontColor, # dark grey
 
 #### LaTeX customizations. See http://wiki.scipy.org/Cookbook/Matplotlib/UsingTex
-#'text.usetex'        : False,  ## use latex for all text handling. The following fonts
+'text.usetex'        : True,  ## use latex for all text handling. The following fonts
                               ## are supported through the usual rc parameter settings:
                               ## new century schoolbook, bookman, times, palatino,
                               ## zapf chancery, charter, serif, sans-serif, helvetica,
@@ -158,7 +159,7 @@ parameters = {
                               ## If another font is desired which can loaded using the
                               ## LaTeX \usepackage command, please inquire at the
                               ## matplotlib mailing list
-#'text.latex.preamble' :,      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
+#'text.latex.preamble':,      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
                             ## AND IS THEREFORE UNSUPPORTED. PLEASE DO NOT ASK FOR HELP
                             ## IF THIS FEATURE DOES NOT DO WHAT YOU EXPECT IT TO.
                             ## text.latex.preamble is a single line of LaTeX code that
@@ -217,8 +218,8 @@ parameters = {
 ## default face and edge color, default tick sizes,
 ## default fontsizes for ticklabels, and so on.  See
 ## http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
-'axes.facecolor'      : 'whitesmoke',   ## axes background color
-'axes.edgecolor'      : 'grey',   ## axes edge color
+'axes.facecolor'      : 'white', #'whitesmoke',   ## axes background color
+'axes.edgecolor'      : fontColor,   ## axes edge color
 'axes.linewidth'      : 0.5,     ## edge linewidth
 'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
@@ -229,7 +230,7 @@ parameters = {
 'axes.labelsize'      : 24,  ## fontsize of the x any y labels
 'axes.labelpad'       : 8.0,     ## space between label and axis
 'axes.labelweight'    : 'normal',  ## weight of the x and y labels
-'axes.labelcolor'     : 'grey',
+'axes.labelcolor'     : fontColor,
 #'axes.axisbelow'      : line,    ## draw axis gridlines and ticks below
                                ## patches (True); above patches but below
                                ## lines ('line'); or above all (False)
@@ -301,7 +302,7 @@ parameters = {
 #'xtick.minor.width'    : 0.6,    ## minor tick width in points
 #'xtick.major.pad'     : 3.5,    ## distance to major tick label in points
 #'xtick.minor.pad'     : 3.4,    ## distance to the minor tick label in points
-'xtick.color'          : 'grey',  ## color of the tick labels
+'xtick.color'          : fontColor,  ## color of the tick labels
 'xtick.labelsize'      : 24, ## fontsize of the tick labels
 #'xtick.direction'      : out,    ## direction: in, out, or inout
 #'xtick.minor.visible'  : False,  ## visibility of minor ticks on x-axis
@@ -321,7 +322,7 @@ parameters = {
 #'ytick.minor.width'    : 0.6,    ## minor tick width in points
 #'ytick.major.pad'      : 3.5,    ## distance to major tick label in points
 #'ytick.minor.pad'      : 3.4,    ## distance to the minor tick label in points
-'ytick.color'          : 'grey',  ## color of the tick labels
+'ytick.color'          : fontColor,  ## color of the tick labels
 'ytick.labelsize'      : 24, ## fontsize of the tick labels
 #'ytick.direction'      : out,    ## direction: in, out, or inout
 #'ytick.minor.visible'  : False,  ## visibility of minor ticks on y-axis
@@ -332,28 +333,28 @@ parameters = {
 #'ytick.alignment'      : center_baseline, ## alignment of yticks
 
 #### GRIDS
-'grid.color'       :   'white',    ## grid color
-#'grid.linestyle'   :   -,         ## solid
+'grid.color'       :   'grey', #'#F0F0F0',    ## grid color
+'grid.linestyle'   :   '--',         ## solid
 'grid.linewidth'   :   0.1,       ## in points
-#'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
+'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
 
 #### Legend
-'legend.loc'           : 'best',
+'legend.loc'           : 'upper right',
 #'legend.frameon'       : True,     ## if True, draw the legend on a background patch
-'legend.framealpha'    : 0.7,      ## legend patch transparency
+'legend.framealpha'    : 0.4,      ## legend patch transparency
 #'legend.facecolor'     : inherit,  ## inherit from axes.facecolor; or color spec
 #'legend.edgecolor'     : 0.8,      ## background patch boundary color
 #'legend.fancybox'      : True,     ## if True, use a rounded box for the
                                  ## legend background, else a rectangle
-'legend.shadow'        : True,    ## if True, give background a shadow effect
+'legend.shadow'        : False,    ## if True, give background a shadow effect
 #'legend.numpoints'     : 1,        ## the number of marker points in the legend line
 #'legend.scatterpoints' : 1,       ## number of scatter points
 #'legend.markerscale'   : 1.0,      ## the relative size of legend markers vs. original
-'legend.fontsize'      : 12,
+'legend.fontsize'      : 13,
 #'legend.title_fontsize'    : None ## None sets to the same as the default axes.
 ## Dimensions as fraction of fontsize:
 #'legend.borderpad'     : 0.4,      ## border whitespace
-#'legend.labelspacing'  : 0.5,      ## the vertical space between the legend entries
+'legend.labelspacing'  : 0.2,      ## the vertical space between the legend entries
 #'legend.handlelength'  : 2.0,      ## the length of the legend lines
 #'legend.handleheight'  : 0.7,      ## the height of the legend handle
 #'legend.handletextpad' : 0.8,      ## the space between the legend line and legend text
@@ -523,7 +524,7 @@ parameters = {
 #'keymap.grid' : g,                     ## switching on/off major grids in current axes
 #'keymap.grid_minor' : G,               ## switching on/off minor grids in current axes
 'keymap.yscale' : 'linear',                   ## toggle scaling of y-axes ('log'/'linear')
-'keymap.xscale' : 'linear',                ## toggle scaling of x-axes ('log'/'linear')
+'keymap.xscale' : 'linear'                ## toggle scaling of x-axes ('log'/'linear')
 #'keymap.all_axes' : a,                 ## enable all axes
 #'keymap.copy' : ctrl+c, cmd+c,         ## Copy figure to clipboard
 
