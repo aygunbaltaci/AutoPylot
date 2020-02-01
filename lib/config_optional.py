@@ -224,10 +224,10 @@ parameters = {
 'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
 #'axes.grid.which'     : major,   ## gridlines at major, minor or both ticks
-'axes.titlesize'      : 24,   ## fontsize of the axes title
+'axes.titlesize'      : 36,   ## fontsize of the axes title
 'axes.titleweight'    : 'bold',  ## font weight of title
 #'axes.titlepad'       : 6.0,     ## pad between axes and title in points
-'axes.labelsize'      : 24,  ## fontsize of the x any y labels
+'axes.labelsize'      : 36,  ## fontsize of the x any y labels
 'axes.labelpad'       : 8.0,     ## space between label and axis
 'axes.labelweight'    : 'normal',  ## weight of the x and y labels
 'axes.labelcolor'     : fontColor,
@@ -303,7 +303,7 @@ parameters = {
 #'xtick.major.pad'     : 3.5,    ## distance to major tick label in points
 #'xtick.minor.pad'     : 3.4,    ## distance to the minor tick label in points
 'xtick.color'          : fontColor,  ## color of the tick labels
-'xtick.labelsize'      : 24, ## fontsize of the tick labels
+'xtick.labelsize'      : 36, ## fontsize of the tick labels
 #'xtick.direction'      : out,    ## direction: in, out, or inout
 #'xtick.minor.visible'  : False,  ## visibility of minor ticks on x-axis
 #'xtick.major.top'      : True,   ## draw x axis top major ticks
@@ -323,7 +323,7 @@ parameters = {
 #'ytick.major.pad'      : 3.5,    ## distance to major tick label in points
 #'ytick.minor.pad'      : 3.4,    ## distance to the minor tick label in points
 'ytick.color'          : fontColor,  ## color of the tick labels
-'ytick.labelsize'      : 24, ## fontsize of the tick labels
+'ytick.labelsize'      : 36, ## fontsize of the tick labels
 #'ytick.direction'      : out,    ## direction: in, out, or inout
 #'ytick.minor.visible'  : False,  ## visibility of minor ticks on y-axis
 #'ytick.major.left'     : True,   ## draw y axis left major ticks
@@ -335,7 +335,7 @@ parameters = {
 #### GRIDS
 'grid.color'       :   'grey', #'#F0F0F0',    ## grid color
 'grid.linestyle'   :   '--',         ## solid
-'grid.linewidth'   :   0.1,       ## in points
+'grid.linewidth'   :   0.5,       ## in points
 'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
 
 #### Legend
@@ -350,7 +350,7 @@ parameters = {
 #'legend.numpoints'     : 1,        ## the number of marker points in the legend line
 #'legend.scatterpoints' : 1,       ## number of scatter points
 #'legend.markerscale'   : 1.0,      ## the relative size of legend markers vs. original
-'legend.fontsize'      : 13,
+'legend.fontsize'      : 24,
 #'legend.title_fontsize'    : None ## None sets to the same as the default axes.
 ## Dimensions as fraction of fontsize:
 #'legend.borderpad'     : 0.4,      ## border whitespace
@@ -363,7 +363,7 @@ parameters = {
 
 #### FIGURE
 ## See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
-'figure.titlesize' : 28,      ## size of the figure title (Figure.suptitle())
+'figure.titlesize' : 40,      ## size of the figure title (Figure.suptitle())
 'figure.titleweight' : 'bold',   ## weight of the figure title
 #'figure.figsize'   : 6.4, 4.8,   ## figure size in inches
 'figure.dpi'       : 100,        ## figure dots per inch

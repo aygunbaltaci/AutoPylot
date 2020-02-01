@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
-import matplotlib.pyplot as plt
-import seaborn as sns
-import numpy as np
-import math
 import os
 import sys
-from colorama import Fore, init # colored output on the terminal
+import math
+from colorama import Fore, init 
 from datetime import datetime
 import tkinter
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import seaborn as sns
 import config_main as config
 import config_optional
 init(autoreset = True) # turn off colors after each print()
@@ -90,12 +91,9 @@ Please turn on your X-server first and then hit [enter]"""
     
     # =============================== Label the plot
     def plotConfigs(self, xLabel, yLabel, zLabel, threeD, title, numOfPlots, plotCounter, plotType, numData):
-        if plotCounter == 1: # delete it
-            self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 250)
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat)
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel)
         self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel[0])
-        print("Config multiaxis: %s" %config.multipleAxis)
         if config.multipleAxis:
             for i in range(numData - 1):
                 self.guest[i].set_ylabel(yLabel[i + 1])
@@ -106,7 +104,7 @@ Please turn on your X-server first and then hit [enter]"""
         if not plotType in {'box', 'histogram'} and not config.multipleAxis: # box and hist plots do not have legend
             self.host[self.figColCnt, self.figRowCnt].legend()
         
-        if plotType in {'seaborn regression'}:
+        if plotType in {'seaborn jointplot'}:
             self.snsJntPlot.ax_joint.set_xlabel(xLabel)
             self.snsJntPlot.ax_joint.set_ylabel(yLabel[0])
             self.snsJntPlot.ax_joint.tick_params(axis = 'x')
@@ -140,7 +138,7 @@ Please turn on your X-server first and then hit [enter]"""
         # Main if clause for plots
         if plotSelect == 'bar':
             for i in range(numData):
-                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], kwargs = {'alpha': 0.5}) 
+                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], alpha = config.alpha) 
         elif plotSelect == 'box':
             boxData = []
             for i in range(numData):
@@ -159,13 +157,13 @@ Please turn on your X-server first and then hit [enter]"""
                 counts, bin_edges = np.histogram(data[colNumX[i]], bins = bins, density = False) # Use histogram function to bin data
                 counts = counts.astype(float) / data_size
                 cdfData = np.cumsum(counts)
-                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], lineWidth = config.lineWidth[0], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) # delete linewidth
+                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], linestyle = config.lineStyle[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
                 self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
         elif plotSelect == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
             self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left', alpha = config.alpha)  
             plt.xticks(self.bins[:-1])
-        elif plotSelect in ['line/scatter/line+scatter']:
+        elif plotSelect in ['line||scatter||line+scatter']:
             if config.multipleAxis: # multiple-axis enabled
                 p, p2, linesSum, labelsSum  = [], [], [], []
                 p.append(0) #initialize array entry
@@ -221,11 +219,11 @@ Please turn on your X-server first and then hit [enter]"""
                     elif plotPlotSelect[i] == 3: # line+scatter plot
                         self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], config.scatterErrPlot_lineStyle, self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
                     elif plotPlotSelect[i] == 4: # line plot w/ errorbar
-                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.lineErrPlot_lineStyle, c = self.colors[config.lineColors[i % len(config.lineColors)]] , label = legendName[i], kwargs = {'alpha': 0.5})
+                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.lineErrPlot_lineStyle, c = self.colors[config.lineColors[i % len(config.lineColors)]] , label = legendName[i], alpha = config.alpha)
                     elif plotPlotSelect[i] == 5: # scatter plot w/ errorbar
-                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='o', c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], kwargs = {'alpha': 0.5})
+                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='o', c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], alpha = config.alpha)
                     else: # line+scatter plot w/ errorbar
-                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='-o', c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], kwargs = {'alpha': 0.5})
+                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt='-o', c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], alpha = config.alpha)
         elif plotSelect == '3d':
             self.host[self.figColCnt, self.figRowCnt].axis('off')
             numOfRow = 2 if numOfPlots > 1 else 1
@@ -240,7 +238,7 @@ Please turn on your X-server first and then hit [enter]"""
         elif plotSelect == 'seaborn line':
             if config.multipleAxis: # multiple-axis enabled
                 linesSum, labelsSum  = [], []
-                sns.lineplot(x = data[colNumX[0]], y = data[colNumY[0]], color = self.colors[config.lineColors[0]], label = legendName[0], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[0], alpha = 0.5) 
+                sns.lineplot(x = data[colNumX[0]], y = data[colNumY[0]], color = self.colors[config.lineColors[0]], label = legendName[0], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[0], alpha = config.alpha) 
                 lines, labels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
                 linesSum += lines
                 labelsSum += labels
@@ -250,7 +248,7 @@ Please turn on your X-server first and then hit [enter]"""
                     j = i - 1
                     if i != numData:
                         self.guest[j] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.guest[j], linewidth = config.lineWidth[i], alpha = 0.5) 
+                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.guest[j], linewidth = config.lineWidth[i], alpha = config.alpha) 
                     self.guest[j].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold, max(data[colNumY[i]]) + config.yLimThreshold)
                     lines2, labels2 = self.guest[j].get_legend_handles_labels()
                     linesSum += lines2
@@ -261,10 +259,10 @@ Please turn on your X-server first and then hit [enter]"""
                 self.axisColoring(numData)
             else:
                 for i in range(numData):
-                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = 0.5)
-        elif plotSelect == 'seaborn regression':
+                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
+        elif plotSelect == 'seaborn jointplot':
             for i in range(numData):
-                self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.regressionPlotKind, color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])    
+                self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.jointPlotKind, color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])    
         
         self.plotCounter += 1
      

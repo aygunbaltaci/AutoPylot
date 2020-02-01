@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 
-import csv
 import os
 import sys
-import numpy as np
 from colorama import Fore, Back, init # colored output on the terminal
+import csv
+import numpy as np
 sys.path.append('lib' + os.sep)
 import config_main as config
 import plotFuncs
@@ -47,7 +47,7 @@ class userInteractions:
         self.fetchZFunc2 = False
         self.inputFile = config.defaultInputFile
         self.legendName = []
-        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line/scatter/line+scatter', '3d', 'seaborn line', 'seaborn regression']
+        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line||scatter||line+scatter', '3d', 'seaborn line', 'seaborn jointplot']
         self.maxNumXAxis = 0 # I don't know whether this is a right value to take, might cause errors. DOUBLE CHECK
         self.maxPlotType = len(self.plotTypes) 
         self.maxPlotPlotType = 6
@@ -98,9 +98,9 @@ class userInteractions:
         self.qTxtFileName = f"""
 \n\n{Back.BLUE}PYTHON3 PLOTTER{Back.BLACK}
 Plot your data without writing scripts!  
-Type [{Fore.YELLOW}exit{Fore.WHITE} || {Fore.YELLOW}EXIT{Fore.WHITE} || {Fore.YELLOW}quit{Fore.WHITE} || {Fore.YELLOW}QUIT{Fore.WHITE}] to terminate the program at any step. \n 
-
-Enter the name of your data file (located in the same directory of program)."""
+Type [{Fore.YELLOW}exit{Fore.WHITE} || {Fore.YELLOW}EXIT{Fore.WHITE} || {Fore.YELLOW}quit{Fore.WHITE} || {Fore.YELLOW}QUIT{Fore.WHITE}] to terminate the program at any step.
+Type [{Fore.YELLOW}undo{Fore.WHITE} || {Fore.YELLOW}UNDO{Fore.WHITE}] to go to previous question at any step. \n
+{Fore.MAGENTA}>>>{Fore.WHITE} Enter the name of your data file (located in the same directory of program)."""
         self.qTxtTypeOfPlot = """
 GRAPH #: %d
 
@@ -117,46 +117,46 @@ Select the plot type for this data set:
 
 Enter the number of the plot [1-6]:"""
         self.qTxtDefault = f"""
-Just hit [{Fore.YELLOW}enter{Fore.WHITE}] for default: ({Fore.CYAN}%s{Fore.WHITE})\n\n"""
+Just hit [{Fore.YELLOW}enter{Fore.WHITE}] for default: ({Fore.CYAN}%s{Fore.WHITE})"""
         self.qTxtSelectYN = f"""
-Please select [{Fore.YELLOW}yY{Fore.WHITE}] or [{Fore.YELLOW}nN{Fore.WHITE}]."""
-        self.qTxtNumOfPlots = """
-How many graphs do you want to plot?"""
+{Fore.MAGENTA}>>>{Fore.WHITE} Please select [{Fore.YELLOW}yY{Fore.WHITE}] or [{Fore.YELLOW}nN{Fore.WHITE}]."""
+        self.qTxtNumOfPlots = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} How many graphs do you want to plot?"""
         self.qTxtSkipCsvDataFetch = f"""
 If you want to derive data ONLY from a function, you may skip this part by typing [{Fore.YELLOW}sS{Fore.WHITE}] \n\n"""
         self.qTxtDataFromFunction = f"""
 If you want to derive data from a function, please type [{Fore.YELLOW}fF{Fore.WHITE}] \n\n"""
-        self.qTxtFetchCol = """
-What is the column number in your input data for %s-axis?"""
-        self.qTxtFetchErrorCol = """
-What is the column number of errorbar data?"""
+        self.qTxtFetchCol = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the column number in your input data for %s-axis?"""
+        self.qTxtFetchErrorCol = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the column number of errorbar data?"""
         self.qTxtMoreData = f"""
-{Fore.WHITE}Do you want to add more dataset to the plot? [{Fore.YELLOW}y/N{Fore.WHITE}]"""
+{Fore.MAGENTA}>>>{Fore.WHITE} Do you want to add more dataset to the plot? [{Fore.YELLOW}y/N{Fore.WHITE}]"""
         self.qTxtMinMaxResX = f"""
 Please enter the min, max. and resolution of x-axis."""
         self.qTxtEnterFormula = f"""
-Enter the formula %s(%s). You may type 
-{Fore.YELLOW}numpy (np.*){Fore.WHITE} and {Fore.YELLOW}math (math.*) {Fore.WHITE}functions in your formula."""
+{Fore.MAGENTA}>>>{Fore.WHITE} Enter the formula %s(%s). You may type 
+{Fore.MAGENTA}numpy (np.*){Fore.WHITE} and {Fore.YELLOW}math (math.*) {Fore.WHITE}functions in your formula."""
         self.qTxtBinResolution = f"""
-What is the bin resolution for dataset {Fore.CYAN}%d{Fore.WHITE}? (e.g. resolution of your data)"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the bin resolution for dataset {Fore.CYAN}%d{Fore.WHITE}? (e.g. resolution of your data)"""
         self.qTxtMultiGraph = f"""
-Do you want to plot multiple graphs? ({Fore.YELLOW}y/N{Fore.WHITE})"""
+{Fore.MAGENTA}>>>{Fore.WHITE} Do you want to plot multiple graphs? ({Fore.YELLOW}y/N{Fore.WHITE})"""
         self.qTxtMultiXAxis = f"""
-Do you want to use different x-axis for each subplot? ({Fore.YELLOW}y/N{Fore.WHITE})"""
+{Fore.MAGENTA}>>>{Fore.WHITE} Do you want to use different x-axis for each subplot? ({Fore.YELLOW}y/N{Fore.WHITE})"""
         self.qTxtThreeDGraph = f"""
-Do you want to plot the graph in 3D? ({Fore.YELLOW}y/N{Fore.WHITE})"""    
-        self.qTxtNumColXAxis = """
-How many columns are x-axes data in your input csv file?"""
+{Fore.MAGENTA}>>>{Fore.WHITE} Do you want to plot the graph in 3D? ({Fore.YELLOW}y/N{Fore.WHITE})"""    
+        self.qTxtNumColXAxis = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} How many columns are x-axes data in your input csv file?"""
         self.qTxtFetchXAxisColNum = f"""
-What is the column number of x-axis for your dataset %d?"""
-        self.qTxtLegendName = """
-What is the %s name for dataset %d? """ 
-        self.qTxtLabelName = """
-What is the label name of %s-axis? """    
-        self.qTxtTitleName = """
-What is the title name of the subplot? """
-        self.qTxtMainTitleName = """
-What is the main title name of the graph? """
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the column number of x-axis for your dataset %d?"""
+        self.qTxtLegendName = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the %s name for dataset %d? """ 
+        self.qTxtLabelName = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the label name of %s-axis? """    
+        self.qTxtTitleName = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the title name of the subplot? """
+        self.qTxtMainTitleName = f"""
+{Fore.MAGENTA}>>>{Fore.WHITE} What is the main title name of the graph? """
         self.fTxtDefault = f"""
 Just hit [{Fore.YELLOW}enter{Fore.RED}] for default: ({Fore.CYAN}%s{Fore.RED})\n\n"""
         self.fTxtNotValid = f"""
@@ -582,7 +582,7 @@ Please make sure that x and y data sizes match! """
                 self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
             self.printText(self.printSuccess, self.plotSelect)
             self.threeD = True if self.plotSelect == '3d' else False
-            if self.plotSelect == 'line/scatter/line+scatter':
+            if self.plotSelect == 'line||scatter||line+scatter':
                 self.nextFunc = 'askPlotPlotType'
             else:
                 self.nextFunc = 'askXData_csv'
@@ -594,7 +594,7 @@ Please make sure that x and y data sizes match! """
             self.plotPyt.resetPlot()
         prevCallFunc_plotPlotType = False
         
-    # =============================== Ask plot type for each data set from user if line/scatter/line+scatter plot selected
+    # =============================== Ask plot type for each data set from user if line||scatter||line+scatter plot selected
     def askPlotPlotType(self):
         # Select plot type
         self.processType = 'plotPlotType'
@@ -645,7 +645,7 @@ Please make sure that x and y data sizes match! """
             if not self.plotSelect in ['box', 'cdf', 'histogram']: # no need for y-axis data for bar plot
                 self.processType = 'fetchColY'
                 self.fetchCol_YZE(self.processType)
-                if self.plotSelect == 'line/scatter/line+scatter' and self.errorBar[-1] == True: 
+                if self.plotSelect == 'line||scatter||line+scatter' and self.errorBar[-1] == True: 
                     self.processType = 'fetchErrorBar'
                     self.fetchCol_YZE(self.processType)
             else:
@@ -699,7 +699,7 @@ Please make sure that x and y data sizes match! """
                 return None
             else:
                 self.nextFunc = 'askLegendNames'
-        if (processType in ['fetchColY', 'fetchErrorBar']) and (self.fetchColY[-1] or self.fetchColE[-1]) in ['f', 'F']:
+        if (processType in ['fetchColY', 'fetchErrorBar']) and (self.fetchColY[-1] in ['f', 'F']) or (self.fetchColE and self.fetchColE[-1] in ['f', 'F']):
             self.fetchColY.pop() if processType == 'fetchColY' else self.fetchColE.pop()
             self.fetchYFunc = True
             self.fetchYFunc2 = True
@@ -787,7 +787,7 @@ Please make sure that x and y data sizes match! """
         if not self.plotSelect in ['box', 'cdf', 'histogram'] and self.processType != 'fetchColZ': # no need for y-axis data for bar plot
             self.processType = 'getFuncYFromUser'
             self.fetchFunc_YE(self.processType)
-            if (self.plotSelect == 'line/scatter/line+scatter' and self.errorBar[-1] == True):
+            if (self.plotSelect == 'line||scatter||line+scatter' and self.errorBar[-1] == True):
                 self.processType = 'getFuncEFromUser'
                 self.fetchFunc_YE(self.processType)
                 
@@ -948,7 +948,7 @@ Please make sure that x and y data sizes match! """
             self.nextFunc = 'askLegendNames'
             self.moreData = True
             self.legendName.pop()
-        elif self.plotSelect == 'line/scatter/line+scatter' and self.moreData:
+        elif self.plotSelect == 'line||scatter||line+scatter' and self.moreData:
             self.nextFunc = 'askPlotPlotType'
         elif self.moreData:
             self.nextFunc = 'askXData_csv'
@@ -1050,7 +1050,7 @@ Please make sure that x and y data sizes match! """
         
         if not self.plotSelect in ['cdf', 'histogram', 'box']:
             # Fetch y-label
-            config.multipleAxis = True if self.yDataCounter > 1 else False
+            config.multipleAxis = True if self.yDataCounter  > 1 and config.multipleAxis else False
             self.processType = 'getLabelY'
             if not config.multipleAxis:
                 if not self.csvData or self.fetchYFunc2:
@@ -1141,20 +1141,20 @@ Please make sure that x and y data sizes match! """
             if self.nextFunc == 'askInputFileName':
                 self.processType = 'fetchInputData'
                 self.askInputFileName()
-                print("progress a: %s" %self.nextFunc)
+                #print("progress a: %s" %self.nextFunc)
             elif self.nextFunc == 'askNumOfPlots':
                 self.askNumOfPlots()
             elif self.nextFunc == 'askPlotType':
                 self.initiatePlotter() # Initiate the plotter class
                 self.plotPyt.prepPlot(self.numOfPlots) # prepare the plot environment
                 self.main_reinitializeVars()
-                print("progress b: %s" %self.nextFunc)
+                #print("progress b: %s" %self.nextFunc)
                 # main plot loop
                 for i in range(self.numOfPlots):
                     while True: 
                         if self.nextFunc == 'askPlotType':
                             self.askPlotType(i)
-                            print("progress c: %s" %self.nextFunc)
+                            #print("progress c: %s" %self.nextFunc)
                             if self.prevCallFunc_askPlotType: # go back to askNumOfPlots
                                 break
                             # data generation loop
@@ -1167,43 +1167,42 @@ Please make sure that x and y data sizes match! """
                                     self.askPlotPlotType()
                                     if self.nextFunc == 'askPlotType':
                                         break
-                                        print("progress d: %s" %self.nextFunc)
+                                        #print("progress d: %s" %self.nextFunc)
                                 if self.csvData and self.nextFunc == 'askXData_csv':
                                     self.askXData_csv()
-                                    print("progress e: %s" %self.nextFunc)
+                                    #print("progress e: %s" %self.nextFunc)
                                 if self.nextFunc == 'askYZEData_csv': 
                                     self.askYZEData_csv()
-                                    print("progress f: %s" %self.nextFunc)
+                                    #print("progress f: %s" %self.nextFunc)
                                 if ((not self.csvData or self.fetchXFunc or self.fetchYFunc or self.fetchZFunc) and self.nextFunc in ['askXData_func', 'askYEData_func', 'askZData_func']) or (self.nextFunc == 'minX' or self.nextFunc == 'resX'): # generate data from function
                                     self.askXData_func()
                                     if self.nextFunc == 'askYEData_func':
                                         self.askYEData_func()
-                                        print("progress g: %s" %self.nextFunc)
+                                        #print("progress g: %s" %self.nextFunc)
                                     if self.nextFunc == 'askZData_func':
                                         self.askZData_func()
-                                        print("progress h: %s" %self.nextFunc)
+                                        #print("progress h: %s" %self.nextFunc)
                                 if self.nextFunc == 'askLegendNames':
                                     self.askLegendNames(self.yDataCounter - 1)
-                                    print("progress i: %s, y data counter: %d" %(self.nextFunc, self.yDataCounter))
+                                    #print("progress i: %s, y data counter: %d" %(self.nextFunc, self.yDataCounter))
                         elif self.nextFunc == 'askXLabel':
                             self.askXLabel()
-                            print("progress k: %s" %self.nextFunc)
+                            #print("progress k: %s" %self.nextFunc)
                         elif self.nextFunc == 'askBinRes':
                             self.askBinRes()
-                            print("progress l: %s" %self.nextFunc)
+                            #print("progress l: %s" %self.nextFunc)
                         elif self.nextFunc == 'askYZLabel':
                             self.askYZLabel()
-                            print("progress m: %s" %self.nextFunc)
+                            #print("progress m: %s" %self.nextFunc)
                         elif self.nextFunc == 'askSubplotTitle':
                             self.askSubplotTitle(i)
-                            print("progress n: %s" %self.nextFunc)
+                            #print("progress n: %s" %self.nextFunc)
                             plotCounter = i
                         elif self.nextFunc == 'subplotDone': 
-                            print("PLOTCOUNTER = %d" %plotCounter)
                             self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.plotPlotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, self.data) # TODO: Why do I send self.numOfPlots???
                             self.plotPyt.plotConfigs(self.xLabel, self.yLabel, self.zLabel, self.threeD, self.title, self.numOfPlots, plotCounter, self.plotSelect, self.yDataCounter)
                             self.main_reinitializeVars()
-                            print("progress o: %s" %self.nextFunc)
+                            #print("progress o: %s" %self.nextFunc)
                             if not self.nextFunc == 'askYZLabel':
                                 if i == (self.numOfPlots - 1):
                                     self.nextFunc = 'askMainTitle'
