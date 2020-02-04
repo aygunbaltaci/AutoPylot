@@ -102,7 +102,15 @@ Please turn on your X-server first and then hit [enter]"""
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
         if not plotType in {'box', 'histogram'} and not config.multipleAxis: # box and hist plots do not have legend
-            self.host[self.figColCnt, self.figRowCnt].legend()
+            if config.legend_bbox_to_anchor != None: # Set up legend only for the last plot
+                if plotCounter != numOfPlots - 1: # turn off all legends except the last plot
+                    self.host[self.figColCnt, self.figRowCnt].legend_.remove() 
+                else:
+                    self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
+                    mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
+            else:    
+                self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
+                mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
         
         if plotType in {'seaborn jointplot'}:
             self.snsJntPlot.ax_joint.set_xlabel(xLabel)
@@ -250,7 +258,7 @@ Please turn on your X-server first and then hit [enter]"""
                     if i != numData:
                         self.guest[j] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
                     sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.guest[j], linewidth = config.lineWidth[i], alpha = config.alpha) 
-                    self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.lineStyle[i])
+                    self.guest[j].lines[0].set_linestyle(config.lineStyle[i])
                     self.guest[j].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold, max(data[colNumY[i]]) + config.yLimThreshold)
                     lines2, labels2 = self.guest[j].get_legend_handles_labels()
                     linesSum += lines2
@@ -263,6 +271,8 @@ Please turn on your X-server first and then hit [enter]"""
                 for i in range(numData):
                     sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
                     self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.lineStyle[i])
+            #self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 50) # delete it
+            self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
         elif plotSelect == 'seaborn jointplot':
             for i in range(numData):
                 self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.jointPlotKind, color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])    

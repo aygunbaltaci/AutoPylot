@@ -608,7 +608,7 @@ Please make sure that x and y data sizes match! """
             self.errorBar.append(True) if self.plotPlotSelect[-1] > 3 else self.errorBar.append(False) # Enable/disable errorBar
             self.nextFunc = 'askXData_csv'
             self.printText(self.printSuccess, self.plotPlotSelect)
-        prevCallFunc_plotPlotType = True
+        self.prevCallFunc_plotPlotType = True
         
     # =============================== Ask x-axis csv data from user      
     def askXData_csv(self):
@@ -618,13 +618,13 @@ Please make sure that x and y data sizes match! """
         self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
         if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter += 1
         if self.fetchColX[-1] in self.undoCommands:
-            if self.prevCallFunc_plotPlotType: 
-                self.nextFunc = 'askPlotType'
-                self.plotSelect = ''
-            else:
+            if self.prevCallFunc_plotPlotType:
                 self.nextFunc = 'askPlotPlotType'
                 self.plotPlotSelect.pop()
                 self.errorBar.pop()
+            else:
+                self.nextFunc = 'askPlotType'
+                self.plotSelect = ''
             self.fetchColX.pop()
             if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter -= 1
         else:
@@ -923,8 +923,12 @@ Please make sure that x and y data sizes match! """
                     self.fetchColY.pop()
                     self.yDataCounter -= 1
                 else:
-                    self.nextFunc = 'askYZEData_csv'
-                    if self.prevCallFunc_E:
+                    self.nextFunc = 'askXData_csv' if self.plotSelect in ['box', 'cdf', 'histogram'] else 'askYZEData_csv'
+                    print("I am here3")
+                    if  self.plotSelect in ['box', 'cdf', 'histogram']:
+                        self.fetchColX.pop()
+                        self.yDataCounter -= 1
+                    elif self.prevCallFunc_E:
                         self.fetchColE.pop()
                     elif self.prevCallFunc_Y:
                         self.fetchColY.pop()
@@ -1170,6 +1174,8 @@ Please make sure that x and y data sizes match! """
                                         #print("progress d: %s" %self.nextFunc)
                                 if self.csvData and self.nextFunc == 'askXData_csv':
                                     self.askXData_csv()
+                                    if self.nextFunc == 'askPlotType':
+                                        break
                                     #print("progress e: %s" %self.nextFunc)
                                 if self.nextFunc == 'askYZEData_csv': 
                                     self.askYZEData_csv()

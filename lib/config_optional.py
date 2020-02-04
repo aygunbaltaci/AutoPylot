@@ -256,7 +256,7 @@ parameters = {
 'axes.spines.left'   : True,   ## display axis spines
 'axes.spines.bottom' : True,
 'axes.spines.top'    : False,
-'axes.spines.right'  : True,
+'axes.spines.right'  : False,
 #'axes.unicode_minus'  : True,    ## use unicode for the minus symbol
                                ## rather than hyphen.  See
                                ## http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
@@ -339,7 +339,7 @@ parameters = {
 'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
 
 #### Legend
-'legend.loc'           : 'upper right',
+#'legend.loc'           : 'upper right',
 #'legend.frameon'       : True,     ## if True, draw the legend on a background patch
 'legend.framealpha'    : 0.4,      ## legend patch transparency
 #'legend.facecolor'     : inherit,  ## inherit from axes.facecolor; or color spec
@@ -380,7 +380,7 @@ parameters = {
 #'figure.subplot.top'     : 0.88,   ## the top of the subplots of the figure
 #'figure.subplot.wspace'  : 0.2,    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
-'figure.subplot.hspace'  : 0.8,    ## the amount of height reserved for space between subplots,
+'figure.subplot.hspace'  : 0.5,    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout
