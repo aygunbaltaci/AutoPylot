@@ -103,9 +103,9 @@ Please turn on your X-server first and then hit [enter]"""
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
         if not plotType in {'box', 'histogram'} and not config.multipleAxis: # box and hist plots do not have legend
             if config.legend_bbox_to_anchor != None: # Set up legend only for the last plot
-                if plotCounter != numOfPlots - 1: # turn off all legends except the last plot
+                if plotCounter != numOfPlots - 1 and self.host[self.figColCnt, self.figRowCnt].legend_ != None: # turn off all legends except the last plot
                     self.host[self.figColCnt, self.figRowCnt].legend_.remove() 
-                else:
+                elif plotCounter == numOfPlots - 1:
                     self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
                     mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
             else:    
@@ -146,7 +146,8 @@ Please turn on your X-server first and then hit [enter]"""
         # Main if clause for plots
         if plotSelect == 'bar':
             for i in range(numData):
-                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], alpha = config.alpha) 
+                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], width = config.bar_width, label = legendName[i], alpha = config.alpha) 
+            if plotCounter == 0: self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 6.5)
         elif plotSelect == 'box':
             boxData = []
             for i in range(numData):
@@ -166,7 +167,7 @@ Please turn on your X-server first and then hit [enter]"""
                 counts = counts.astype(float) / data_size
                 cdfData = np.cumsum(counts)
                 self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], linestyle = config.lineStyle[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
-                self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
+                #self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
         elif plotSelect == 'histogram':
             self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
             self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left', alpha = config.alpha)  
@@ -272,7 +273,7 @@ Please turn on your X-server first and then hit [enter]"""
                     sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
                     self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.lineStyle[i])
             #self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 50) # delete it
-            self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
+            #self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
         elif plotSelect == 'seaborn jointplot':
             for i in range(numData):
                 self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.jointPlotKind, color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])    

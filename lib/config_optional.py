@@ -6,6 +6,9 @@
 # ADD () for entries with multiple values. E.g. 'figure.figsize'   : (6.4, 4.8)
 # ADD '' for string entries. E.g. 'patch.edgecolor'        : 'black'
 fontColor = '#404040' # dark grey
+fontSize = 56
+legendSize = 38
+titleSize = 50
 parameters = {
 #'lines.linewidth'   : 1.5,     ## line width in points
 #'lines.linestyle'   : -,       ## solid line
@@ -224,10 +227,10 @@ parameters = {
 'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
 #'axes.grid.which'     : major,   ## gridlines at major, minor or both ticks
-'axes.titlesize'      : 36,   ## fontsize of the axes title
+'axes.titlesize'      : fontSize,   ## fontsize of the axes title
 'axes.titleweight'    : 'bold',  ## font weight of title
 #'axes.titlepad'       : 6.0,     ## pad between axes and title in points
-'axes.labelsize'      : 36,  ## fontsize of the x any y labels
+'axes.labelsize'      : fontSize,  ## fontsize of the x any y labels
 'axes.labelpad'       : 8.0,     ## space between label and axis
 'axes.labelweight'    : 'normal',  ## weight of the x and y labels
 'axes.labelcolor'     : fontColor,
@@ -303,7 +306,7 @@ parameters = {
 #'xtick.major.pad'     : 3.5,    ## distance to major tick label in points
 #'xtick.minor.pad'     : 3.4,    ## distance to the minor tick label in points
 'xtick.color'          : fontColor,  ## color of the tick labels
-'xtick.labelsize'      : 36, ## fontsize of the tick labels
+'xtick.labelsize'      : fontSize, ## fontsize of the tick labels
 #'xtick.direction'      : out,    ## direction: in, out, or inout
 #'xtick.minor.visible'  : False,  ## visibility of minor ticks on x-axis
 #'xtick.major.top'      : True,   ## draw x axis top major ticks
@@ -323,7 +326,7 @@ parameters = {
 #'ytick.major.pad'      : 3.5,    ## distance to major tick label in points
 #'ytick.minor.pad'      : 3.4,    ## distance to the minor tick label in points
 'ytick.color'          : fontColor,  ## color of the tick labels
-'ytick.labelsize'      : 36, ## fontsize of the tick labels
+'ytick.labelsize'      : fontSize, ## fontsize of the tick labels
 #'ytick.direction'      : out,    ## direction: in, out, or inout
 #'ytick.minor.visible'  : False,  ## visibility of minor ticks on y-axis
 #'ytick.major.left'     : True,   ## draw y axis left major ticks
@@ -350,7 +353,7 @@ parameters = {
 #'legend.numpoints'     : 1,        ## the number of marker points in the legend line
 #'legend.scatterpoints' : 1,       ## number of scatter points
 #'legend.markerscale'   : 1.0,      ## the relative size of legend markers vs. original
-'legend.fontsize'      : 24,
+'legend.fontsize'      : legendSize,
 #'legend.title_fontsize'    : None ## None sets to the same as the default axes.
 ## Dimensions as fraction of fontsize:
 #'legend.borderpad'     : 0.4,      ## border whitespace
@@ -363,7 +366,7 @@ parameters = {
 
 #### FIGURE
 ## See http://matplotlib.org/api/figure_api.html#matplotlib.figure.Figure
-'figure.titlesize' : 40,      ## size of the figure title (Figure.suptitle())
+'figure.titlesize' : titleSize,      ## size of the figure title (Figure.suptitle())
 'figure.titleweight' : 'bold',   ## weight of the figure title
 #'figure.figsize'   : 6.4, 4.8,   ## figure size in inches
 'figure.dpi'       : 100,        ## figure dots per inch
