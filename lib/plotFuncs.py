@@ -103,11 +103,16 @@ Please turn on your X-server first and then hit [enter]"""
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
         if not plotType in {'box', 'histogram'} and not config.multipleAxis: # box and hist plots do not have legend
             if config.legend_bbox_to_anchor != None: # Set up legend only for the last plot
+                if plotType != 'cdf': # delete it
+                    self.guest[0].legend_.remove() # delete it 
+                    self.host[self.figColCnt, self.figRowCnt].lines.pop(-1) # delete it
                 if plotCounter != numOfPlots - 1 and self.host[self.figColCnt, self.figRowCnt].legend_ != None: # turn off all legends except the last plot
                     self.host[self.figColCnt, self.figRowCnt].legend_.remove() 
                 elif plotCounter == numOfPlots - 1:
                     self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
                     mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
+                    self.host[self.figColCnt, self.figRowCnt].lines.pop(-1) # delete it
+                    self.host[self.figColCnt, self.figRowCnt].lines.pop(3) # delete it
             else:    
                 self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
                 mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
@@ -144,10 +149,11 @@ Please turn on your X-server first and then hit [enter]"""
     # =============================== Plotter function
     def mainPlotter(self, plotCounter, numOfPlots, plotSelect, plotPlotSelect, numData, colNumX, colNumY, colNumZ, colNumE, legendName, binRes, data):
         # Main if clause for plots
+        tmpCnt = 4 * plotCounter # delete it
         if plotSelect == 'bar':
             for i in range(numData):
                 self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], width = config.bar_width, label = legendName[i], alpha = config.alpha) 
-            if plotCounter == 0: self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 6.5)
+            if plotCounter == 0: self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 6.5) # delete it
         elif plotSelect == 'box':
             boxData = []
             for i in range(numData):
@@ -269,9 +275,24 @@ Please turn on your X-server first and then hit [enter]"""
                 self.guest[j].legend(linesSum, labelsSum)
                 self.axisColoring(numData)
             else:
-                for i in range(numData):
-                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
+                for i in range(numData): # fix here, until 'numdata'
+                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[tmpCnt + i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
                     self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.lineStyle[i])
+                self.guest.append(0)
+                self.guest[0] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
+                sns.lineplot(x = data[colNumX[numData - 1]], y = data[colNumY[numData - 1]], color = self.colors[config.lineColors[tmpCnt + numData - 1 % len(config.lineColors)]], label = legendName[numData - 1], ax = self.guest[0], linewidth = config.lineWidth[numData - 1], alpha = config.alpha) 
+                self.guest[0].lines[0].set_linestyle(config.lineStyle[numData - 1])
+                self.guest[0].set_ylim(min(data[colNumY[numData - 1]]) - config.yLimThreshold, max(data[colNumY[numData - 1]]) + config.yLimThreshold)
+                lines2, labels2 = self.guest[0].get_legend_handles_labels()
+                self.guest[0].grid(False)
+                self.guest[0].legend_.remove()
+                self.guest[0].legend(lines2, labels2)
+                self.guest[0].spines['right'].set_position(("axes", 1))
+                self.guest[0].set_ylabel('Height (m)')
+                self.guest[0].yaxis.label.set_color(self.colors[config.lineColors[tmpCnt + 3]])
+                self.guest[0].yaxis.label.set_alpha(config.alpha)
+
+            tmpCnt = 4
             #self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 50) # delete it
             #self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
         elif plotSelect == 'seaborn jointplot':

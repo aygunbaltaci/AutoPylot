@@ -15,7 +15,7 @@ figDimX = 25.60 # figure dimensions
 figDimY = 14.40 # figure dimensions
 
 ############ Legend-related Configurations (valid if 'multipleAxis == False')
-legend_bbox_to_anchor = (0.5, -0.225) # !!! IF SET, ONLY THE LEGENDS OF LAST PLOT WILL BE USED !!! Place legend in a specific box configuration. Use 'None' for default. Format: '(x, y) or (x, y, w, h)'. Check out: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
+legend_bbox_to_anchor = (0.5, -1.25) # !!! IF SET, ONLY THE LEGENDS OF LAST PLOT WILL BE USED !!! Place legend in a specific box configuration. Use 'None' for default. Format: '(x, y) or (x, y, w, h)'. Check out: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
 legend_loc = "center"
 legend_mode = None # set to 'expand' if you want horizontal expansion
 legend_border_axesPad = 0
@@ -36,8 +36,8 @@ axisOffset = 0.1 # Valid iff 'multipleAxis = True'. y-axes offset value
 alpha = 0.5 # Transparency level of line plots
 
 ############ Default Value Definitions for Output Figure
-defaultLegendNames = ['Link 1', 'Link 2', 'PD - Link 1', 'PD - Link 2', 'PD - Link 1', 'PD - Link 2', 'legend7', 'legend8', 'legend9', 'legend10'] # Default legend names
-defaultSubTitleNames = ['\\textbf{PER - Downlink}', '\\textbf{PER - Uplink}', 'subtitle3', 'subtitle4', 'subtitle5', 'subtitle6', 'subtitle7', 'subtitle8', 'subtitle9', 'subtitle10'] # Default subtitle names
+defaultLegendNames = ['PS - Orig. Link', 'PS - Link 1', 'PS - Link 2', 'PS - UAV Height', 'PD - Orig. Link', 'PD - Link 1', 'PD - Link 2', 'PD - UAV Height', 'legend9', 'legend10'] # Default legend names
+defaultSubTitleNames = ['\\textbf{Packet Splitting - Downlink}', '\\textbf{Packet Duplication - Downlink}', '\\textbf{Downlink Data Rate}', 'subtitle4', 'subtitle5', 'subtitle6', 'subtitle7', 'subtitle8', 'subtitle9', 'subtitle10'] # Default subtitle names
 defaultMoreData = False # Default answer to whether to plot more dataset or not
 defaultPlotSelect = 'line||scatter||line+scatter' # default plot type to be used
 defaultPlotPlotSelect = 1 # 1: line, 2: scatter, 3: line+scatter. If user selects line||scatter||line+scatter plot type, then the default plot type to be used for each data set in the plot
@@ -54,9 +54,9 @@ bar_width = 2
 
 ############ Inputs for 'line||scatter||line+scatter'
 ############ line plots (cdf, line, line with errorbars and seaborn line plots) 
-lineWidth = [3, 3, 3, 3, 3, 3, 1, 1, 1, 1] # line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-lineColors = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9] # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors[]" in plotFuncs.py if you need more color options for your plot!
-lineStyle = ['-', '-', '-', 'dashed', '-', '-', '-', '-', '-', '-'] # linestyle per plot. valid inputs are: '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
+lineWidth = [3, 3, 3, 1, 3, 3, 3, 1, 1, 1] # line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+lineColors = [0, 1, 2, 4, 3, 5, 6, 7, 8, 9] # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors[]" in plotFuncs.py if you need more color options for your plot!
+lineStyle = ['dashed', '-', '-', ':', 'dashed', '-', '-', ':', '-', '-'] # linestyle per plot. valid inputs are: '-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'
 ############ scatter plots (scatter, scatter with errorbar plots) 
 scatter_style = ['0', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o', 'o'] # scatter style of "scatter plots". For acceptable inputs, check out: https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
 ############ line+scatter plots (line+scatter, line+scatter with errorbar plots) 

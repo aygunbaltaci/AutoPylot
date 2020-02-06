@@ -6,9 +6,9 @@
 # ADD () for entries with multiple values. E.g. 'figure.figsize'   : (6.4, 4.8)
 # ADD '' for string entries. E.g. 'patch.edgecolor'        : 'black'
 fontColor = '#404040' # dark grey
-fontSize = 56
-legendSize = 38
-titleSize = 50
+fontSize = 30
+legendSize = 24
+titleSize = 34
 parameters = {
 #'lines.linewidth'   : 1.5,     ## line width in points
 #'lines.linestyle'   : -,       ## solid line
@@ -259,7 +259,7 @@ parameters = {
 'axes.spines.left'   : True,   ## display axis spines
 'axes.spines.bottom' : True,
 'axes.spines.top'    : False,
-'axes.spines.right'  : False,
+'axes.spines.right'  : True,
 #'axes.unicode_minus'  : True,    ## use unicode for the minus symbol
                                ## rather than hyphen.  See
                                ## http://en.wikipedia.org/wiki/Plus_and_minus_signs#Character_codes
