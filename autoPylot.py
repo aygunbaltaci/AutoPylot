@@ -69,6 +69,7 @@ class userInteractions:
         self.prevCallFunc_Y = False
         self.prevCallFunc_yLabel = False
         self.prevCallFunc_Z = False
+        self.prevFunc = []
         self.prevPlotSelect = ''
         self.printFailure = 'f'
         self.printQuestion = 'q'
@@ -218,6 +219,11 @@ Please make sure that x and y data sizes match! """
             return True
         else: 
             return False
+
+    # =============================== Go to prev question
+    def gotoPrevQuestion(self):    
+        self.prevFunc.pop()
+        self.nextFunc = self.prevFunc[-1]
 
     # =============================== Question messages on the terminal
     def printText_question(self, printType, printVal):
@@ -530,6 +536,17 @@ Please make sure that x and y data sizes match! """
             self.fetchDefLabels(plots)
             self.convDataToFloat()
     
+    # =============================== Reinitialize some variables  
+    def main_reinitializeVars(self):
+        # Reinitialize some vars
+        self.yDataCounter = 0
+        self.threeD = False
+        self.fetchColX = []
+        self.fetchColY = []
+        self.fetchColZ = []
+        self.legendName = []
+        self.yLabel = []
+    
     # =============================== Ask input file name from user      
     def askInputFileName(self):
         self.data = []
@@ -543,6 +560,8 @@ Please make sure that x and y data sizes match! """
             else:
                 self.csvData = False
         self.nextFunc = 'askNumOfPlots'
+        self.prevFunc.append('askInputFileName')
+        self.prevFunc.append(self.nextFunc)
         
     # =============================== Ask number of plots from user   
     def askNumOfPlots(self):
@@ -550,24 +569,14 @@ Please make sure that x and y data sizes match! """
         self.processType = 'numOfPlots'
         self.printText(self.printQuestion, self.defaultNumOfPlots)
         self.numOfPlots = self.acceptUserInput(self.defaultNumOfPlots)
-        if not self.numOfPlots in self.undoCommands:
-            self.nextFunc = 'askPlotType'
-            self.printText(self.printSuccess, self.numOfPlots)
-        else:
+        if self.numOfPlots in self.undoCommands:
             self.numOfPlots = self.defaultNumOfPlots
             self.inputFile = config.defaultInputFile
-            self.nextFunc = 'askInputFileName'
-        
-    # =============================== Reinitialize some variables  
-    def main_reinitializeVars(self):
-        # Reinitialize some vars
-        self.yDataCounter = 0
-        self.threeD = False
-        self.fetchColX = []
-        self.fetchColY = []
-        self.fetchColZ = []
-        self.legendName = []
-        self.yLabel = []
+            self.gotoPrevQuestion()
+        else:
+            self.nextFunc = 'askPlotType'
+            self.prevFunc.append(self.nextFunc)
+            self.printText(self.printSuccess, self.numOfPlots)
         
     # =============================== Ask plot type from user      
     def askPlotType(self, i):
@@ -576,7 +585,13 @@ Please make sure that x and y data sizes match! """
         printVal = [i + 1, config.defaultPlotSelect]
         self.printText(self.printQuestion, printVal)
         self.plotSelect = self.acceptUserInput(config.defaultPlotSelect)
-        if not self.plotSelect in self.undoCommands:
+        if self.plotSelect in self.undoCommands:
+            self.numOfPlots = self.defaultNumOfPlots
+            self.plotSelect = ''
+            self.gotoPrevQuestion()
+            self.prevCallFunc_askPlotType = True
+            self.plotPyt.resetPlot()
+        else:
             self.prevCallFunc_askPlotType = False
             if not self.plotSelect == config.defaultPlotSelect:
                 self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
@@ -586,13 +601,9 @@ Please make sure that x and y data sizes match! """
                 self.nextFunc = 'askPlotPlotType'
             else:
                 self.nextFunc = 'askXData_csv'
-        else:
-            self.numOfPlots = self.defaultNumOfPlots
-            self.plotSelect = ''
-            self.nextFunc = 'askNumOfPlots'
-            self.prevCallFunc_askPlotType = True
-            self.plotPyt.resetPlot()
+            self.prevFunc.append(self.nextFunc)
         prevCallFunc_plotPlotType = False
+        
         
     # =============================== Ask plot type for each data set from user if line||scatter||line+scatter plot selected
     def askPlotPlotType(self):
@@ -602,14 +613,16 @@ Please make sure that x and y data sizes match! """
         self.printText(self.printQuestion, printVal)
         userInput = self.acceptUserInput(config.defaultPlotPlotSelect)
         if userInput in self.undoCommands:
-            self.nextFunc = 'askPlotType'
+            self.gotoPrevQuestion()
         else:
             self.plotPlotSelect.append(int(userInput))
             self.errorBar.append(True) if self.plotPlotSelect[-1] > 3 else self.errorBar.append(False) # Enable/disable errorBar
-            self.nextFunc = 'askXData_csv'
+            self.nextFunc = 'askXData_csv'    
             self.printText(self.printSuccess, self.plotPlotSelect)
+            self.prevFunc.append(self.nextFunc)
         self.prevCallFunc_plotPlotType = True
         
+
     # =============================== Ask x-axis csv data from user      
     def askXData_csv(self):
         self.processType = 'fetchColX'
@@ -618,12 +631,11 @@ Please make sure that x and y data sizes match! """
         self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
         if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter += 1
         if self.fetchColX[-1] in self.undoCommands:
+            self.gotoPrevQuestion()
             if self.prevCallFunc_plotPlotType:
-                self.nextFunc = 'askPlotPlotType'
                 self.plotPlotSelect.pop()
                 self.errorBar.pop()
             else:
-                self.nextFunc = 'askPlotType'
                 self.plotSelect = ''
             self.fetchColX.pop()
             if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter -= 1
@@ -638,6 +650,7 @@ Please make sure that x and y data sizes match! """
                 self.fetchColX.pop()
                 self.fetchXFunc = True    
                 self.fetchXFunc2 = True 
+            self.prevFunc.append(self.nextFunc)
         
     # =============================== Ask y-, z-axis and errorbar csv data from user      
     def askYZEData_csv(self):
@@ -666,13 +679,14 @@ Please make sure that x and y data sizes match! """
             self.fetchColY.append(self.acceptUserInput(self.defaultFetchColY))
             self.yDataCounter += 1
             if self.fetchColY[-1] in self.undoCommands:
-                self.nextFunc = 'askXData_csv'
+                self.gotoPrevQuestion()              
                 self.fetchColX.pop()
                 self.fetchColY.pop()
                 self.yDataCounter -= 1
                 return None
             else:
                 self.nextFunc = 'askLegendNames'
+                self.prevFunc.append(self.nextFunc)
         elif processType == 'fetchColZ':
             self.prevCallFunc_E = False
             self.prevCallFunc_Y = False
@@ -680,12 +694,13 @@ Please make sure that x and y data sizes match! """
             self.printText(self.printQuestion, self.defaultFetchColZ)
             self.fetchColZ.append(self.acceptUserInput(self.defaultFetchColZ))
             if self.fetchColZ[-1] in self.undoCommands:
-                self.nextFunc = 'askXData_csv'
+                self.gotoPrevQuestion()
                 self.fetchColX.pop()
                 self.fetchColZ.pop()
                 return None
             else:
                 self.nextFunc = 'askLegendNames'
+                self.prevFunc.append(self.nextFunc)
         else: # processType == 'fetchErrorBar':
             self.prevCallFunc_E = True
             self.prevCallFunc_Y = False
@@ -693,30 +708,34 @@ Please make sure that x and y data sizes match! """
             self.printText(self.printQuestion, self.defaultFetchErrorBar)
             self.fetchColE.append(self.acceptUserInput(self.defaultFetchErrorBar))
             if self.fetchColE[-1] in self.undoCommands:
-                self.nextFunc = 'askXData_csv'
+                self.gotoPrevQuestion()
                 self.fetchColX.pop()
                 self.fetchColE.pop()
                 return None
             else:
                 self.nextFunc = 'askLegendNames'
+                self.prevFunc.append(self.nextFunc)
         if (processType in ['fetchColY', 'fetchErrorBar']) and (self.fetchColY[-1] in ['f', 'F']) or (self.fetchColE and self.fetchColE[-1] in ['f', 'F']):
             self.fetchColY.pop() if processType == 'fetchColY' else self.fetchColE.pop()
             self.fetchYFunc = True
             self.fetchYFunc2 = True
             self.nextFunc = 'askYEData_func'
+            self.prevFunc.append(self.nextFunc)
             self.yDataCounter -= 1
         elif processType == 'fetchColZ' and self.fetchColZ[-1] in ['f', 'F']:
             self.fetchColZ.pop()
             self.fetchZFunc = True
             self.fetchZFunc2 = True
             self.nextFunc = 'askZData_func'
+            self.prevFunc.append(self.nextFunc)
         else:
             if processType == 'fetchColY':
                 self.printText(self.printSuccess, self.fetchColY) 
             elif processType == 'fetchColZ':
                 self.printText(self.printSuccess, self.fetchColZ) 
             else:
-                self.printText(self.printSuccess, self.fetchColE) 
+                self.printText(self.printSuccess, self.fetchColE)
+        
         
     # =============================== Ask x-axis func data from user      
     def askXData_func(self):
@@ -733,38 +752,41 @@ Please make sure that x and y data sizes match! """
                 print("Min. x: ")
                 self.minX = self.acceptUserInput(self.defaultMinX)
                 if self.minX in self.undoCommands:
+                    self.gotoPrevQuestion()
                     if prevCallFunc_plotPlotType: 
-                        self.nextFunc = 'askPlotType'
                         self.plotSelect = ''
                     else:
-                        self.nextFunc = 'askPlotPlotType'
                         self.plotPlotSelect.pop()
                         self.errorBar.pop()
                     self.minX = self.defaultMinX
                 else:
                     self.nextFunc = 'maxX'
+                    self.prevFunc.append(self.nextFunc)
                 if self.minX in ['q', 'Q']:
                     return True
             if self.nextFunc == 'maxX':
                 print("Max. x: ")
                 self.maxX = self.acceptUserInput(self.defaultMaxX)
                 if self.maxX in self.undoCommands:
-                    self.nextFunc = 'minX'
+                    self.gotoPrevQuestion()
                     self.minX = self.defaultMinX
                     self.maxX = self.defaultMaxX
                 else:
                     self.nextFunc = 'resX'
+                    self.prevFunc.append(self.nextFunc)
             if self.nextFunc == 'resX':
                 print("Res. x: ")
                 self.resX = self.acceptUserInput(self.defaultResX)
                 if self.resX in self.undoCommands:
-                    self.nextFunc = 'maxX'
+                    self.gotoPrevQuestion()
                     self.maxX = self.defaultMaxX
                     self.resX = self.defaultResX
                 else:
                     self.nextFunc = 'computeX'
+                    self.prevFunc.append(self.nextFunc)
             if self.nextFunc == 'computeX':
                 self.nextFunc = 'askYEData_func'
+                self.prevFunc.append(self.nextFunc)
                 self.x = np.arange(self.minX, self.maxX, self.resX)
                 self.printText(self.printSuccess, self.x)
                 self.data.append(self.x)
@@ -799,35 +821,37 @@ Please make sure that x and y data sizes match! """
         if processType == 'getFuncYFromUser':
             self.prevCallFunc_errorBar = False
             self.y = self.acceptUserInput(self.defaultY)
-            if not self.y in self.undoCommands:
-                self.nextFunc = 'askZData_func'
-                self.printText(self.printSuccess, self.y)
-                self.data.append(self.y)
-                self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-                self.yDataCounter += 1
-            else:
-                self.nextFunc = 'resX'
+            if self.y in self.undoCommands:
+                self.gotoPrevQuestion()
                 self.resX = self.defaultResX
                 self.x = self.defaultX
                 self.y = self.defaultY
                 self.data.pop()
                 self.fetchColX.pop()
+            else:
+                self.nextFunc = 'askZData_func'
+                self.prevFunc.append(self.nextFunc)
+                self.printText(self.printSuccess, self.y)
+                self.data.append(self.y)
+                self.fetchColY.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
+                self.yDataCounter += 1
                 
         else: # errorbar function
             self.prevCallFunc_errorBar = True
             self.e = self.acceptUserInput(self.defaultE)
-            if not self.e in self.undoCommands:
-                self.nextFunc = 'askZData_func'
-                self.printText(self.printSuccess, self.e)
-                self.data.append(self.e)
-                self.fetchColE.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-            else: 
-                self.nextFunc = 'resX'
+            if self.e in self.undoCommands:
+                self.gotoPrevQuestion()
                 self.resX = self.defaultResX
                 self.x = self.defaultX
                 self.e = self.defaultE
                 self.data.pop()
                 self.fetchColX.pop()
+            else:
+                self.nextFunc = 'askZData_func'
+                self.prevFunc.append(self.nextFunc)
+                self.printText(self.printSuccess, self.e)
+                self.data.append(self.e)
+                self.fetchColE.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
         
     # =============================== Ask z-axis func data from user      
     def askZData_func(self):
@@ -841,12 +865,7 @@ Please make sure that x and y data sizes match! """
             print("z(x, y): ")
             self.z = self.acceptUserInput(self.defaultZ)
             if not self.z in self.undoCommands:
-                self.nextFunc = 'askLegendNames'
-                self.printText(self.printSuccess, self.z)
-                self.data.append(self.z)
-                self.fetchColZ.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-            else:
-                self.nextFunc = 'askYEData_func'
+                self.gotoPrevQuestion()
                 self.z = self.defaultZ
                 self.data.pop()
                 if self.prevCallFunc_errorBar:
@@ -856,8 +875,15 @@ Please make sure that x and y data sizes match! """
                     self.y = self.defaultY
                     self.fetchColY.pop()
                     self.yDataCounter -= 1
+            else:
+                self.nextFunc = 'askLegendNames'
+                self.prevFunc.append(self.nextFunc)
+                self.printText(self.printSuccess, self.z)
+                self.data.append(self.z)
+                self.fetchColZ.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
         else:
             self.nextFunc = 'askLegendNames'
+            self.prevFunc.append(self.nextFunc)
     
     # =============================== Ask legend names of fetched data from user      
     def askLegendNames(self, i):
@@ -869,21 +895,19 @@ Please make sure that x and y data sizes match! """
             self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             if self.legendName[-1] in self.undoCommands:
                 self.legendName.pop()
+                self.gotoPrevQuestion()
                 if self.prevCallFunc:
-                    self.nextFunc = 'askYEData_func'
                     self.y = self.defaultY
                     self.data.pop()
                     self.fetchColY.pop()
                     self.yDataCounter -= 1
-                else:
-                    self.nextFunc = 'askYZEData_csv'
-                    if self.prevCallFunc_E:
-                        self.fetchColE.pop()
-                    elif self.prevCallFunc_Y:
-                        self.fetchColY.pop()
-                        self.yDataCounter -= 1
-                    elif self.prevCallFunc_Z: 
-                        self.fetchColZ.pop()
+                elif self.prevCallFunc_E:
+                    self.fetchColE.pop()
+                elif self.prevCallFunc_Y:
+                    self.fetchColY.pop()
+                    self.yDataCounter -= 1
+                elif self.prevCallFunc_Z: 
+                    self.fetchColZ.pop()
             else:
                 self.nextFunc = 'askMoreData'
                 self.printText(self.printSuccess, self.legendName)
@@ -893,13 +917,12 @@ Please make sure that x and y data sizes match! """
             self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             if self.legendName[-1] in self.undoCommands:
                 self.legendName.pop()
+                self.gotoPrevQuestion()
                 if self.prevCallFunc:
-                    self.nextFunc = 'askZData_func'
                     self.z = self.defaultZ
                     self.data.pop()
                     self.fetchColZ.pop()
                 else:
-                    self.nextFunc = 'askYZEData_csv'
                     if self.prevCallFunc_E:
                         self.fetchColE.pop()
                     elif self.prevCallFunc_Y:
@@ -909,6 +932,7 @@ Please make sure that x and y data sizes match! """
                         self.fetchColZ.pop()
             else:
                 self.nextFunc = 'askMoreData'
+                self.prevFunc.append(self.nextFunc)
                 self.printText(self.printSuccess, self.legendName)
         else:
             printVal = [i + 1, config.defaultLegendNames[i], 'legend']
@@ -916,15 +940,13 @@ Please make sure that x and y data sizes match! """
             self.legendName.append(self.acceptUserInput(config.defaultLegendNames[i]))
             if self.legendName[-1] in self.undoCommands:
                 self.legendName.pop()
+                self.gotoPrevQuestion()
                 if self.prevCallFunc:
-                    self.nextFunc = 'askYEData_func'
                     self.y = self.defaultY
                     self.data.pop()
                     self.fetchColY.pop()
                     self.yDataCounter -= 1
                 else:
-                    self.nextFunc = 'askXData_csv' if self.plotSelect in ['box', 'cdf', 'histogram'] else 'askYZEData_csv'
-                    print("I am here3")
                     if  self.plotSelect in ['box', 'cdf', 'histogram']:
                         self.fetchColX.pop()
                         self.yDataCounter -= 1
@@ -937,6 +959,7 @@ Please make sure that x and y data sizes match! """
                         self.fetchColZ.pop()
             else:
                 self.nextFunc = 'askMoreData'
+                self.prevFunc.append(self.nextFunc)
                 self.printText(self.printSuccess, self.legendName)
         self.fetchXFunc = False
         self.fetchYFunc = False
@@ -949,15 +972,18 @@ Please make sure that x and y data sizes match! """
         self.printText(self.printQuestion, printVal)
         self.moreData = self.acceptUserInput(config.defaultMoreData)
         if self.moreData in self.undoCommands:
-            self.nextFunc = 'askLegendNames'
+            self.gotoPrevQuestion()
             self.moreData = True
             self.legendName.pop()
         elif self.plotSelect == 'line||scatter||line+scatter' and self.moreData:
             self.nextFunc = 'askPlotPlotType'
+            self.prevFunc.append(self.nextFunc)
         elif self.moreData:
             self.nextFunc = 'askXData_csv'
+            self.prevFunc.append(self.nextFunc)
         else:
             self.nextFunc = 'askXLabel'
+            self.prevFunc.append(self.nextFunc)
         return self.moreData
             
     # =============================== Ask x-axis label name from user
@@ -967,14 +993,15 @@ Please make sure that x and y data sizes match! """
         if self.plotSelect == 'box':
             self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
             self.xLabel = (self.acceptUserInput(config.defaultXLabel))
-            if not self.xLabel in self.undoCommands:
-                self.nextFunc = 'askBinRes'
-                self.printText(self.printSuccess, self.xLabel)
-                self.prevCallFunc_xLabel = False
-            else:
-                self.nextFunc = 'askMoreData'
+            if self.xLabel in self.undoCommands:
+                self.gotoPrevQuestion()
                 self.xLabel = config.defaultXLabel
                 self.prevCallFunc_xLabel = True
+            else:
+                self.nextFunc = 'askBinRes'
+                self.prevFunc.append(self.nextFunc)
+                self.printText(self.printSuccess, self.xLabel)
+                self.prevCallFunc_xLabel = False
         else:
             if not self.csvData or self.fetchXFunc2:
                 self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
@@ -982,14 +1009,15 @@ Please make sure that x and y data sizes match! """
             else:
                 self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
                 self.xLabel = self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]])
-            if not self.xLabel in self.undoCommands:
+            if self.xLabel in self.undoCommands:
+                self.gotoPrevQuestion()
+                self.xLabel = config.defaultXLabel
+                self.prevCallFunc_xLabel = True                
+            else:
                 self.nextFunc = 'askBinRes'
+                self.prevFunc.append(self.nextFunc)
                 self.printText(self.printSuccess, self.xLabel)
                 self.prevCallFunc_xLabel = False
-            else:
-                self.nextFunc = 'askMoreData'
-                self.xLabel = config.defaultXLabel
-                self.prevCallFunc_xLabel = True
                 
     # =============================== Ask bin resolution for histogram graphs from user
     def askBinRes(self):
@@ -997,19 +1025,22 @@ Please make sure that x and y data sizes match! """
             self.processType = 'binResolution'
             self.printText(self.printQuestion, self.defaultBinRes)
             self.binRes = self.acceptUserInput(self.defaultBinRes)
-            if not self.binRes in self.undoCommands:
-                self.nextFunc = 'askYZLabel'
-                self.printText(self.printSuccess, self.binRes)
-                self.prevCallFunc_yLabel = False
-            else:
-                self.nextFunc = 'askXLabel'
+            if self.binRes in self.undoCommands:
+                self.gotoPrevQuestion()
                 self.binRes = self.defaultBinRes
                 self.xLabel = config.defaultXLabel
+            else:
+                self.nextFunc = 'askYZLabel'
+                self.prevFunc.append(self.nextFunc)
+                self.printText(self.printSuccess, self.binRes)
+                self.prevCallFunc_yLabel = False
         else:
             self.nextFunc = 'askYZLabel'
+            self.prevFunc.append(self.nextFunc)
             
         if self.prevCallFunc_yLabel == True:
             self.nextFunc = 'askXLabel'
+            self.prevFunc.append(self.nextFunc)
             self.prevCallFunc_yLabel = False
         
     # =============================== Ask y- and z-axis label names from user
@@ -1018,7 +1049,7 @@ Please make sure that x and y data sizes match! """
         if self.plotSelect == 'cdf':
             self.yLabel.append(config.cdfDefaultLabel)
             if self.yLabel[-1] in self.undoCommands:
-                self.nextFunc = 'askBinRes'
+                self.gotoPrevQuestion()
                 self.yLabel.pop()
                 self.binRes = self.defaultBinRes
                 self.prevCallFunc_yLabel = True
@@ -1028,7 +1059,7 @@ Please make sure that x and y data sizes match! """
         elif self.plotSelect == 'histogram':
             self.yLabel.append(config.histDefaultLabel)
             if self.yLabel[-1] in self.undoCommands:
-                self.nextFunc = 'askBinRes'
+                self.gotoPrevQuestion()
                 self.yLabel.pop()
                 self.binRes = self.defaultBinRes
                 self.prevCallFunc_yLabel = True
@@ -1044,12 +1075,13 @@ Please make sure that x and y data sizes match! """
                 self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
                 self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
             if self.yLabel[-1] in self.undoCommands:
-                self.nextFunc = 'askBinRes'
+                self.gotoPrevQuestion()
                 self.yLabel.pop()
                 self.binRes = self.defaultBinRes
                 self.prevCallFunc_yLabel = True
             else:
                 self.nextFunc = 'askSubplotTitle'
+                self.prevFunc.append(self.nextFunc)
                 self.printText(self.printSuccess, self.yLabel)
         
         if not self.plotSelect in ['cdf', 'histogram', 'box']:
@@ -1064,12 +1096,13 @@ Please make sure that x and y data sizes match! """
                     self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]]) 
                     self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]]))
                 if self.yLabel[-1] in self.undoCommands:
-                    self.nextFunc = 'askBinRes'
+                    self.gotoPrevQuestion()
                     self.yLabel.pop()
                     self.binRes = self.defaultBinRes
                     self.prevCallFunc_yLabel = True
                 else:
                     self.nextFunc = 'askSubplotTitle'
+                    self.prevFunc.append(self.nextFunc)
                     self.printText(self.printSuccess, self.yLabel)
             else: # Fetch y-label for the additional y-axes
                 for j in range(self.yDataCounter):
@@ -1080,12 +1113,13 @@ Please make sure that x and y data sizes match! """
                         self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[j]]) 
                         self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[j]]))
                     if self.yLabel in self.undoCommands:
-                        self.nextFunc = 'askBinRes'
+                        self.gotoPrevQuestion()
                         self.yLabel.pop()
                         self.binRes = self.defaultBinRes
                         self.prevCallFunc_yLabel = True
                     else:
                         self.nextFunc = 'askSubplotTitle'
+                        self.prevFunc.append(self.nextFunc)
                         self.printText(self.printSuccess, self.yLabel)
             if self.plotSelect == '3d':
                 # set z-axis label
@@ -1097,12 +1131,13 @@ Please make sure that x and y data sizes match! """
                     self.printText(self.printQuestion, self.defaultLabels[self.fetchColZ[-1]]) 
                     self.zLabel = self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]])
                 if self.zLabel in self.undoCommands:
-                    self.nextFunc = 'askBinRes'
+                    self.gotoPrevQuestion()
                     self.zLabel = 'z'
                     self.binRes = self.defaultBinRes
                     self.prevCallFunc_yLabel = True
                 else:
                     self.nextFunc = 'askSubplotTitle'
+                    self.prevFunc.append(self.nextFunc)
                     self.printText(self.printSuccess, self.zLabel)
             self.fetchXFunc2 = False
             self.fetchYFunc2 = False
@@ -1117,18 +1152,20 @@ Please make sure that x and y data sizes match! """
             printVar = [mainTitle, config.defaultSubTitleNames[i]]
             self.printText(self.printQuestion, printVar) 
             self.title = self.acceptUserInput(config.defaultSubTitleNames[i])
-            if not self.title in self.undoCommands:
-                self.nextFunc = 'subplotDone'
-                self.printText(self.printSuccess, self.title)
-            else:
-                self.nextFunc = 'askYZLabel'
+            if self.title in self.undoCommands:
+                self.gotoPrevQuestion()
                 self.title = config.defaultSubTitleNames[i]
                 if self.plotSelect == '3d':
                     self.zLabel = 'z'
                 else:
                     self.yLabel.pop()
+            else:
+                self.nextFunc = 'subplotDone'
+                self.prevFunc.append(self.nextFunc)
+                self.printText(self.printSuccess, self.title)
         else:
             self.nextFunc = 'subplotDone'
+            self.prevFunc.append(self.nextFunc)
             
     # =============================== Ask main title name from user
     def askMainTitle(self):
@@ -1145,9 +1182,11 @@ Please make sure that x and y data sizes match! """
             if self.nextFunc == 'askInputFileName':
                 self.processType = 'fetchInputData'
                 self.askInputFileName()
+                print(self.prevFunc)
                 #print("progress a: %s" %self.nextFunc)
             elif self.nextFunc == 'askNumOfPlots':
                 self.askNumOfPlots()
+                print(self.prevFunc)
             elif self.nextFunc == 'askPlotType':
                 self.initiatePlotter() # Initiate the plotter class
                 self.plotPyt.prepPlot(self.numOfPlots) # prepare the plot environment
@@ -1158,6 +1197,7 @@ Please make sure that x and y data sizes match! """
                     while True: 
                         if self.nextFunc == 'askPlotType':
                             self.askPlotType(i)
+                            print(self.prevFunc)
                             #print("progress c: %s" %self.nextFunc)
                             if self.prevCallFunc_askPlotType: # go back to askNumOfPlots
                                 break
@@ -1166,42 +1206,54 @@ Please make sure that x and y data sizes match! """
                             while True:
                                 if self.yDataCounter != 0 and self.nextFunc == 'askMoreData':
                                     if not self.askMoreData():
+                                        print(self.prevFunc)
                                         break
                                 if self.nextFunc == 'askPlotPlotType':
                                     self.askPlotPlotType()
+                                    print(self.prevFunc)
                                     if self.nextFunc == 'askPlotType':
                                         break
                                         #print("progress d: %s" %self.nextFunc)
                                 if self.csvData and self.nextFunc == 'askXData_csv':
                                     self.askXData_csv()
+                                    print(self.prevFunc)
                                     if self.nextFunc == 'askPlotType':
                                         break
                                     #print("progress e: %s" %self.nextFunc)
                                 if self.nextFunc == 'askYZEData_csv': 
                                     self.askYZEData_csv()
+                                    print(self.prevFunc)
                                     #print("progress f: %s" %self.nextFunc)
                                 if ((not self.csvData or self.fetchXFunc or self.fetchYFunc or self.fetchZFunc) and self.nextFunc in ['askXData_func', 'askYEData_func', 'askZData_func']) or (self.nextFunc == 'minX' or self.nextFunc == 'resX'): # generate data from function
                                     self.askXData_func()
+                                    print(self.prevFunc)
                                     if self.nextFunc == 'askYEData_func':
                                         self.askYEData_func()
+                                        print(self.prevFunc)
                                         #print("progress g: %s" %self.nextFunc)
                                     if self.nextFunc == 'askZData_func':
                                         self.askZData_func()
+                                        print(self.prevFunc)
                                         #print("progress h: %s" %self.nextFunc)
                                 if self.nextFunc == 'askLegendNames':
                                     self.askLegendNames(self.yDataCounter - 1)
+                                    print(self.prevFunc)
                                     #print("progress i: %s, y data counter: %d" %(self.nextFunc, self.yDataCounter))
                         elif self.nextFunc == 'askXLabel':
                             self.askXLabel()
+                            print(self.prevFunc)
                             #print("progress k: %s" %self.nextFunc)
                         elif self.nextFunc == 'askBinRes':
                             self.askBinRes()
+                            print(self.prevFunc)
                             #print("progress l: %s" %self.nextFunc)
                         elif self.nextFunc == 'askYZLabel':
                             self.askYZLabel()
+                            print(self.prevFunc)
                             #print("progress m: %s" %self.nextFunc)
                         elif self.nextFunc == 'askSubplotTitle':
                             self.askSubplotTitle(i)
+                            print(self.prevFunc)
                             #print("progress n: %s" %self.nextFunc)
                             plotCounter = i
                         elif self.nextFunc == 'subplotDone': 

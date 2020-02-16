@@ -103,16 +103,11 @@ Please turn on your X-server first and then hit [enter]"""
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
         if not plotType in {'box', 'histogram'} and not config.multipleAxis: # box and hist plots do not have legend
             if config.legend_bbox_to_anchor != None: # Set up legend only for the last plot
-                if plotType != 'cdf': # delete it
-                    self.guest[0].legend_.remove() # delete it 
-                    self.host[self.figColCnt, self.figRowCnt].lines.pop(-1) # delete it
                 if plotCounter != numOfPlots - 1 and self.host[self.figColCnt, self.figRowCnt].legend_ != None: # turn off all legends except the last plot
                     self.host[self.figColCnt, self.figRowCnt].legend_.remove() 
                 elif plotCounter == numOfPlots - 1:
                     self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
                     mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
-                    self.host[self.figColCnt, self.figRowCnt].lines.pop(-1) # delete it
-                    self.host[self.figColCnt, self.figRowCnt].lines.pop(3) # delete it
             else:    
                 self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
                 mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
@@ -144,159 +139,174 @@ Please turn on your X-server first and then hit [enter]"""
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat) # save fig to logs dir
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
-     
     
+    # =============================== Bar graph
+    def barPlot(self, numData, colNumX, colNumY, legendName, data):
+        for i in range(numData):
+            self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], width = config.bar_width, label = legendName[i], alpha = config.alpha) 
+
+    # =============================== Box graph
+    def boxPlot(self, numData, colNumX, legendName, data):
+        boxData = []
+        for i in range(numData):
+            boxData.append(data[colNumX[i]])
+        self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1, patch_artist = True, boxprops = dict(facecolor = self.colors[config.lineColors[0]], 
+        color = self.colors[config.lineColors[1]]), capprops = dict(color = self.colors[config.lineColors[2]]), whiskerprops = dict(color = self.colors[config.lineColors[3]]), 
+        flierprops = dict(color = self.colors[config.lineColors[4]], markeredgecolor = self.colors[config.lineColors[5]]), medianprops = dict(color = self.colors[config.lineColors[6]]))
+        self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
+
+    # =============================== CDF graph
+    def cdfPlot(self, numData, colNumX, legendName, data):
+        for i in range(numData):
+            bin_edges_list = [] 
+            cdfData = []
+            data_size = len(data[colNumX[i]]) # taken from: https://stackoverflow.com/questions/24575869/read-file-and-plot-cdf-in-python
+            data_set = sorted(set(data[colNumX[i]]))
+            bins = np.append(data_set, data_set[-1] + 1)
+            counts, bin_edges = np.histogram(data[colNumX[i]], bins = bins, density = False) # Use histogram function to bin data
+            counts = counts.astype(float) / data_size
+            cdfData = np.cumsum(counts)
+            self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], linestyle = config.lineStyle[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
+            #self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
+
+    # =============================== Histogram graph
+    def histogramPlot(self, numData, colNumX, binRes, data):
+        self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
+        self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left', alpha = config.alpha)  
+        plt.xticks(self.bins[:-1])
+
+    # =============================== Line-type graphs
+    def linePlot(self, plotPlotSelect, numData, colNumX, colNumY, colNumE, legendName, data):
+        if config.multipleAxis: # multiple-axis enabled
+            p, p2, linesSum, labelsSum  = [], [], [], []
+            p.append(0) #initialize array entry
+            if plotPlotSelect[0] == 1: # line plot
+                p[0], = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.lineColors[0]], linestyle = config.lineStyle[0], label = legendName[0], linewidth = config.lineWidth[0], alpha = config.alpha)  
+            elif plotPlotSelect[0] == 2: # scatter plot
+                p[0] = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.lineColors[0]], marker = config.scatter_style[0], label = legendName[0], alpha = config.alpha)  
+            elif plotPlotSelect[0] == 3: # line+scatter plot
+                p2.append(0) #initialize array entry
+                p[0], p2[-1], = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.lineColors[0]], config.lineScatter_style[0], linestyle = config.lineStyle[0], label = legendName[0], linewidth = config.lineWidth[0], alpha = config.alpha)    
+            elif plotPlotSelect[0] == 4: # line plot w/ errorbar
+                p[0], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], c = self.colors[config.lineColors[0]], fmt = config.lineStyle[0], label = legendName[0], kwargs = {'alpha': config.alpha})
+            elif plotPlotSelect[0] == 5: # scatter plot w/ errorbar
+                p[0], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], c = self.colors[config.lineColors[0]], fmt = config.scatter_style[0], label = legendName[0], kwargs = {'alpha': config.alpha})
+            else: # line+scatter plot w/ errorbar
+                p[0], p2[-1], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], c = self.colors[config.lineColors[0]], fmt = config.lineScatter_style[0], label = legendName[0], kwargs = {'alpha': config.alpha})
+            lines, labels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
+            linesSum += lines
+            labelsSum += labels
+            for i in range(1, numData):
+                p.append(0) #initialize array entry
+                self.guest.append(0) #initialize array entry
+                j = i - 1
+                if i != numData:
+                    self.guest[j] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
+                if plotPlotSelect[0] == 1: # line plot
+                    p[i], = self.guest[j].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i]], linestyle = config.lineStyle[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)  
+                elif plotPlotSelect[0] == 2: # scatter plot
+                    p[i] = self.guest[j].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i]], marker = config.scatter_style[i], label = legendName[i], alpha = config.alpha)  
+                elif plotPlotSelect[0] == 3: # line+scatter plot
+                    p2.append(0) #initialize array entry
+                    p[i], p2[-1], = self.guest[j].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i]], config.lineScatter_style[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)    
+                elif plotPlotSelect[0] == 4: # line plot w/ errorbar
+                    p[i], = self.guest[j].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.lineColors[i]], fmt = config.lineStyle[i], label = legendName[i], kwargs = {'alpha': config.alpha})
+                elif plotPlotSelect[0] == 5: # scatter plot w/ errorbar
+                    p[i], = self.guest[j].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.lineColors[i]], fmt = config.scatter_style[i], label = legendName[i], kwargs = {'alpha': config.alpha})
+                else: # line+scatter plot w/ errorbar
+                    p2.append(0) #initialize array entry
+                    p[i], p2[-1], = self.guest[j].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.lineColors[i]], fmt = config.lineScatter_style[i], label = legendName[i], kwargs = {'alpha': config.alpha})
+                self.guest[j].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold, max(data[colNumY[i]]) + config.yLimThreshold)
+                self.guest[j].grid(False)
+                lines2, labels2 = self.guest[j].get_legend_handles_labels()
+                linesSum += lines2
+                labelsSum += labels2
+            self.guest[j].legend(linesSum, labelsSum)
+            self.axisColoring(numData)
+        else:
+            for i in range(numData):
+                if plotPlotSelect[i] == 1: # line plot
+                    self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
+                elif plotPlotSelect[i] == 2: # scatter plot
+                    self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i % len(config.lineColors)]], marker = config.scatter_style[i], label = legendName[i], alpha = config.alpha)
+                elif plotPlotSelect[i] == 3: # line+scatter plot
+                    self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], config.lineScatter_style[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
+                elif plotPlotSelect[i] == 4: # line plot w/ errorbar
+                    self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.lineStyle[i], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], kwargs = {'alpha': config.alpha})
+                elif plotPlotSelect[i] == 5: # scatter plot w/ errorbar
+                    self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.scatter_style[i], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], kwargs = {'alpha': config.alpha})
+                else: # line+scatter plot w/ errorbar
+                    self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.lineScatter_style[i], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], kwargs = {'alpha': config.alpha})
+                    
+    # =============================== 3D graph
+    def threeDPlot(self, numOfPlots, plotSelect, numData, colNumX, colNumY, colNumZ, legendName, data):
+        self.host[self.figColCnt, self.figRowCnt].axis('off')
+        numOfRow = 2 if numOfPlots > 1 else 1
+        self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
+        for i in range(numData):
+            self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
+        self.host[self.figColCnt, self.figRowCnt].azim = config.threeD_azimDegree
+        self.host[self.figColCnt, self.figRowCnt].elev = config.threeD_elevDegree
+        # padding and scaling options for z-axis
+        self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
+        self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
+
+    # =============================== Seaborn Line Graph
+    def seabornLinePlot(self, numData, colNumX, colNumY, legendName, data):
+        if config.multipleAxis: # multiple-axis enabled
+            linesSum, labelsSum  = [], []
+            sns.lineplot(x = data[colNumX[0]], y = data[colNumY[0]], color = self.colors[config.lineColors[0]], label = legendName[0], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[0], alpha = config.alpha) 
+            self.host[self.figColCnt, self.figRowCnt].lines[0].set_linestyle(config.lineStyle[0])
+            lines, labels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
+            linesSum += lines
+            labelsSum += labels
+            self.host[self.figColCnt, self.figRowCnt].legend_.remove()
+            for i in range(1, numData):
+                self.guest.append(0) #initialize array entry
+                j = i - 1
+                if i != numData:
+                    self.guest[j] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
+                sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.guest[j], linewidth = config.lineWidth[i], alpha = config.alpha) 
+                self.guest[j].lines[0].set_linestyle(config.lineStyle[i])
+                self.guest[j].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold, max(data[colNumY[i]]) + config.yLimThreshold)
+                lines2, labels2 = self.guest[j].get_legend_handles_labels()
+                linesSum += lines2
+                labelsSum += labels2
+                self.guest[j].grid(False)
+                self.guest[j].legend_.remove()
+            self.guest[j].legend(linesSum, labelsSum)
+            self.axisColoring(numData)
+        else:
+            for i in range(numData): # fix here, until 'numdata'
+                sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
+                self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.lineStyle[i])
+
+        #self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 50) # delete it
+        #self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
+
+    # =============================== Seaborn Joint Graph
+    def seabornJointPlot(self, numData, colNumX, colNumY, legendName, data):
+        for i in range(numData):
+            self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.jointPlotKind, color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])
+
     # =============================== Plotter function
     def mainPlotter(self, plotCounter, numOfPlots, plotSelect, plotPlotSelect, numData, colNumX, colNumY, colNumZ, colNumE, legendName, binRes, data):
         # Main if clause for plots
-        tmpCnt = 4 * plotCounter # delete it
         if plotSelect == 'bar':
-            for i in range(numData):
-                self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], width = config.bar_width, label = legendName[i], alpha = config.alpha) 
-            if plotCounter == 0: self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 6.5) # delete it
+            self.barPlot(numData, colNumX, colNumY, legendName, data)
         elif plotSelect == 'box':
-            boxData = []
-            for i in range(numData):
-                boxData.append(data[colNumX[i]])
-            self.host[self.figColCnt, self.figRowCnt].boxplot(boxData, positions = np.array(range(len(boxData))) + 1, patch_artist = True, boxprops = dict(facecolor = self.colors[config.lineColors[0]], 
-            color = self.colors[config.lineColors[1]]), capprops = dict(color = self.colors[config.lineColors[2]]), whiskerprops = dict(color = self.colors[config.lineColors[3]]), 
-            flierprops = dict(color = self.colors[config.lineColors[4]], markeredgecolor = self.colors[config.lineColors[5]]), medianprops = dict(color = self.colors[config.lineColors[6]]))
-            self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
+            self.boxPlot(numData, colNumX, legendName, data)
         elif plotSelect == 'cdf':
-            for i in range(numData):
-                bin_edges_list = [] 
-                cdfData = []
-                data_size = len(data[colNumX[i]]) # taken from: https://stackoverflow.com/questions/24575869/read-file-and-plot-cdf-in-python
-                data_set = sorted(set(data[colNumX[i]]))
-                bins = np.append(data_set, data_set[-1] + 1)
-                counts, bin_edges = np.histogram(data[colNumX[i]], bins = bins, density = False) # Use histogram function to bin data
-                counts = counts.astype(float) / data_size
-                cdfData = np.cumsum(counts)
-                self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, self.colors[config.lineColors[i]], linestyle = config.lineStyle[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha) 
-                #self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
+            self.cdfPlot(numData, colNumX, legendName, data)
         elif plotSelect == 'histogram':
-            self.bins = np.arange(min(data[colNumX[0]]) - binRes, max(data[colNumX[0]]) + binRes * 2, binRes)
-            self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[0]], bins = self.bins, color = self.colors[config.lineColors[0]], align = 'left', alpha = config.alpha)  
-            plt.xticks(self.bins[:-1])
+            self.histogramPlot(numData, colNumX, binRes, data)
         elif plotSelect in ['line||scatter||line+scatter']:
-            if config.multipleAxis: # multiple-axis enabled
-                p, p2, linesSum, labelsSum  = [], [], [], []
-                p.append(0) #initialize array entry
-                if plotPlotSelect[0] == 1: # line plot
-                    p[0], = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.lineColors[0]], linestyle = config.lineStyle[0], label = legendName[0], linewidth = config.lineWidth[0], alpha = config.alpha)  
-                elif plotPlotSelect[0] == 2: # scatter plot
-                    p[0] = self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[0]], data[colNumY[0]], c = self.colors[config.lineColors[0]], marker = config.scatter_style[0], label = legendName[0], alpha = config.alpha)  
-                elif plotPlotSelect[0] == 3: # line+scatter plot
-                    p2.append(0) #initialize array entry
-                    p[0], p2[-1], = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[0]], data[colNumY[0]], self.colors[config.lineColors[0]], config.lineScatter_style[0], linestyle = config.lineStyle[0], label = legendName[0], linewidth = config.lineWidth[0], alpha = config.alpha)    
-                elif plotPlotSelect[0] == 4: # line plot w/ errorbar
-                    p[0], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], c = self.colors[config.lineColors[0]], fmt = config.lineStyle[0], label = legendName[0], kwargs = {'alpha': 0.5})
-                elif plotPlotSelect[0] == 5: # scatter plot w/ errorbar
-                    p[0], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], c = self.colors[config.lineColors[0]], fmt = config.scatter_style[0], label = legendName[0], kwargs = {'alpha': 0.5})
-                else: # line+scatter plot w/ errorbar
-                    p[0], p2[-1], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[0]], data[colNumY[0]], yerr = data[colNumE[0]], c = self.colors[config.lineColors[0]], fmt = config.lineScatter_style[0], label = legendName[0], kwargs = {'alpha': 0.5})
-                lines, labels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
-                linesSum += lines
-                labelsSum += labels
-                for i in range(1, numData):
-                    p.append(0) #initialize array entry
-                    self.guest.append(0) #initialize array entry
-                    j = i - 1
-                    if i != numData:
-                        self.guest[j] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                    if plotPlotSelect[0] == 1: # line plot
-                        p[i], = self.guest[j].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i]], linestyle = config.lineStyle[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)  
-                    elif plotPlotSelect[0] == 2: # scatter plot
-                        p[i] = self.guest[j].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i]], marker = config.scatter_style[i], label = legendName[i], alpha = config.alpha)  
-                    elif plotPlotSelect[0] == 3: # line+scatter plot
-                        p2.append(0) #initialize array entry
-                        p[i], p2[-1], = self.guest[j].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i]], config.lineScatter_style[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)    
-                    elif plotPlotSelect[0] == 4: # line plot w/ errorbar
-                        p[i], = self.guest[j].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.lineColors[i]], fmt = config.lineStyle[i], label = legendName[i], kwargs = {'alpha': 0.5})
-                    elif plotPlotSelect[0] == 5: # scatter plot w/ errorbar
-                        p[i], = self.guest[j].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.lineColors[i]], fmt = config.scatter_style[i], label = legendName[i], kwargs = {'alpha': 0.5})
-                    else: # line+scatter plot w/ errorbar
-                        p2.append(0) #initialize array entry
-                        p[i], p2[-1], = self.guest[j].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.lineColors[i]], fmt = config.lineScatter_style[i], label = legendName[i], kwargs = {'alpha': 0.5})
-                    self.guest[j].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold, max(data[colNumY[i]]) + config.yLimThreshold)
-                    self.guest[j].grid(False)
-                    lines2, labels2 = self.guest[j].get_legend_handles_labels()
-                    linesSum += lines2
-                    labelsSum += labels2
-                self.guest[j].legend(linesSum, labelsSum)
-                self.axisColoring(numData)
-            else:
-                for i in range(numData):
-                    if plotPlotSelect[i] == 1: # line plot
-                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
-                    elif plotPlotSelect[i] == 2: # scatter plot
-                        self.host[self.figColCnt, self.figRowCnt].scatter(data[colNumX[i]], data[colNumY[i]], c = self.colors[config.lineColors[i % len(config.lineColors)]], marker = config.scatter_style[i], label = legendName[i], alpha = config.alpha)
-                    elif plotPlotSelect[i] == 3: # line+scatter plot
-                        self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.lineColors[i % len(config.lineColors)]], config.lineScatter_style[i], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
-                    elif plotPlotSelect[i] == 4: # line plot w/ errorbar
-                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.lineStyle[i], c = self.colors[config.lineColors[i % len(config.lineColors)]] , label = legendName[i], alpha = config.alpha)
-                    elif plotPlotSelect[i] == 5: # scatter plot w/ errorbar
-                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.scatter_style[i], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], alpha = config.alpha)
-                    else: # line+scatter plot w/ errorbar
-                        self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], fmt = config.lineScatter_style[i], c = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], alpha = config.alpha)
+            self.linePlot(plotPlotSelect, numData, colNumX, colNumY, colNumE, legendName, data)
         elif plotSelect == '3d':
-            self.host[self.figColCnt, self.figRowCnt].axis('off')
-            numOfRow = 2 if numOfPlots > 1 else 1
-            self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d')
-            for i in range(numData):
-                self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]], self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], linewidth = config.lineWidth[i], alpha = config.alpha)
-            self.host[self.figColCnt, self.figRowCnt].azim = config.threeD_azimDegree
-            self.host[self.figColCnt, self.figRowCnt].elev = config.threeD_elevDegree
-            # padding and scaling options for z-axis
-            self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad
-            self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ)
+            self.threeDPlot(numOfPlots, plotSelect, numData, colNumX, colNumY, colNumZ, legendName, data)
         elif plotSelect == 'seaborn line':
-            if config.multipleAxis: # multiple-axis enabled
-                linesSum, labelsSum  = [], []
-                sns.lineplot(x = data[colNumX[0]], y = data[colNumY[0]], color = self.colors[config.lineColors[0]], label = legendName[0], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[0], alpha = config.alpha) 
-                self.host[self.figColCnt, self.figRowCnt].lines[0].set_linestyle(config.lineStyle[0])
-                lines, labels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
-                linesSum += lines
-                labelsSum += labels
-                self.host[self.figColCnt, self.figRowCnt].legend_.remove()
-                for i in range(1, numData):
-                    self.guest.append(0) #initialize array entry
-                    j = i - 1
-                    if i != numData:
-                        self.guest[j] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i], ax = self.guest[j], linewidth = config.lineWidth[i], alpha = config.alpha) 
-                    self.guest[j].lines[0].set_linestyle(config.lineStyle[i])
-                    self.guest[j].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold, max(data[colNumY[i]]) + config.yLimThreshold)
-                    lines2, labels2 = self.guest[j].get_legend_handles_labels()
-                    linesSum += lines2
-                    labelsSum += labels2
-                    self.guest[j].grid(False)
-                    self.guest[j].legend_.remove()
-                self.guest[j].legend(linesSum, labelsSum)
-                self.axisColoring(numData)
-            else:
-                for i in range(numData): # fix here, until 'numdata'
-                    sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.lineColors[tmpCnt + i % len(config.lineColors)]], label = legendName[i], ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.lineWidth[i], alpha = config.alpha)
-                    self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.lineStyle[i])
-                self.guest.append(0)
-                self.guest[0] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-                sns.lineplot(x = data[colNumX[numData - 1]], y = data[colNumY[numData - 1]], color = self.colors[config.lineColors[tmpCnt + numData - 1 % len(config.lineColors)]], label = legendName[numData - 1], ax = self.guest[0], linewidth = config.lineWidth[numData - 1], alpha = config.alpha) 
-                self.guest[0].lines[0].set_linestyle(config.lineStyle[numData - 1])
-                self.guest[0].set_ylim(min(data[colNumY[numData - 1]]) - config.yLimThreshold, max(data[colNumY[numData - 1]]) + config.yLimThreshold)
-                lines2, labels2 = self.guest[0].get_legend_handles_labels()
-                self.guest[0].grid(False)
-                self.guest[0].legend_.remove()
-                self.guest[0].legend(lines2, labels2)
-                self.guest[0].spines['right'].set_position(("axes", 1))
-                self.guest[0].set_ylabel('Height (m)')
-                self.guest[0].yaxis.label.set_color(self.colors[config.lineColors[tmpCnt + 3]])
-                self.guest[0].yaxis.label.set_alpha(config.alpha)
-
-            tmpCnt = 4
-            #self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 50) # delete it
-            #self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
+            self.seabornLinePlot(numData, colNumX, colNumY, legendName, data)
         elif plotSelect == 'seaborn jointplot':
-            for i in range(numData):
-                self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.jointPlotKind, color = self.colors[config.lineColors[i % len(config.lineColors)]], label = legendName[i])    
+            self.seabornJointPlot(numData, colNumX, colNumY, legendName, data)
         self.plotCounter += 1
      
