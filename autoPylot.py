@@ -47,19 +47,21 @@ class userInteractions:
         self.fetchZFunc2 = False
         self.inputFile = config.defaultInputFile
         self.legendName = []
-        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line||scatter||line+scatter', '3d', 'seaborn line', 'seaborn jointplot']
+        self.plotTypes = ['bar', 'box', 'cdf', 'histogram', 'line, scatter, errorbars', '3d', 'seaborn line', 'seaborn jointplot']
         self.maxNumXAxis = 0 # I don't know whether this is a right value to take, might cause errors. DOUBLE CHECK
         self.maxPlotType = len(self.plotTypes) 
-        self.maxPlotPlotType = 6
+        self.maxPlotPlotType = 2
         self.minColNum = 0
         self.minPlotType = 1
         self.minPlotPlotType = 1
         self.moreData = False
         self.nextFunc = 'askInputFileName'
         self.numData = 0
+        self.plotCounter = 0
         self.plotSelect = ''
         self.plotPlotSelect = []
         self.plotPyt = None
+        self.plots_noYAxis = ['box', 'cdf', 'histogram']
         self.prevCallFunc = False
         self.prevCallFunc_askPlotType = False
         self.prevCallFunc_errorBar = False
@@ -90,7 +92,7 @@ class userInteractions:
         self.threeD = self.defaultThreeD
         self.title = config.defaultTitle
         self.x = self.defaultX
-        self.xLabel = config.defaultXLabel
+        self.xLabel = config.defaultXLabel[0]
         self.y = self.defaultY
         self.z = self.defaultZ
         self.zLabel = config.defaultZLabel
@@ -110,13 +112,9 @@ What type of graph do you want to plot? \nOptions:"""
 Select the plot type for this data set: 
 
 1. Line
-2. Scatter
-3. Line+Scatter
-4. Line w/ ErrorBar
-5. Scatter w/ ErrorBar
-6. Line+Scatter w/ ErrorBar
+2. Line w/ ErrorBar
 
-Enter the number of the plot [1-6]:"""
+Enter the number of the plot [1-2]:"""
         self.qTxtDefault = f"""
 Just hit [{Fore.YELLOW}enter{Fore.WHITE}] for default: ({Fore.CYAN}%s{Fore.WHITE})"""
         self.qTxtSelectYN = f"""
@@ -280,7 +278,7 @@ Please make sure that x and y data sizes match! """
             print(self.qTxtLabelName %'x' + self.qTxtDefault %printVal)
         elif self.processType == 'getLabelY':
                 print(self.qTxtLabelName %'y' + self.qTxtDefault %printVal)
-                if self.plotSelect in {'line', 'scatter', 'line+scatter'}:
+                if self.plotSelect in {'line, scatter, errorbars'}:
                     self.prevPlotSelect = self.plotSelect
         elif self.processType == 'getLabelZ':
             print(self.qTxtLabelName %'z' + self.qTxtDefault %printVal)
@@ -597,7 +595,7 @@ Please make sure that x and y data sizes match! """
                 self.plotSelect = self.plotTypes[int(self.plotSelect) - 1] # - 1 to map user input to correct entry inside self.plotTypes[]. E.g. user input '3' will be mapped to '2' which corresponds to 'line' graph
             self.printText(self.printSuccess, self.plotSelect)
             self.threeD = True if self.plotSelect == '3d' else False
-            if self.plotSelect == 'line||scatter||line+scatter':
+            if self.plotSelect == 'line, scatter, errorbars':
                 self.nextFunc = 'askPlotPlotType'
             else:
                 self.nextFunc = 'askXData_csv'
@@ -605,7 +603,7 @@ Please make sure that x and y data sizes match! """
         prevCallFunc_plotPlotType = False
         
         
-    # =============================== Ask plot type for each data set from user if line||scatter||line+scatter plot selected
+    # =============================== Ask plot type for each data set from user if line, scatter, errorbars plot selected
     def askPlotPlotType(self):
         # Select plot type
         self.processType = 'plotPlotType'
@@ -616,7 +614,7 @@ Please make sure that x and y data sizes match! """
             self.gotoPrevQuestion()
         else:
             self.plotPlotSelect.append(int(userInput))
-            self.errorBar.append(True) if self.plotPlotSelect[-1] > 3 else self.errorBar.append(False) # Enable/disable errorBar
+            self.errorBar.append(True) if self.plotPlotSelect[-1] == 2 else self.errorBar.append(False) # Enable/disable errorBar TODO try to avoid setting plotplotSelect[-1] == 2. Get rid of hard coding the 2.
             self.nextFunc = 'askXData_csv'    
             self.printText(self.printSuccess, self.plotPlotSelect)
             self.prevFunc.append(self.nextFunc)
@@ -629,7 +627,7 @@ Please make sure that x and y data sizes match! """
         printVal = [self.yDataCounter, self.defaultFetchColX]
         self.printText(self.printQuestion, printVal)
         self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
-        if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter += 1
+        if self.plotSelect in self.plots_noYAxis: self.yDataCounter += 1
         if self.fetchColX[-1] in self.undoCommands:
             self.gotoPrevQuestion()
             if self.prevCallFunc_plotPlotType:
@@ -638,7 +636,7 @@ Please make sure that x and y data sizes match! """
             else:
                 self.plotSelect = ''
             self.fetchColX.pop()
-            if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter -= 1
+            if self.plotSelect in self.plots_noYAxis: self.yDataCounter -= 1
         else:
             if not self.fetchColX[-1] in ['f', 'F'] or not self.nextFunc == 'minX':
                 self.nextFunc = 'askYZEData_csv'
@@ -655,10 +653,10 @@ Please make sure that x and y data sizes match! """
     # =============================== Ask y-, z-axis and errorbar csv data from user      
     def askYZEData_csv(self):
         if self.fetchXFunc is False:
-            if not self.plotSelect in ['box', 'cdf', 'histogram']: # no need for y-axis data for bar plot
+            if not self.plotSelect in self.plots_noYAxis: # no need for y-axis data for bar plot
                 self.processType = 'fetchColY'
                 self.fetchCol_YZE(self.processType)
-                if self.plotSelect == 'line||scatter||line+scatter' and self.errorBar[-1] == True: 
+                if self.plotSelect == 'line, scatter, errorbars' and self.errorBar[-1] == True: 
                     self.processType = 'fetchErrorBar'
                     self.fetchCol_YZE(self.processType)
             else:
@@ -791,7 +789,7 @@ Please make sure that x and y data sizes match! """
                 self.printText(self.printSuccess, self.x)
                 self.data.append(self.x)
                 self.fetchColX.append(len(self.data) - 1) # record at which index you saved the x data in self.data matrix
-                if self.plotSelect in ['box', 'cdf', 'histogram']: self.yDataCounter += 1
+                if self.plotSelect in self.plots_noYAxis: self.yDataCounter += 1
                 if self.plotSelect in ['histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
                     return True
                 if self.fetchColX[-1] in ['q', 'Q']:
@@ -806,10 +804,10 @@ Please make sure that x and y data sizes match! """
     def askYEData_func(self):
         self.fetchYFunc = True
         self.fetchYFunc2 = True
-        if not self.plotSelect in ['box', 'cdf', 'histogram'] and self.processType != 'fetchColZ': # no need for y-axis data for bar plot
+        if not self.plotSelect in self.plots_noYAxis and self.processType != 'fetchColZ': # no need for y-axis data for bar plot
             self.processType = 'getFuncYFromUser'
             self.fetchFunc_YE(self.processType)
-            if (self.plotSelect == 'line||scatter||line+scatter' and self.errorBar[-1] == True):
+            if (self.plotSelect == 'line, scatter, errorbars' and self.errorBar[-1] == True):
                 self.processType = 'getFuncEFromUser'
                 self.fetchFunc_YE(self.processType)
                 
@@ -947,7 +945,7 @@ Please make sure that x and y data sizes match! """
                     self.fetchColY.pop()
                     self.yDataCounter -= 1
                 else:
-                    if  self.plotSelect in ['box', 'cdf', 'histogram']:
+                    if  self.plotSelect in self.plots_noYAxis:
                         self.fetchColX.pop()
                         self.yDataCounter -= 1
                     elif self.prevCallFunc_E:
@@ -975,7 +973,7 @@ Please make sure that x and y data sizes match! """
             self.gotoPrevQuestion()
             self.moreData = True
             self.legendName.pop()
-        elif self.plotSelect == 'line||scatter||line+scatter' and self.moreData:
+        elif self.plotSelect == 'line, scatter, errorbars' and self.moreData:
             self.nextFunc = 'askPlotPlotType'
             self.prevFunc.append(self.nextFunc)
         elif self.moreData:
@@ -991,11 +989,11 @@ Please make sure that x and y data sizes match! """
         # Fetch x-label
         self.processType = 'getLabelX'
         if self.plotSelect == 'box':
-            self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
-            self.xLabel = (self.acceptUserInput(config.defaultXLabel))
+            self.printText(self.printQuestion, config.defaultXLabel[self.plotCounter]) # send i instead of legend name to be able to print dataset # in printText()
+            self.xLabel = (self.acceptUserInput(config.defaultXLabel[self.plotCounter]))
             if self.xLabel in self.undoCommands:
                 self.gotoPrevQuestion()
-                self.xLabel = config.defaultXLabel
+                self.xLabel = config.defaultXLabel[self.plotCounter]
                 self.prevCallFunc_xLabel = True
             else:
                 self.nextFunc = 'askBinRes'
@@ -1004,14 +1002,15 @@ Please make sure that x and y data sizes match! """
                 self.prevCallFunc_xLabel = False
         else:
             if not self.csvData or self.fetchXFunc2:
-                self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
-                self.xLabel = (self.acceptUserInput(config.defaultXLabel))
+                self.printText(self.printQuestion, config.defaultXLabel[self.plotCounter]) # send i instead of legend name to be able to print dataset # in printText()
+                self.xLabel = (self.acceptUserInput(config.defaultXLabel[self.plotCounter]))
             else:
-                self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
-                self.xLabel = self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]])
+                if config.fetchXLabelFromCsv: config.defaultXLabel[self.plotCounter] = self.defaultLabels[self.fetchColX[-1]]
+                self.printText(self.printQuestion, config.defaultXLabel[self.plotCounter]) 
+                self.xLabel = self.acceptUserInput(config.defaultXLabel[self.plotCounter])
             if self.xLabel in self.undoCommands:
                 self.gotoPrevQuestion()
-                self.xLabel = config.defaultXLabel
+                self.xLabel = config.defaultXLabel[self.plotCounter]
                 self.prevCallFunc_xLabel = True                
             else:
                 self.nextFunc = 'askBinRes'
@@ -1028,7 +1027,7 @@ Please make sure that x and y data sizes match! """
             if self.binRes in self.undoCommands:
                 self.gotoPrevQuestion()
                 self.binRes = self.defaultBinRes
-                self.xLabel = config.defaultXLabel
+                self.xLabel = config.defaultXLabel[self.plotCounter]
             else:
                 self.nextFunc = 'askYZLabel'
                 self.prevFunc.append(self.nextFunc)
@@ -1069,11 +1068,12 @@ Please make sure that x and y data sizes match! """
         elif self.plotSelect == 'box':
             self.processType = 'getLabelY'
             if not self.csvData or self.fetchYFunc2:
-                self.printText(self.printQuestion, config.defaultXLabel) # send i instead of legend name to be able to print dataset # in printText()
-                self.yLabel.append(self.acceptUserInput(config.defaultXLabel)) # fetch x label to the y-axis
+                self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) # send i instead of legend name to be able to print dataset # in printText()
+                self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter])) # fetch x label to the y-axis
             else:
-                self.printText(self.printQuestion, self.defaultLabels[self.fetchColX[-1]]) 
-                self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColX[-1]]))
+                if config.fetchYLabelFromCsv: config.defaultYLabel[self.plotCounter] = self.defaultLabels[self.fetchColY[-1]]
+                self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) 
+                self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter]))
             if self.yLabel[-1] in self.undoCommands:
                 self.gotoPrevQuestion()
                 self.yLabel.pop()
@@ -1090,11 +1090,12 @@ Please make sure that x and y data sizes match! """
             self.processType = 'getLabelY'
             if not config.multipleAxis:
                 if not self.csvData or self.fetchYFunc2:
-                    self.printText(self.printQuestion, config.defaultYLabel) # send i instead of legend name to be able to print dataset # in printText()
-                    self.yLabel.append(self.acceptUserInput(config.defaultYLabel))
+                    self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) # send i instead of legend name to be able to print dataset # in printText()
+                    self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter]))
                 else:
-                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[-1]]) 
-                    self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[-1]]))
+                    if config.fetchYLabelFromCsv: config.defaultYLabel[self.plotCounter] = self.defaultLabels[self.fetchColY[-1]]
+                    self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) 
+                    self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter]))
                 if self.yLabel[-1] in self.undoCommands:
                     self.gotoPrevQuestion()
                     self.yLabel.pop()
@@ -1107,11 +1108,12 @@ Please make sure that x and y data sizes match! """
             else: # Fetch y-label for the additional y-axes
                 for j in range(self.yDataCounter):
                     if not self.csvData or self.fetchYFunc2:
-                        self.printText(self.printQuestion, config.defaultYLabel) # send j instead of legend name to be able to print dataset # in printText()
-                        self.yLabel.append(self.acceptUserInput(config.defaultYLabel)) # fetch x label to the y-axis
+                        self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) # send j instead of legend name to be able to print dataset # in printText()
+                        self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter])) # fetch x label to the y-axis
                     else:
-                        self.printText(self.printQuestion, self.defaultLabels[self.fetchColY[j]]) 
-                        self.yLabel.append(self.acceptUserInput(self.defaultLabels[self.fetchColY[j]]))
+                        if config.fetchYLabelFromCsv: config.defaultYLabel[self.plotCounter] = self.defaultLabels[self.fetchColY[j]]
+                        self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) 
+                        self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter]))
                     if self.yLabel in self.undoCommands:
                         self.gotoPrevQuestion()
                         self.yLabel.pop()
@@ -1125,11 +1127,12 @@ Please make sure that x and y data sizes match! """
                 # set z-axis label
                 self.processType = 'getLabelZ'
                 if not self.csvData or self.fetchZFunc2:
-                    self.printText(self.printQuestion, config.defaultZLabel) # send i instead of legend name to be able to print dataset # in printText()
-                    self.zLabel = self.acceptUserInput(config.defaultZLabel)
+                    self.printText(self.printQuestion, config.defaultZLabel[self.plotCounter]) # send i instead of legend name to be able to print dataset # in printText()
+                    self.zLabel = self.acceptUserInput(config.defaultZLabel[self.plotCounter])
                 else:
-                    self.printText(self.printQuestion, self.defaultLabels[self.fetchColZ[-1]]) 
-                    self.zLabel = self.acceptUserInput(self.defaultLabels[self.fetchColZ[-1]])
+                    if config.fetchZLabelFromCsv: config.defaultZLabel[self.plotCounter] = self.defaultLabels[self.fetchColZ[-1]]
+                    self.printText(self.printQuestion, config.defaultZLabel[self.plotCounter]) 
+                    self.zLabel = self.acceptUserInput(config.defaultZLabel[self.plotCounter])
                 if self.zLabel in self.undoCommands:
                     self.gotoPrevQuestion()
                     self.zLabel = 'z'
@@ -1194,6 +1197,7 @@ Please make sure that x and y data sizes match! """
                 #print("progress b: %s" %self.nextFunc)
                 # main plot loop
                 for i in range(self.numOfPlots):
+                    self.plotCounter = i
                     while True: 
                         if self.nextFunc == 'askPlotType':
                             self.askPlotType(i)
@@ -1255,10 +1259,9 @@ Please make sure that x and y data sizes match! """
                             self.askSubplotTitle(i)
                             print(self.prevFunc)
                             #print("progress n: %s" %self.nextFunc)
-                            plotCounter = i
                         elif self.nextFunc == 'subplotDone': 
-                            self.plotPyt.mainPlotter(plotCounter, self.numOfPlots, self.plotSelect, self.plotPlotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, self.data) # TODO: Why do I send self.numOfPlots???
-                            self.plotPyt.plotConfigs(self.xLabel, self.yLabel, self.zLabel, self.threeD, self.title, self.numOfPlots, plotCounter, self.plotSelect, self.yDataCounter)
+                            self.plotPyt.mainPlotter(self.plotCounter, self.numOfPlots, self.plotSelect, self.plotPlotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, self.data) # TODO: Why do I send self.numOfPlots???
+                            self.plotPyt.plotConfigs(self.xLabel, self.yLabel, self.zLabel, self.threeD, self.title, self.numOfPlots, self.plotCounter, self.plotSelect, self.yDataCounter)
                             self.main_reinitializeVars()
                             #print("progress o: %s" %self.nextFunc)
                             if not self.nextFunc == 'askYZLabel':
