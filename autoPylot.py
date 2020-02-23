@@ -1044,7 +1044,7 @@ Please make sure that x and y data sizes match! """
         
     # =============================== Ask y- and z-axis label names from user
     def askYZLabel(self):
-        if self.plotSelect in ['cdf', 'histogram', 'box']: config.multipleAxis = False
+        if self.plotSelect in ['cdf', 'histogram', 'box']: config.additionalYAxes = False
         if self.plotSelect == 'cdf':
             self.yLabel.append(config.cdfDefaultLabel)
             if self.yLabel[-1] in self.undoCommands:
@@ -1086,9 +1086,9 @@ Please make sure that x and y data sizes match! """
         
         if not self.plotSelect in ['cdf', 'histogram', 'box']:
             # Fetch y-label
-            config.multipleAxis = True if self.yDataCounter  > 1 and config.multipleAxis else False
+            config.additionalYAxes = True if self.yDataCounter  > 1 and config.additionalYAxes else False
             self.processType = 'getLabelY'
-            if not config.multipleAxis:
+            if not config.additionalYAxes:
                 if not self.csvData or self.fetchYFunc2:
                     self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) # send i instead of legend name to be able to print dataset # in printText()
                     self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter]))
@@ -1261,7 +1261,7 @@ Please make sure that x and y data sizes match! """
                             #print("progress n: %s" %self.nextFunc)
                         elif self.nextFunc == 'subplotDone': 
                             self.plotPyt.mainPlotter(self.plotCounter, self.numOfPlots, self.plotSelect, self.plotPlotSelect, self.yDataCounter, self.fetchColX, self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, self.data) # TODO: Why do I send self.numOfPlots???
-                            self.plotPyt.plotConfigs(self.xLabel, self.yLabel, self.zLabel, self.threeD, self.title, self.numOfPlots, self.plotCounter, self.plotSelect, self.yDataCounter)
+                            self.plotPyt.graphConfigs(self.xLabel, self.yLabel, self.zLabel, self.threeD, self.title, self.numOfPlots, self.plotCounter, self.plotSelect, self.yDataCounter)
                             self.main_reinitializeVars()
                             #print("progress o: %s" %self.nextFunc)
                             if not self.nextFunc == 'askYZLabel':
