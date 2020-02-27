@@ -33,7 +33,7 @@ histDefaultLabel = 'Number of Occurence' # Default y-axis label name of histogra
 cdfDefaultLabel = 'CDF (\%)' # Default y-axis label name of CDF plots
 
 ########### Multiple y-axis Settings
-additionalYAxes = True # to enable multiple y-axes on each plot
+additionalYAxes = False # to enable multiple y-axes on each plot
 additionalYAxes_enable = [True, True, True, True, True, True, True, True, True, True] # turn on or off additional y-axes. 1st entry is the 1st y-axis on the right side of the plot (2nd y-axis of the plot). 
 
 ########### Other Plot-related Settings
@@ -41,15 +41,18 @@ shareX = False # Have the x-axes of the plots in the same scale. Valid inputs: T
 shareY = False # Have the y-axes of the plots in the same scale. Valid inputs: True, False, 'col', 'row'
 oneColSpecPlt = True # Valid iff plotsPerRow = 1. Halve the width of one-column plots. Better x&y scaling for two-column scientific papers
 oneColSpecPlt_loc_xTitle = 0.3 # Valid iff oneColSpecPlt = True. Lcoation of x title. 0.3 is center.
+limX = [(None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None)] # limit the range of x-axes. E.g. (0, 100) 0: starting point, 100: ending point
+limY = [(None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None)] # limit the range of y-axes. E.g. (0, 100) 0: starting point, 100: ending point 
+limZ = [(None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None)] # limit the range of z-axes. E.g. (0, 100) 0: starting point, 100: ending point 
+scaleX = ['linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear'] # Scale of x-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+scaleY = ['linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear'] # Scale of y-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+scaleZ = ['linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear'] # Scale of z-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
 xAxis_labelPad = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # padding size between x label and xticks in the plot. Increase it if label conflicts with ticks in the plot
 yAxis_labelPad = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # padding size between y label and yticks in the plot. Increase it if label conflicts with ticks in the plot
 zAxis_labelPad = [2, 2, 2, 2, 2, 2, 2, 2, 2, 2] # padding size between z label and zticks in the plot. Increase it if label conflicts with ticks in the plot
 threeD_azimDegree = [-160, -160, -160, -160, -160, -160, -160, -160, -160, -160] # Azimuth degree of viewpoint of 3D plots
 threeD_elevDegree = [30, 30, 30, 30, 30, 30, 30, 30, 30, 30] # Elevation degree of viewpoint of 3D plots
-scaleX = ['linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear'] # Scale of x-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
-scaleY = ['linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear'] # Scale of y-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
-scaleZ = ['linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear', 'linear'] # Scale of z-axes. Valid inputs are: 'linear', 'log', 'symlog', 'logit', ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
-yLimThreshold = [25, 25, 25, 25, 25, 25, 25, 25, 25, 25] # PER LINE, NOT PER PLOT. Valid iff 'additionalYAxes = True'. Extra values to add to the y limits of additional y-axes.
+yLimThreshold = [25, 25, 25, 25, 25, 25, 25, 25, 25, 25] # PER LINE, NOT PER PLOT. Valid iff 'additionalYAxes = True'. Extra values to add to the y limits of additional y-axes. 
 axisOffset = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1] # Valid iff 'additionalYAxes = True'. y-axes offset value
 alpha = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] # Transparency level of plots
 
