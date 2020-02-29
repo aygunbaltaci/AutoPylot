@@ -6,9 +6,9 @@
 # ADD () for entries with multiple values. E.g. 'figure.figsize'   : (6.4, 4.8)
 # ADD '' for string entries. E.g. 'patch.edgecolor'        : 'black'
 fontColor = '#404040' # dark grey
-fontSize = 30
-legendSize = 24
-titleSize = 34
+fontSize = 50
+legendSize = 32
+titleSize = 54
 parameters = {
 #'lines.linewidth'   : 1.5,     ## line width in points
 #'lines.linestyle'   : -,       ## solid line
@@ -342,7 +342,7 @@ parameters = {
 'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
 
 #### Legend
-#'legend.loc'           : 'upper right',
+'legend.loc'           : 'upper right',
 #'legend.frameon'       : True,     ## if True, draw the legend on a background patch
 'legend.framealpha'    : 0.4,      ## legend patch transparency
 #'legend.facecolor'     : inherit,  ## inherit from axes.facecolor; or color spec

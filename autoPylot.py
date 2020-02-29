@@ -630,26 +630,26 @@ Please make sure that x and y data sizes match! """
         self.fetchColX.append(self.acceptUserInput(self.defaultFetchColX))
         if self.plotSelect in self.plots_noYAxis: self.yDataCounter += 1
         if self.fetchColX[-1] in self.undoCommands:
+            self.fetchColX.pop() # if you add this line and the line below right at the end of the if statement they belong to, the counter does not decrease the y counter
+            if self.plotSelect in self.plots_noYAxis: self.yDataCounter -= 1
             self.gotoPrevQuestion()
             if self.prevCallFunc_plotPlotType:
                 self.plotPlotSelect.pop()
                 self.errorBar.pop()
             else:
                 self.plotSelect = ''
-            self.fetchColX.pop()
-            if self.plotSelect in self.plots_noYAxis: self.yDataCounter -= 1
         else:
             if not self.fetchColX[-1] in ['f', 'F'] or not self.nextFunc == 'minX':
                 self.nextFunc = 'askYZEData_csv'
                 self.printText(self.printSuccess, self.fetchColX)
-                if self.plotSelect in ['histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
-                    return True
+                #if self.plotSelect in ['histogram']: # do not accept more than 1 x-axis data, no y-axis data needed
+                #    return True
             if self.fetchColX[-1] in ['f', 'F'] or self.nextFunc == 'minX':
                 self.nextFunc = 'askXData_func'
                 self.fetchColX.pop()
                 self.fetchXFunc = True    
                 self.fetchXFunc2 = True 
-            self.prevFunc.append(self.nextFunc)
+            if not self.plotSelect in self.plots_noYAxis: self.prevFunc.append(self.nextFunc)
         
     # =============================== Ask y-, z-axis and errorbar csv data from user      
     def askYZEData_csv(self):
@@ -663,6 +663,7 @@ Please make sure that x and y data sizes match! """
             else:
                 if self.plotSelect in self.plots_noYAxis: self.fetchColY.append(0) # still fill in the y-axis with null data
                 self.nextFunc = 'askBinRes' if self.plotSelect == 'histogram' else 'askLegendNames'
+                self.prevFunc.append(self.nextFunc)
             if self.plotSelect == '3d':
                 self.processType = 'fetchColZ'
                 self.fetchCol_YZE(self.processType)
@@ -863,6 +864,7 @@ Please make sure that x and y data sizes match! """
                 self.gotoPrevQuestion()
                 self.binRes = self.defaultBinRes
                 self.fetchColX.pop()
+                self.fetchColY.pop()
                 self.yDataCounter -= 1
             else:
                 self.nextFunc = 'askLegendNames'
@@ -1013,6 +1015,11 @@ Please make sure that x and y data sizes match! """
             self.generatePlot = True
             self.nextFunc = 'askXLabel'
             self.prevFunc.append(self.nextFunc)
+        if self.generatePlot: 
+            self.plotPyt.mainPlotter(self.plotCounter, self.numOfPlots, 
+                    self.plotSelect, self.plotPlotSelect, self.yDataCounter - 1, self.fetchColX, 
+                    self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, 
+                    self.data) # TODO: Why do I send self.numOfPlots???
         return self.moreData
             
     # =============================== Ask x-axis label name from user
@@ -1121,11 +1128,13 @@ Please make sure that x and y data sizes match! """
                         if config.fetchYLabelFromCsv: config.defaultYLabel[self.plotCounter] = self.defaultLabels[self.fetchColY[j]]
                         self.printText(self.printQuestion, config.defaultYLabel[self.plotCounter]) 
                         self.yLabel.append(self.acceptUserInput(config.defaultYLabel[self.plotCounter]))
-                    if self.yLabel in self.undoCommands:
+                    if self.yLabel[-1] in self.undoCommands: # TODO This part does not work well, improve it. It should correctly delete the last entry of y-label input and go back to prev question
                         self.gotoPrevQuestion()
-                        self.yLabel.pop()
+                        for k in range(j + 1):
+                            self.yLabel.pop()
                         self.binRes = self.defaultBinRes
                         self.prevCallFunc_yLabel = True
+                        break
                     else:
                         self.nextFunc = 'askSubplotTitle'
                         self.prevFunc.append(self.nextFunc)
@@ -1171,11 +1180,9 @@ Please make sure that x and y data sizes match! """
                     self.yLabel.pop()
             else:
                 self.nextFunc = 'subplotDone'
-                self.prevFunc.append(self.nextFunc)
                 self.printText(self.printSuccess, self.title)
         else:
             self.nextFunc = 'subplotDone'
-            self.prevFunc.append(self.nextFunc)
             
     # =============================== Ask main title name from user
     def askMainTitle(self):
@@ -1192,16 +1199,12 @@ Please make sure that x and y data sizes match! """
             if self.nextFunc == 'askInputFileName':
                 self.processType = 'fetchInputData'
                 self.askInputFileName()
-                print(self.prevFunc)
-                #print("progress a: %s" %self.nextFunc)
             elif self.nextFunc == 'askNumOfPlots':
                 self.askNumOfPlots()
-                print(self.prevFunc)
             elif self.nextFunc == 'askPlotType':
                 self.initiatePlotter() # Initiate the plotter class
                 self.plotPyt.prepPlot(self.numOfPlots) # prepare the plot environment
                 self.main_reinitializeVars()
-                #print("progress b: %s" %self.nextFunc)
                 # main plot loop
                 for i in range(self.numOfPlots):
                     self.plotCounter = i
@@ -1211,73 +1214,46 @@ Please make sure that x and y data sizes match! """
                             while True:
                                 if self.nextFunc == 'askPlotType':
                                     self.askPlotType(i)
-                                    print(self.prevFunc)
-                                    #print("progress c: %s" %self.nextFunc)
                                     if self.prevCallFunc_askPlotType: # go back to askNumOfPlots
-                                        break
-                                if self.yDataCounter != 0 and self.nextFunc == 'askMoreData':
-                                    if not self.askMoreData():
-                                        print(self.prevFunc)
                                         break
                                 if self.nextFunc == 'askPlotPlotType':
                                     self.askPlotPlotType()
-                                    print(self.prevFunc)
                                     if self.nextFunc == 'askPlotType':
                                         break
-                                        #print("progress d: %s" %self.nextFunc)
                                 if self.csvData and self.nextFunc == 'askXData_csv':
                                     self.askXData_csv()
-                                    print(self.prevFunc)
                                     if self.nextFunc == 'askPlotType':
                                         break
-                                    #print("progress e: %s" %self.nextFunc)
                                 if self.nextFunc == 'askYZEData_csv': 
                                     self.askYZEData_csv()
-                                    print(self.prevFunc)
-                                    #print("progress f: %s" %self.nextFunc)
                                 if ((not self.csvData or self.fetchXFunc or self.fetchYFunc or self.fetchZFunc) and self.nextFunc in ['askXData_func', 'askYEData_func', 'askZData_func']) or (self.nextFunc == 'minX' or self.nextFunc == 'resX'): # generate data from function
                                     self.askXData_func()
-                                    print(self.prevFunc)
                                     if self.nextFunc == 'askYEData_func':
                                         self.askYEData_func()
-                                        print(self.prevFunc)
-                                        #print("progress g: %s" %self.nextFunc)
                                     if self.nextFunc == 'askZData_func':
                                         self.askZData_func()
-                                        print(self.prevFunc)
-                                        #print("progress h: %s" %self.nextFunc)
                                 if self.nextFunc == 'askBinRes':
                                     self.askBinRes()
-                                    print(self.prevFunc)
-                                    #print("progress l: %s" %self.nextFunc)
                                 if self.nextFunc == 'askLegendNames':
                                     self.askLegendNames(self.yDataCounter - 1)
-                                    print(self.prevFunc)
-                                    #print("progress i: %s, y data counter: %d" %(self.nextFunc, self.yDataCounter))
-                                if self.generatePlot:
-                                    print(self.yDataCounter)
-                                    self.plotPyt.mainPlotter(self.plotCounter, self.numOfPlots, self.plotSelect, self.plotPlotSelect, self.yDataCounter - 1, self.fetchColX, self.fetchColY, self.fetchColZ, self.fetchColE, self.legendName, self.binRes, self.data) # TODO: Why do I send self.numOfPlots???
+                                if self.yDataCounter != 0 and self.nextFunc == 'askMoreData':
+                                    if not self.askMoreData():
+                                        break
                         elif self.nextFunc == 'askXLabel':
                             self.askXLabel()
-                            print(self.prevFunc)
-                            #print("progress k: %s" %self.nextFunc)
                         elif self.nextFunc == 'askYZLabel':
                             self.askYZLabel()
-                            print(self.prevFunc)
-                            #print("progress m: %s" %self.nextFunc)
                         elif self.nextFunc == 'askSubplotTitle':
                             self.askSubplotTitle(i)
-                            print(self.prevFunc)
-                            #print("progress n: %s" %self.nextFunc)
                         elif self.nextFunc == 'subplotDone': 
                             self.plotPyt.graphConfigs(self.xLabel, self.yLabel, self.zLabel, self.threeD, self.title, self.numOfPlots, self.plotCounter, self.plotSelect, self.yDataCounter)
                             self.main_reinitializeVars()
-                            #print("progress o: %s" %self.nextFunc)
                             if not self.nextFunc == 'askYZLabel':
                                 if i == (self.numOfPlots - 1):
                                     self.nextFunc = 'askMainTitle'
                                 else:
                                     self.nextFunc = 'askPlotType'
+                                self.prevFunc.append(self.nextFunc)
                                 break
                         elif self.prevCallFunc_askPlotType: # go back to askNumOfPlots
                                 break

@@ -27,8 +27,7 @@ class plotPython:
         self.plotCounter = 0
         self.oneColSpecPlt = False
         self.guest = []
-        self.linesSum = None
-        self.labelsSum = None
+        self.hostLines, self.hostLabels, self.guestLines, self.guestLabels, self.linesSum, self.labelsSum  = [], [], [], [], [], []
         self.snsJntPlot = None
         self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.fTxtNoXServer = f"""
@@ -74,22 +73,60 @@ Please turn on your X-server first and then hit [enter]"""
         self.numOfRow = 0
         self.figRowCnt = 0
         self.figColCnt = 0
-        self.fig.clf()
+        self.fig.clf()  
+        #self.host[self.figColCnt, self.figRowCnt].clf() # use this instead of self.fig.clf() if you find a way to do undo over multi-plots.
         plt.close()
 
     # =============================== Color the axes for multi-y axes (seaborn) line plots
     def axisColoring(self, dataNum):
         # color host
         self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[config.line_colors[0]])
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_alpha(config.alpha[0])
         # color guests     
-        self.guest[self.guestPlotCnt].yaxis.label.set_color(self.colors[config.line_colors[dataNum]])
+        self.guest[self.guestPlotCnt - 1].yaxis.label.set_color(self.colors[config.line_colors[dataNum]])
+        self.guest[self.guestPlotCnt - 1].yaxis.label.set_alpha(config.alpha[dataNum])
 
     # =============================== Graph Configurations
     def graphConfigs(self, xLabel, yLabel, zLabel, threeD, title, numOfPlots, plotCounter, plotSelect, numData):
         # save fig
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), format = config.figFormat)
         
-        # set x- and y-label
+        # set label scalings
+        self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX[plotCounter])
+        self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY[plotCounter])
+        if threeD: 
+            self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ[plotCounter])
+            # set azimuth and elevation angles for 3D plot 
+            self.host[self.figColCnt, self.figRowCnt].azim = config.threeD_azimDegree[plotCounter]
+            self.host[self.figColCnt, self.figRowCnt].elev = config.threeD_elevDegree[plotCounter]
+
+        # set axis limits
+        self.host[self.figColCnt, self.figRowCnt].set_xlim(config.limX[plotCounter])
+        self.host[self.figColCnt, self.figRowCnt].set_ylim(config.limY[plotCounter])
+        if threeD: 
+            self.host[self.figColCnt, self.figRowCnt].set_zlim(config.limZ[plotCounter])
+        
+        # set ticks
+        if not config.xticks[plotCounter][-1] is None: # check if user set spacing for ticks, otherwise don't set up xticks manually
+            if config.xticks[plotCounter][0] is None or config.xticks[plotCounter][1] is None: # get start and end points from ax if user did not define them
+                ticksStart, ticksEnd = self.host[self.figColCnt, self.figRowCnt].get_xlim()
+                self.host[self.figColCnt, self.figRowCnt].xaxis.set_ticks(np.arange(ticksStart, ticksEnd, config.xticks[plotCounter][2]))
+            else:
+                self.host[self.figColCnt, self.figRowCnt].xaxis.set_ticks(np.arange(config.xticks[plotCounter][0], config.xticks[plotCounter][1], config.xticks[plotCounter][2]))
+        if not config.yticks[plotCounter][-1] is None:
+            if config.yticks[plotCounter][0] is None or config.yticks[plotCounter][1] is None:
+                ticksStart, ticksEnd = self.host[self.figColCnt, self.figRowCnt].get_ylim()
+                self.host[self.figColCnt, self.figRowCnt].yaxis.set_ticks(np.arange(ticksStart, ticksEnd, config.yticks[plotCounter][2]))
+            else:
+                self.host[self.figColCnt, self.figRowCnt].yaxis.set_ticks(np.arange(config.yticks[plotCounter][0], config.yticks[plotCounter][1], config.yticks[plotCounter][2]))
+        if threeD and not config.zticks[plotCounter][-1] is None: 
+            if config.zticks[plotCounter][0] is None or config.zticks[plotCounter][1] is None:
+                ticksStart, ticksEnd = self.host[self.figColCnt, self.figRowCnt].get_zlim()
+                self.host[self.figColCnt, self.figRowCnt].zaxis.set_ticks(np.arange(ticksStart, ticksEnd, config.zticks[plotCounter][2]))
+            else:
+                self.host[self.figColCnt, self.figRowCnt].zaxis.set_ticks(np.arange(config.zticks[plotCounter][0], config.zticks[plotCounter][1], config.zticks[plotCounter][2]))
+
+        # set labels
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel)
         self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel[0])
         if config.additionalYAxes:# and plotSelect in ['line', 'seaborn line']:
@@ -100,42 +137,30 @@ Please turn on your X-server first and then hit [enter]"""
                     guestCnt += 1
         if threeD: self.host[self.figColCnt, self.figRowCnt].set_zlabel(zLabel)
 
-        # set x- and y-label padding
+        # set label paddings
         self.host[self.figColCnt, self.figRowCnt].axes.xaxis.labelpad = config.xAxis_labelPad[plotCounter]
         self.host[self.figColCnt, self.figRowCnt].axes.yaxis.labelpad = config.yAxis_labelPad[plotCounter]
         if threeD: self.host[self.figColCnt, self.figRowCnt].axes.zaxis.labelpad = config.zAxis_labelPad[plotCounter]
-
-        # set x- and y-axis limits
-        self.host[self.figColCnt, self.figRowCnt].set_xlim(config.limX[plotCounter])
-        self.host[self.figColCnt, self.figRowCnt].set_ylim(config.limY[plotCounter])
-        if threeD: 
-            self.host[self.figColCnt, self.figRowCnt].set_zlim(config.limZ[plotCounter])
-
-        # set x- and y-label scaling
-        self.host[self.figColCnt, self.figRowCnt].set_xscale(config.scaleX[plotCounter])
-        self.host[self.figColCnt, self.figRowCnt].set_yscale(config.scaleY[plotCounter])
-        if threeD: 
-            self.host[self.figColCnt, self.figRowCnt].set_zscale(config.scaleZ[plotCounter])
-            # set azimuth and elevation angles for 3D plot 
-            self.host[self.figColCnt, self.figRowCnt].azim = config.threeD_azimDegree[plotCounter]
-            self.host[self.figColCnt, self.figRowCnt].elev = config.threeD_elevDegree[plotCounter]
 
         # set subtitle
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
         
         # set legend
-        if not plotSelect in {'box'} and not config.additionalYAxes: # box plots do not have legend
-            if config.legend_bbox_to_anchor != None: # Set up legend only for the last plot
-                if plotCounter != numOfPlots - 1 and self.host[self.figColCnt, self.figRowCnt].legend_ != None: # turn off all legends except the last plot
-                    self.host[self.figColCnt, self.figRowCnt].legend_.remove() 
-                elif plotCounter == numOfPlots - 1:
+        if self.guestPlotCnt > 0: 
+            self.linesSum = self.hostLines + self.linesSum
+            self.labelsSum = self.hostLabels + self.labelsSum
+            self.guest[self.guestPlotCnt - 1].legend(self.linesSum, self.labelsSum)
+        if config.subplotLegend:
+            if not plotSelect in {'box'} and not config.additionalYAxes: # box plots do not have legend
+                if config.legend_bbox_to_anchor != None: # Set up legend only for the last plot
                     self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
                             mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
-            else:    
-                self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
-                        mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
-        
+                else:    
+                    self.host[self.figColCnt, self.figRowCnt].legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
+                            mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
+            self.hostLines, self.hostLabels, self.guestLines, self.guestLabels, self.linesSum, self.labelsSum  = [], [], [], [], [], [] # reinitialize label arrays
+ 
         # seaborn jointplot specific settings
         if plotSelect in {'seaborn jointplot'}:
             self.snsJntPlot.ax_joint.set_xlabel(xLabel)
@@ -161,6 +186,9 @@ Please turn on your X-server first and then hit [enter]"""
             self.fig.suptitle(title) # Main title
         else:
             self.fig.suptitle(title, x = config.oneColSpecPlt_loc_xTitle) # Main title
+        if config.figLegend: 
+            self.fig.legend(bbox_to_anchor = config.legend_bbox_to_anchor, loc = config.legend_loc, 
+                    mode = config.legend_mode, borderaxespad = config.legend_border_axesPad, ncol = config.legend_nCol)
         self.fig.savefig('%s' %config.logDir + os.sep + '%s.%s' %(self.date, config.figFormat), bbox_inches = 'tight', format = config.figFormat) # save fig to logs dir
         self.fig.tight_layout() # to adjust spacing between graphs and labels
         plt.show()
@@ -193,8 +221,8 @@ Please turn on your X-server first and then hit [enter]"""
         self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, 
                 self.colors[config.line_colors[i]], linestyle = config.line_style[i], 
                 label = legendName[i], linewidth = config.line_width[i], 
-                marker = config.line_markerStyle[i], alpha = config.alpha[i]) 
-        #self.host[self.figColCnt, self.figRowCnt].set_xscale('log') # delete it
+                marker = config.line_markerStyle[i], alpha = config.alpha[i])
+        print(self.host[self.figColCnt, self.figRowCnt].legend())
 
     # =============================== Histogram graph
     def histogramPlot(self, i, colNumX, binRes, legendName, data):
@@ -234,7 +262,7 @@ Please turn on your X-server first and then hit [enter]"""
 
     # =============================== Line-type graphs
     def linePlot(self, plotPlotSelect, dataNum, colNumX, colNumY, colNumE, legendName, data):
-        p, guestLines, guestLabels, linesSum, labelsSum  = [], [], [], [], []
+        p = []
         if config.additionalYAxes: # multiple-axis enabled
             if dataNum == 0:
                 self.linePlot_host(dataNum, p, plotPlotSelect, colNumX, 
@@ -243,17 +271,17 @@ Please turn on your X-server first and then hit [enter]"""
                 if config.additionalYAxes_enable[dataNum]:
                     lines, labels = self.linePlot_guest(dataNum, p, plotPlotSelect, colNumX,
                             colNumY, colNumE, legendName, data)
-                    guestLines += lines
-                    guestLabels += labels
+                    self.guestLines += lines
+                    self.guestLabels += labels
                     self.guestPlotCnt += 1
                     self.axisOffset += config.axisOffset[self.guestPlotCnt]
                 else:
                     self.linePlot_host(dataNum, p, plotPlotSelect, colNumX, colNumY, colNumE, 
                             legendName, data)
-            hostLines, hostLabels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
-            linesSum = hostLines + guestLines
-            labelsSum = hostLabels + guestLabels
-            self.guest[self.guestPlotCnt - 1].legend(linesSum, labelsSum)
+            self.hostLines, self.hostLabels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
+            self.linesSum = self.hostLines + self.guestLines
+            self.labelsSum = self.hostLabels + self.guestLabels
+            if self.guestPlotCnt > 0: self.guest[self.guestPlotCnt - 1].legend(self.linesSum, self.labelsSum)
             if self.guestPlotCnt == dataNum - 1: self.axisColoring(dataNum) # color the axes iff each line has a y-axis
         else:
             self.linePlot_host(dataNum, p, plotPlotSelect, colNumX, 
@@ -274,6 +302,15 @@ Please turn on your X-server first and then hit [enter]"""
                 ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.line_width[i], marker = config.line_markerStyle[i], 
                 hue = config.snsLine_hue[i], size = config.snsLine_size[i], style = config.snsLine_style[i], alpha = config.alpha[i]) 
         self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.line_style[i])
+        self.host[self.figColCnt, self.figRowCnt].legend_.remove()
+
+    # =============================== Seaborn Line Graph - Primary y-axis when used with guest plot
+    def seabornLinePlot_host_withGuest(self, i, colNumX, colNumY, legendName, data):
+        self.seabornLinePlot_host(i, colNumX,
+                            colNumY, legendName, data)
+        lines, labels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
+        self.hostLines += lines
+        self.hostLabels += labels
 
     # =============================== Seaborn Line Graph - Additional y-axes
     def seabornLinePlot_guest(self, i, colNumX, colNumY, legendName, data):
@@ -288,37 +325,28 @@ Please turn on your X-server first and then hit [enter]"""
         self.guest[self.guestPlotCnt].legend_.remove()
         self.guest[self.guestPlotCnt].spines['right'].set_position(("axes", self.axisOffset))
         lines, labels = self.guest[self.guestPlotCnt].get_legend_handles_labels()
-        return lines, labels 
+        self.linesSum += lines
+        self.labelsSum += labels
+        self.guestPlotCnt += 1
+        self.axisOffset += config.axisOffset[self.guestPlotCnt]
 
     # =============================== Seaborn Line Graph
     def seabornLinePlot(self, dataNum, colNumX, colNumY, legendName, data):
-        guestLines, guestLabels, linesSum, labelsSum  = [], [], [], []
         if config.additionalYAxes: # multiple-axis enabled
             if dataNum == 0:
-                self.seabornLinePlot_host(dataNum, colNumX,
-                        colNumY, legendName, data)
+                self.seabornLinePlot_host_withGuest(dataNum, colNumX,
+                            colNumY, legendName, data)
             else:
                 if config.additionalYAxes_enable[dataNum]:
-                    lines, labels = self.seabornLinePlot_guest(dataNum, numData, colNumX,
+                    self.seabornLinePlot_guest(dataNum, colNumX,
                             colNumY, legendName, data)
-                    guestLines += lines
-                    guestLabels += labels
-                    self.guestPlotCnt += 1
-                    self.axisOffset += config.axisOffset[self.guestPlotCnt]
                 else:
-                    self.seabornLinePlot_host(dataNum, colNumX,
+                    self.seabornLinePlot_host_withGuest(dataNum, colNumX,
                             colNumY, legendName, data)
-            self.host[self.figColCnt, self.figRowCnt].legend_.remove()
-            hostLines, hostLabels = self.host[self.figColCnt, self.figRowCnt].get_legend_handles_labels()
-            linesSum = hostLines + guestLines
-            labelsSum = hostLabels + guestLabels
-            self.guest[self.guestPlotCnt - 1].legend(linesSum, labelsSum)
-            if self.guestPlotCnt == dataNum - 1: self.axisColoring(dataNum) # color the axes iff each line has a y-axis
+            if any(config.additionalYAxes_enable) and self.guestPlotCnt > 0: self.axisColoring(dataNum) # color the axes iff each line has a y-axis
         else:
             self.seabornLinePlot_host(dataNum, colNumX,
                     colNumY, legendName, data)
-        #self.host[self.figColCnt, self.figRowCnt].set_ylim(0, 50) # delete it
-        #self.host[self.figColCnt, self.figRowCnt].set_yscale('log') # delete it
 
     # =============================== Seaborn Joint Graph
     def seabornJointPlot(self, i, colNumX, colNumY, legendName, data):
