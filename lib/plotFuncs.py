@@ -78,12 +78,12 @@ Please turn on your X-server first and then hit [enter]"""
         plt.close()
 
     # =============================== Color the axes for multi-y axes (seaborn) line plots
-    def axisColoring(self, dataNum):
+    def axisColoring(self, dataNum, colorHost, colorGuest):
         # color host
-        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[config.line_colors[0]])
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(self.colors[colorHost])
         self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_alpha(config.alpha[0])
         # color guests     
-        self.guest[self.guestPlotCnt - 1].yaxis.label.set_color(self.colors[config.line_colors[dataNum]])
+        self.guest[self.guestPlotCnt - 1].yaxis.label.set_color(self.colors[colorGuest])
         self.guest[self.guestPlotCnt - 1].yaxis.label.set_alpha(config.alpha[dataNum])
 
     # =============================== Graph Configurations
@@ -105,6 +105,7 @@ Please turn on your X-server first and then hit [enter]"""
         self.host[self.figColCnt, self.figRowCnt].set_ylim(config.limY[plotCounter])
         if threeD: 
             self.host[self.figColCnt, self.figRowCnt].set_zlim(config.limZ[plotCounter])
+        #if plotCounter == 1: self.guest[self.guestPlotCnt - 1].set_ylim(0, 50)
         
         # set ticks
         if not config.xticks[plotCounter][-1] is None: # check if user set spacing for ticks, otherwise don't set up xticks manually
@@ -195,17 +196,23 @@ Please turn on your X-server first and then hit [enter]"""
     
     # =============================== Bar graph
     def barPlot(self, i, colNumX, colNumY, legendName, data):
-        self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], color = self.colors[config.line_colors[i % len(config.line_colors)]], 
-                width = config.bar_width[i], bottom = config.bar_bottom[i], align = config.bar_align[i], label = legendName[i], alpha = config.alpha[i]) 
+        self.host[self.figColCnt, self.figRowCnt].bar(data[colNumX[i]], data[colNumY[i]], 
+                color = self.colors[config.bar_barColors[i % len(config.bar_barColors)]], 
+                edgecolor = self.colors[config.bar_edgeColors[i % len(config.bar_edgeColors)]],
+                linewidth = config.bar_edgeWidths[i], tick_label = config.bar_labels[i], capsize = config.bar_capSize[i],
+                width = config.bar_widths[i], bottom = config.bar_bottom[i], align = config.bar_align[i], 
+                label = legendName[i], alpha = config.alpha[i]) 
 
     # =============================== Box graph
     def boxPlot(self, i, colNumX, legendName, data):
-        self.host[self.figColCnt, self.figRowCnt].boxplot(data[colNumX[i]], positions = np.array(range(len(data[colNumX[i]]))) + 1, notch = config.box_notched[i], vert = config.box_vert[i],
-                whis = config.box_whis[i], bootstrap = config.box_bootstrap[i], widths = config.box_widths[i], patch_artist = config.box_patchArtist[i], labels = config.box_labels[i], 
-                zorder = config.box_zOrder[i], boxprops = dict(facecolor = self.colors[config.line_colors[0]], color = self.colors[config.line_colors[1]]), 
-                capprops = dict(color = self.colors[config.line_colors[2]]), whiskerprops = dict(color = self.colors[config.line_colors[3]]), 
-                flierprops = dict(color = self.colors[config.line_colors[4]], markeredgecolor = self.colors[config.line_colors[5]]), 
-                medianprops = dict(color = self.colors[config.line_colors[6]]))
+        self.host[self.figColCnt, self.figRowCnt].boxplot(data[colNumX[i]], positions = np.array(range(len(data[colNumX[i]]))) + 1, 
+                boxprops = dict(facecolor = self.colors[config.box_boxColors[i]], color = self.colors[config.box_lineColors[i]]), 
+                capprops = dict(color = self.colors[config.box_capColors[i]]), whiskerprops = dict(color = self.colors[config.box_whiskerColors[i]]), 
+                flierprops = dict(color = self.colors[config.box_flierColors[i]], markeredgecolor = self.colors[config.box_markerEdgeColors[i]]), 
+                medianprops = dict(color = self.colors[config.box_medianColors[i]]), widths = config.box_widths[i], 
+                labels = config.box_labels[i], vert = config.box_vert[i], notch = config.box_notched[i], 
+                whis = config.box_whis[i], bootstrap = config.box_bootstrap[i], patch_artist = config.box_patchArtist[i], 
+                zorder = config.box_zOrder[i])
         self.host[self.figColCnt, self.figRowCnt].set_xticklabels(legendName)
 
     # =============================== CDF graph
@@ -219,29 +226,36 @@ Please turn on your X-server first and then hit [enter]"""
         counts = counts.astype(float) / data_size
         cdfData = np.cumsum(counts)
         self.host[self.figColCnt, self.figRowCnt].plot(bin_edges[0:-1], cdfData, 
-                self.colors[config.line_colors[i]], linestyle = config.line_style[i], 
-                label = legendName[i], linewidth = config.line_width[i], 
-                marker = config.line_markerStyle[i], alpha = config.alpha[i])
+                self.colors[config.cdf_lineColors[i]], linewidth = config.cdf_lineWidth[i], 
+                linestyle = config.cdf_lineStyle[i], marker = config.cdf_markerStyle[i], 
+                markersize = config.cdf_markerSize[i], label = legendName[i],   
+                alpha = config.alpha[i])
         print(self.host[self.figColCnt, self.figRowCnt].legend())
 
     # =============================== Histogram graph
     def histogramPlot(self, i, colNumX, binRes, legendName, data):
         self.bins = np.arange(min(data[colNumX[i]]) - binRes, max(data[colNumX[i]]) + binRes * 2, binRes)
-        self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[i]], bins = self.bins, density = config.hist_density[i], cumulative = config.hist_cumulative[i],
-                bottom = config.hist_bottom[i], histtype = config.hist_histtype[i], align = config.hist_align[i], orientation = config.hist_orientation[i],
-                rwidth = config.hist_rwidth[i], color = self.colors[config.line_colors[i]], stacked = config.hist_stacked[i], 
-                edgecolor = config.hist_edgeColor[i], label = legendName[i], alpha = config.alpha[i])  
+        self.host[self.figColCnt, self.figRowCnt].hist(data[colNumX[i]], bins = self.bins, color = self.colors[config.hist_colors[i]], 
+                edgecolor = config.hist_edgeColors[i], histtype = config.hist_histType[i], density = config.hist_density[i], 
+                cumulative = config.hist_cumulative[i], bottom = config.hist_bottom[i], align = config.hist_align[i],
+                 orientation = config.hist_orientation[i], rwidth = config.hist_rwidth[i], stacked = config.hist_stacked[i],
+                 label = legendName[i], alpha = config.alpha[i])  
         self.host[self.figColCnt, self.figRowCnt].set_xticks(self.bins[:-1]) # TODO modify this per ax
 
     # =============================== Line Plot - Primary y-axis  
     def linePlot_host(self, i, p, plotPlotSelect, colNumX, colNumY, colNumE, legendName, data):
         p.append(0) #initialize array entry
         if plotPlotSelect[0] == 1: # line plot
-            p[self.guestPlotCnt], = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.line_colors[i]], 
-                    linestyle = config.line_style[i], label = legendName[i], linewidth = config.line_width[i], marker = config.line_markerStyle[i], alpha = config.alpha[i])  
+            p[self.guestPlotCnt], = self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], 
+                    self.colors[config.line_lineColors[i]], linewidth = config.line_lineWidth[i], 
+                    linestyle = config.line_lineStyle[i], marker = config.line_markerStyle[i], 
+                    markersize = config.line_markerSize[i], label = legendName[i], alpha = config.alpha[i])
         elif plotPlotSelect[0] == 2: # line plot w/ errorbar
-            p[self.guestPlotCnt], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], 
-                    c = self.colors[config.line_colors[i]], fmt = config.line_style[i], label = legendName[i], kwargs = {'alpha': config.alpha[i]})
+            p[self.guestPlotCnt], = self.host[self.figColCnt, self.figRowCnt].errorbar(data[colNumX[i]], data[colNumY[i]], 
+                    yerr = data[colNumE[i]], ecolor = self.colors[config.errorbar_lineColors[i]], 
+                    elinewidth = config.errorbar_lineWidth[i], fmt = config.errorbar_lineStyle[i], 
+                    capsize = config.errorbar_capSize[i], capthick = config.errorbar_capThickness[i],  
+                    barsabove = config.errorbar_barsAbove[i], label = legendName[i], kwargs = {'alpha': config.alpha[i]})
 
     # =============================== Line Plot - Additional y-axes
     def linePlot_guest(self, i, p, plotPlotSelect, colNumX, colNumY, colNumE, legendName, data):
@@ -249,11 +263,16 @@ Please turn on your X-server first and then hit [enter]"""
         self.guest.append(0) #initialize array entry
         self.guest[self.guestPlotCnt] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
         if plotPlotSelect[0] == 1: # line plot
-            p[self.guestPlotCnt], = self.guest[self.guestPlotCnt].plot(data[colNumX[i]], data[colNumY[i]], self.colors[config.line_colors[i]], linestyle = config.line_style[i], 
-            label = legendName[i], linewidth = config.line_width[i], marker = config.line_markerStyle[i], alpha = config.alpha[i])  
+            p[self.guestPlotCnt], = self.guest[self.guestPlotCnt].plot(data[colNumX[i]], data[colNumY[i]], 
+                    self.colors[config.line_lineColors[i]], linewidth = config.line_lineWidth[i], 
+                    linestyle = config.line_lineStyle[i], marker = config.line_markerStyle[i], 
+                    markersize = config.line_markerSize[i], label = legendName[i], alpha = config.alpha[i])  
         elif plotPlotSelect[0] == 2: # line plot w/ errorbar
-            p[self.guestPlotCnt], = self.guest[self.guestPlotCnt].errorbar(data[colNumX[i]], data[colNumY[i]], yerr = data[colNumE[i]], c = self.colors[config.line_colors[i]], 
-            fmt = config.line_style[i], label = legendName[i], kwargs = {'alpha': config.alpha[i]})
+            p[self.guestPlotCnt], = self.guest[self.guestPlotCnt].errorbar(data[colNumX[i]], data[colNumY[i]], 
+                    yerr = data[colNumE[i]], ecolor = self.colors[config.errorbar_lineColors[i]], 
+                    elinewidth = config.errorbar_lineWidth[i], fmt = config.errorbar_lineStyle[i], 
+                    capsize = config.errorbar_capSize[i], capthick = config.errorbar_capThickness[i],  
+                    barsabove = config.errorbar_barsAbove[i], label = legendName[i], kwargs = {'alpha': config.alpha[i]})
         self.guest[self.guestPlotCnt].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold[i], max(data[colNumY[i]]) + config.yLimThreshold[i])
         self.guest[self.guestPlotCnt].grid(False)
         self.guest[self.guestPlotCnt].spines['right'].set_position(("axes", self.axisOffset)) 
@@ -282,7 +301,7 @@ Please turn on your X-server first and then hit [enter]"""
             self.linesSum = self.hostLines + self.guestLines
             self.labelsSum = self.hostLabels + self.guestLabels
             if self.guestPlotCnt > 0: self.guest[self.guestPlotCnt - 1].legend(self.linesSum, self.labelsSum)
-            if self.guestPlotCnt == dataNum - 1: self.axisColoring(dataNum) # color the axes iff each line has a y-axis
+            if self.guestPlotCnt == dataNum - 1: self.axisColoring(dataNum, config.line_lineColors[0], config.line_lineColors[dataNum]) # color the axes iff each line has a y-axis
         else:
             self.linePlot_host(dataNum, p, plotPlotSelect, colNumX, 
                         colNumY, colNumE, legendName, data)
@@ -293,15 +312,20 @@ Please turn on your X-server first and then hit [enter]"""
         numOfRow = 2 if numOfPlots > 1 else 1
         self.host[self.figColCnt, self.figRowCnt] = self.fig.add_subplot(math.ceil(numOfPlots / numOfRow), numOfRow, plotCounter + 1, projection = '3d') # TODO move this to prepplot()
         for i in range(numData):
-            self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]], self.colors[config.line_colors[i % len(config.line_colors)]], 
-                    label = legendName[i], linewidth = config.line_width[i], marker = config.line_markerStyle[i], alpha = config.alpha[i])
+            self.host[self.figColCnt, self.figRowCnt].plot(data[colNumX[i]], data[colNumY[i]], data[colNumZ[i]], 
+                    self.colors[config.threeD_lineColors[i % len(config.threeD_lineColors)]], 
+                    linewidth = config.threeD_lineWidth[i], linestyle = config.threeD_lineStyle[i], 
+                    marker = config.threeD_markerStyle[i], markersize = config.threeD_markerSize[i],
+                    label = legendName[i], alpha = config.alpha[i])
 
     # =============================== Seaborn Line Graph - Primary y-axis
     def seabornLinePlot_host(self, i, colNumX, colNumY, legendName, data):
-        sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.line_colors[i]], label = legendName[i], 
-                ax = self.host[self.figColCnt, self.figRowCnt], linewidth = config.line_width[i], marker = config.line_markerStyle[i], 
-                hue = config.snsLine_hue[i], size = config.snsLine_size[i], style = config.snsLine_style[i], alpha = config.alpha[i]) 
-        self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.line_style[i])
+        sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.snsLine_lineColors[i]], 
+                linewidth = config.snsLine_lineWidth[i], marker = config.snsLine_markerStyle[i],
+                markersize = config.snsLine_markerSize[i], hue = config.snsLine_hue[i], size = config.snsLine_size[i], 
+                style = config.snsLine_style[i], label = legendName[i], alpha = config.alpha[i],
+                ax = self.host[self.figColCnt, self.figRowCnt]) 
+        self.host[self.figColCnt, self.figRowCnt].lines[i].set_linestyle(config.snsLine_lineStyle[i])
         self.host[self.figColCnt, self.figRowCnt].legend_.remove()
 
     # =============================== Seaborn Line Graph - Primary y-axis when used with guest plot
@@ -316,10 +340,13 @@ Please turn on your X-server first and then hit [enter]"""
     def seabornLinePlot_guest(self, i, colNumX, colNumY, legendName, data):
         self.guest.append(0) # initialize array entry
         self.guest[self.guestPlotCnt] = self.host[self.figColCnt, self.figRowCnt].twinx() # setup 2nd axis based on the first graph
-        sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], color = self.colors[config.line_colors[i % len(config.line_colors)]], label = legendName[i], 
-                ax = self.guest[self.guestPlotCnt], linewidth = config.line_width[i], marker = config.line_markerStyle[i],
-                hue = config.snsLine_hue[i], size = config.snsLine_size[i], style = config.snsLine_style[i], alpha = config.alpha[i]) 
-        self.guest[self.guestPlotCnt].lines[0].set_linestyle(config.line_style[i])
+        sns.lineplot(x = data[colNumX[i]], y = data[colNumY[i]], 
+                color = self.colors[config.snsLine_lineColors[i % len(config.snsLine_lineColors)]], 
+                linewidth = config.snsLine_lineWidth[i], marker = config.snsLine_markerStyle[i],
+                markersize = config.snsLine_markerSize[i], hue = config.snsLine_hue[i], size = config.snsLine_size[i], 
+                style = config.snsLine_style[i], label = legendName[i], alpha = config.alpha[i],
+                ax = self.guest[self.guestPlotCnt]) 
+        self.guest[self.guestPlotCnt].lines[0].set_linestyle(config.snsLine_lineStyle[i])
         self.guest[self.guestPlotCnt].set_ylim(min(data[colNumY[i]]) - config.yLimThreshold[i], max(data[colNumY[i]]) + config.yLimThreshold[i])
         self.guest[self.guestPlotCnt].grid(False)
         self.guest[self.guestPlotCnt].legend_.remove()
@@ -343,7 +370,7 @@ Please turn on your X-server first and then hit [enter]"""
                 else:
                     self.seabornLinePlot_host_withGuest(dataNum, colNumX,
                             colNumY, legendName, data)
-            if any(config.additionalYAxes_enable) and self.guestPlotCnt > 0: self.axisColoring(dataNum) # color the axes iff each line has a y-axis
+            if any(config.additionalYAxes_enable) and self.guestPlotCnt > 0: self.axisColoring(dataNum, config.snsLine_lineColors[0], config.snsLine_lineColors[dataNum]) # color the axes iff each line has a y-axis
         else:
             self.seabornLinePlot_host(dataNum, colNumX,
                     colNumY, legendName, data)
