@@ -377,8 +377,8 @@ Please turn on your X-server first and then hit [enter]"""
 
     # =============================== Seaborn Joint Graph
     def seabornJointPlot(self, i, colNumX, colNumY, legendName, data):
-        self.snsJntPlot = sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.snsJoint_kind, 
-        color = self.colors[config.line_colors[i % len(config.line_colors)]], label = legendName[i])
+        sns.jointplot(x = data[colNumX[i]], y = data[colNumY[i]], kind = config.snsJoint_kind, 
+                color = self.colors[config.snsJoint_lineColors[i % len(config.snsJoint_lineColors)]], label = legendName[i])
 
     # =============================== Plotter function
     def mainPlotter(self, plotCounter, numOfPlots, plotSelect, plotPlotSelect, dataNum, colNumX, colNumY, colNumZ, colNumE, legendName, binRes, data):

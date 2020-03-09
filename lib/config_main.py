@@ -23,7 +23,7 @@ fetchZLabelFromCsv = False # Fetch z label name from csv file. It will overwrite
 defaultXLabel = ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'] # Default x-axis label name
 defaultYLabel = ['y', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y'] # Default y-axis label name
 defaultZLabel = ['z', 'z', 'z', 'z', 'z', 'z', 'z', 'z', 'z', 'z'] # Default z-axis label name 
-defaultLegendNames = ['DJI Spark - Captured Data', 'DJI Mavic Air', 'Parrot AR', 'DJI Spark - Formula', 'DJI Spark - UL', 'DJI Mavic Air - UL', 'Parrot AR - UL', 'DJI Spark - UL - Formula', 'legend9', 'legend10'] # PER LINE, NOT PER PLOT. Default legend names
+defaultLegendNames = ['DJI Spark - Manual', 'DJI Mavic Air - Manual', 'DJI Spark - Waypoint', 'DJI Spark - Formula', 'DJI Spark - UL', 'DJI Mavic Air - UL', 'Parrot AR - UL', 'DJI Spark - UL - Formula', 'legend9', 'legend10'] # PER LINE, NOT PER PLOT. Default legend names
 defaultSubTitleNames = ['\\textbf{Downlink PDF Analysis}', '\\textbf{Uplink PDF Analysis}', '\\textbf{Downlink CDF Analysis}', '\\textbf{Uplink CDF Analysis}', 'subtitle5', 'subtitle6', 'subtitle7', 'subtitle8', 'subtitle9', 'subtitle10'] # Default subtitle names
 defaultTitle = ' ' # Default title name
 defaultMoreData = False # Default answer to whether to plot more dataset or not
@@ -139,7 +139,7 @@ threeD_markerSize = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] # PER LINE, NOT PER PLOT. mar
 
 ############ Inputs for 'seaborn line' plots - https://seaborn.pydata.org/generated/seaborn.lineplot.html https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html 
 snsLine_lineColors = [0, 1, 2, 4, 3, 5, 6, 7, 8, 9] # PER LINE, NOT PER PLOT. Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors[]" in plotFuncs.py if you need more color options for your plot!
-snsLine_lineWidth = [10, 4, 4, 5, 5, 5, 5, 3, 1, 1] # PER LINE, NOT PER PLOT. line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+snsLine_lineWidth = [10, 10, 10, 5, 5, 5, 5, 3, 1, 1] # PER LINE, NOT PER PLOT. line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
 snsLine_lineStyle = ['solid', 'solid', 'solid', 'dashed', 'solid', 'solid', 'solid', 'dashed', '', ''] # linestyle per plot. Valid inputs: {'-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'}
 snsLine_markerStyle = ['', 'v', 's', '', '', '', '', '', '', ''] # PER LINE, NOT PER PLOT. marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
 snsLine_markerSize = [15, 15, 15, 15, 10, 1, 1, 1, 1, 1] # PER LINE, NOT PER PLOT. marker size. 
@@ -148,4 +148,5 @@ snsLine_size = [None, None, None, None, None, None, None, None, None, None] # gr
 snsLine_style = [None, None, None, None, None, None, None, None, None, None] # groupling variable that will produce lines with different dashes and/or markers
 
 ############ Inputs for 'seaborn joint' plots - https://seaborn.pydata.org/generated/seaborn.jointplot.html
+snsJoint_lineColors = [0, 1, 2, 4, 3, 5, 6, 7, 8, 9] # PER LINE, NOT PER PLOT. Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors[]" in plotFuncs.py if you need more color options for your plot!
 snsJoint_kind = 'reg' # type of graph for sns.regression plots. Valid inputs: {'scatter', 'resid', 'reg', 'kde', 'hex'}
