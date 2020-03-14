@@ -11,7 +11,7 @@ defaultDelimeter = ',' # Default delimeter type for CSV files
 defaultEncoding = 'utf-8-sig' # Default encoding type for CSV files
 
 ############ Output Figure-related Configurations
-plotsPerRow = 2 # num of subplots per row
+plotsPerRow = 1 # num of subplots per row
 figFormat = 'pdf' # data format type of the plots to be saved
 figDimX = 25.60 # figure dimensions
 figDimY = 14.40 # figure dimensions
@@ -23,7 +23,7 @@ fetchZLabelFromCsv = False # Fetch z label name from csv file. It will overwrite
 defaultXLabel = ['x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x', 'x'] # Default x-axis label name
 defaultYLabel = ['y', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y', 'y'] # Default y-axis label name
 defaultZLabel = ['z', 'z', 'z', 'z', 'z', 'z', 'z', 'z', 'z', 'z'] # Default z-axis label name 
-defaultLegendNames = ['DJI Spark - Manual', 'DJI Mavic Air - Manual', 'DJI Spark - Waypoint', 'DJI Spark - Formula', 'DJI Spark - UL', 'DJI Mavic Air - UL', 'Parrot AR - UL', 'DJI Spark - UL - Formula', 'legend9', 'legend10'] # PER LINE, NOT PER PLOT. Default legend names
+defaultLegendNames = ['DJI Spark - Captured Data', 'DJI Mavic Air', 'Parrot AR', 'DJI Spark - Formula', 'DJI Spark - UL', 'DJI Mavic Air - UL', 'Parrot AR - UL', 'DJI Spark - UL - Formula', 'legend9', 'legend10'] # PER LINE, NOT PER PLOT. Default legend names
 defaultSubTitleNames = ['\\textbf{Downlink PDF Analysis}', '\\textbf{Uplink PDF Analysis}', '\\textbf{Downlink CDF Analysis}', '\\textbf{Uplink CDF Analysis}', 'subtitle5', 'subtitle6', 'subtitle7', 'subtitle8', 'subtitle9', 'subtitle10'] # Default subtitle names
 defaultTitle = ' ' # Default title name
 defaultMoreData = False # Default answer to whether to plot more dataset or not
@@ -39,7 +39,7 @@ additionalYAxes_enable = [True, True, True, True, True, True, True, True, True, 
 ########### Other Plot-related Settings
 shareX = False # Have the x-axes of the plots in the same scale. Valid inputs: True, False, 'col', 'row' 
 shareY = False # Have the y-axes of the plots in the same scale. Valid inputs: True, False, 'col', 'row'
-oneColSpecPlt = False # Valid iff plotsPerRow = 1. Halve the width of one-column plots. Better x&y scaling for two-column scientific papers
+oneColSpecPlt = True # Valid iff plotsPerRow = 1. Halve the width of one-column plots. Better x&y scaling for two-column scientific papers
 oneColSpecPlt_loc_xTitle = 0.3 # Valid iff oneColSpecPlt = True. Lcoation of x title. 0.3 is center.
 limX = [(None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None)] # limit the range of x-axes. E.g. (0, 100) 0: starting point, 100: ending point
 limY = [(None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None), (None, None)] # limit the range of y-axes. E.g. (0, 100) 0: starting point, 100: ending point 
@@ -139,7 +139,7 @@ threeD_markerSize = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1] # PER LINE, NOT PER PLOT. mar
 
 ############ Inputs for 'seaborn line' plots - https://seaborn.pydata.org/generated/seaborn.lineplot.html https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html 
 snsLine_lineColors = [0, 1, 2, 4, 3, 5, 6, 7, 8, 9] # PER LINE, NOT PER PLOT. Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors[]" in plotFuncs.py if you need more color options for your plot!
-snsLine_lineWidth = [10, 10, 10, 5, 5, 5, 5, 3, 1, 1] # PER LINE, NOT PER PLOT. line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+snsLine_lineWidth = [10, 10, 4, 5, 5, 5, 5, 3, 1, 1] # PER LINE, NOT PER PLOT. line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
 snsLine_lineStyle = ['solid', 'solid', 'solid', 'dashed', 'solid', 'solid', 'solid', 'dashed', '', ''] # linestyle per plot. Valid inputs: {'-', '--', '-.', ':', 'None', ' ', '', 'solid', 'dashed', 'dashdot', 'dotted'}
 snsLine_markerStyle = ['', 'v', 's', '', '', '', '', '', '', ''] # PER LINE, NOT PER PLOT. marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
 snsLine_markerSize = [15, 15, 15, 15, 10, 1, 1, 1, 1, 1] # PER LINE, NOT PER PLOT. marker size. 
