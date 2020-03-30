@@ -5,14 +5,239 @@ import sys
 from colorama import Fore, Back, init # colored output on the terminal
 import csv
 import numpy as np
+import yaml
 sys.path.append('lib' + os.sep)
-import config_main as config
-import plotFuncs
+import plotFunctions
 init(autoreset = True) # turn off colors after each print()
    
 ###################### USER INTERACTIONS
+
+class autoPylot:
+    # =============================== Initialize variables
+    def __init__(self):
+        self.config_folderdirectory = os.getcwd() + os.sep + 'config' + os.sep
+        self.mainconfig_name = 'mainconfig'
+        self.config_format = '.yaml'
+        self.config_separator = ','
+
+    # =============================== Initialize plotFunctions class
+    def init_plotFunctions(self):
+        self.plotPyt = plotFunctions.plotPython()
+
+    # =============================== Find input file
+    def inputFileFinder(self):
+        files = os.listdir(os.getcwd() + os.sep + self.mainconfig['MAIN']['inputfile_directory'])
+        if self.mainconfig['MAIN']['inputfile_name'] + '.' + self.mainconfig['MAIN']['inputfile_format'] in files: 
+            return True
+        else: 
+            return False
+
+    # =============================== Open main config file
+    def openMainConfig(self)
+        with open(self.config_folderdirectory + self.mainconfig_name + self.config_format, 'r') as stream:
+            self.mainconfig = yaml.safe_load(stream)
+    
+    # =============================== Show the graph
+    def showGraph(self):
+        self.plotPyt.showPlot(self.mainconfig['MAIN']['figure_title'], len(self.mainconfig['PLOT']))
+
+    # =============================== Incrementer to accept correct values for xmin, xmax and xres in x-axis of function plots
+    def adjust_xInput_func(self): 
+        self.counter_acceptUserInput += 1
+        if self.counter_acceptUserInput == 3:
+            self.counter_acceptUserInput = 0
+    
+    # =============================== Validate input data given by the user
+    def checkUserInput(self, input):
+        if self.processType == 'fetchColY' and input == '': # return default y column from csv if user pressed Enter
+            input = self.defaultFetchColY
+        try: 
+            if self.processType in ['plotType', 'plotPlotType', 'binResolution', 'checkNumXAxis', 'fetchXAxisColNum', 'numOfPlots']: # prevFuncName[i][3] is 1st prev. function name, prevFuncName[i+1][3] is 2nd most prev. func. name, etc.
+                val = float(input)
+                if self.processType == 'plotType': # if fetchDataInfo() called, check whether user input is within defined range
+                    if not (self.minPlotType <= int(input) <= self.maxPlotType):
+                        raise ValueError # not correct way to use exception errors
+                elif self.processType == 'plotPlotType':
+                    if not (self.minPlotPlotType <= int(input) <= self.maxPlotPlotType):
+                        raise ValueError # not correct way to use exception errors
+                elif self.processType == 'checkNumXAxis': 
+                    if not (self.defaultNumXAxis <= int(input) <= self.maxNumXAxis):
+                        raise ValueError # not correct way to use exception errors
+                elif self.processType == 'fetchXAxisColNum':
+                    if not (0 <= val <= self.numData - 1):
+                        raise ValueError # not correct way to use exception errors
+            elif self.processType == 'fetchInputData':
+                if input in ['s', 'S']:
+                    pass
+                elif not self.inputFileFinder(input) is True:
+                    raise ValueError
+            elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ', 'fetchErrorBar']:
+                if self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and not input in ['f', 'F']:
+                    input = int(input)
+                if (input in ['f', 'F']) or (self.processType == 'fetchColX' and self.yDataCounter > 0):
+                    pass
+                elif not self.minColNum <= int(input) <= self.numData - 1: 
+                    raise ValueError
+                elif self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and (len(self.data[input]) != len(self.data[self.fetchColX[-1]])):
+                    raise ValueError
+            elif (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'moreData']) and not (input in ['y', 'Y', 'n', 'N']):
+                raise ValueError
+            elif self.processType == 'getFuncXFromUser':
+                val = float(input)
+                if self.counter_acceptUserInput == 0: 
+                    self.x_min = val
+                elif self.counter_acceptUserInput == 1:
+                    if val <= self.x_min: # avoid maximum value of x-axis to be smaller that minimum value of x-axis.
+                        return False
+                elif self.counter_acceptUserInput == 2 and val <= 0: # avoid resolution value of x-axis to be less or equal than 0.
+                    return False
+                self.adjust_xInput_func()
+            elif self.processType in ['getFuncYFromUser', 'getFuncEFromUser']:
+                x = np.array(self.data[self.fetchColX[-1]])
+                val = eval(input)
+            elif self.processType == 'getFuncZFromUser':
+                x = np.array(self.data[self.fetchColX[-1]])
+                y = np.array(self.data[self.fetchColY[-1]])
+                val = eval(input)
+        except (AttributeError, SyntaxError, NameError, TypeError, ZeroDivisionError, ValueError):
+            return False
+        return True
+    
+    # =============================== Accept input data given by the user
+    def acceptUserInput(self, default):
+        while True: 
+            userInput = input()
+            self.check_quit(userInput)
+            if userInput in self.undoCommands: 
+                break
+            checkedInput = self.checkUserInput(userInput) 
+            if userInput == '':
+                if self.processType in ['fetchColY', 'fetchColZ', 'fetchErrorBar'] and checkedInput == False:
+                    self.printText(self.printFailure, default) # x, y, z data sizes do not match
+                elif self.processType in ['getFuncYFromUser', 'getFuncEFromUser']:
+                    userInput = np.array(self.data[self.fetchColX[-1]]) ** 2 if self.processType == 'getFuncYFromUser' else np.array(np.random.random_sample(len(self.data[self.fetchColX[-1]])))  # update default Y or errorbar with given x input from user 
+                    break
+                else:
+                    userInput = default
+                    if self.processType == 'getFuncXFromUser':
+                        if self.counter_acceptUserInput == 0:
+                            self.x_min = default
+                        elif self.counter_acceptUserInput == 1: 
+                            self.x_max = default
+                        self.adjust_xInput_func()
+                    break
+            elif checkedInput is True: # DON'T USE 'checkedInput == True' or 'checkedInput', it will mess up the code. Check this out: https://stackoverflow.com/questions/9494404/use-of-true-false-and-none-as-return-values-in-python-functions
+                if (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'moreData']) and (userInput in ['y', 'Y']):
+                    userInput = True
+                elif (self.processType in ['checkMultiGraph', 'checkMultiXAxis', 'checkThreeDGraph', 'moreData']) and (userInput in ['n', 'N']):
+                    userInput = False
+                elif self.processType in ['getFuncXFromUser', 'binResolution', 'checkNumXAxis']:
+                    userInput = float(userInput)
+                elif self.processType in ['fetchXAxisColNum', 'numOfPlots']:
+                    userInput = int(userInput)
+                elif self.processType in ['fetchColX', 'fetchColY', 'fetchColZ', 'fetchErrorBar']:
+                    if userInput in ['f', 'F']:
+                        pass
+                    else:
+                        userInput = int(userInput)
+                elif self.processType in ['getFuncYFromUser', 'getFuncEFromUser']:
+                    x = np.array(self.data[self.fetchColX[-1]])
+                    userInput = eval(userInput)
+                elif self.processType == 'getFuncZFromUser':
+                    x = np.array(self.data[self.fetchColX[-1]]) # define "x" and "y" as arrays to be able to evaluate string input function from user in two lines below
+                    y = np.array(self.data[self.fetchColY[-1]])
+                    userInput = eval(userInput)
+                break
+            else:
+                self.printText(self.printFailure, default)
+        return userInput
+    
+    # =============================== Convert rows to cols in input data from csv
+    def transposeData(self):
+        self.data = list(map(list, zip(*self.data))) # transpose the self.data: rows -> columns
+        self.numData = len(self.data)
+        
+    # =============================== Fetch default label names from csv file
+    def fetchDefLabels(self, plots): 
+        # Update default label names if labels are given in the input file
+        if not (self.data[0][0].isdigit()): # only check one of the first-row entries. If one of them is not a number, then the other first-row entries should be the same
+            for i in range(self.numData):
+                self.data[i][0] = self.data[i][0] if self.data[i][0] != '' else 'blank'
+                self.defaultLabels.append(self.data[i][0])
+            
+            # Delete labels from input data
+            for i in range(self.numData):
+                del self.data[i][0]
+    
+    # =============================== Convert input data into float
+    def convDataToFloat(self): 
+        # convert input data to float 
+        for i in range(self.numData):
+            self.data[i] = [x for x in self.data[i] if len(x.strip()) > 0]
+        for i in range(self.numData): # iterate over each column    
+            for j in range(len(self.data[i])):
+                try:
+                    self.data[i][j] = float(self.data[i][j])
+                except ValueError: 
+                    print(self.fInputDataNotValid)
+                    sys.exit(0)
+    
+    # =============================== Fetch input data from csv 
+    def fetchInputData(self):
+        # open csv file
+        with open(config.defaultInputDir + os.sep + self.inputFile, 'r', encoding = config.defaultEncoding) as csvfile: 
+            plots = csv.reader(csvfile, delimiter = config.defaultDelimeter)
+            # Fetch data from each row
+            for row in plots:
+                self.data.append(row)
+            self.transposeData()
+            self.fetchDefLabels(plots)
+            self.convDataToFloat()
+
+    # =============================== Main logic
+    def main(self):
+        # initialize plotFunctions class
+        self.init_plotFunctions()
+        # prepare the plot environment
+        self.plotPyt.prepPlot(self.numOfPlots)
+        # open config file
+        self.openMainConfig()
+        # fetch input data
+        self.fetchInputData()
+        # logic for plots 
+        for i in range(len(self.mainconfig['PLOT'])):
+            for j in range(len(self.mainconfig['PLOT']['Subplot' + str(i)]) - 34): # TODO Fix -33!!! 34 - 1
+                self.plotPyt.mainPlotter(
+                        i, 
+                        len(self.mainconfig['PLOT']), 
+                        self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type'], # REMOVE IT 
+                        j,
+                        self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_xdata'], 
+                        self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_ydata'], 
+                        self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_zdata'], 
+                        self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_edata'], 
+                        self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['plot_legend'], 
+                        self.data) # TODO: Why do I send self.numOfPlots???
+                self.threeD = True if self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type'] == '3d' else False
+            self.plotPyt.graphConfigs(
+                    self.mainconfig['PLOT']['Subplot' + str(i)]['plot_xlabel'], 
+                    self.mainconfig['PLOT']['Subplot' + str(i)]['plot_ylabel'], 
+                    self.mainconfig['PLOT']['Subplot' + str(i)]['plot_zlabel'], 
+                    self.threeD, self.mainconfig['PLOT']['Subplot' + str(i)]['plot_title'], 
+                    len(self.mainconfig['PLOT']), 
+                    self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type'], 
+                    len(self.mainconfig['PLOT']['Subplot' + str(i)]) - 34) # TODO get rid of plotselect, does not make sense
+        self.showGraph()
+
+task = userInteractions()
+task.main() # Fetch self.data-related info from user
+
+##############################################################################
+# !!! THIS CLASS IS DEPRECATED !!!
+##############################################################################
+
 class userInteractions:
-    # =============================== Initializer
+# =============================== Initializer
     def __init__(self):
         self.counter_acceptUserInput = 0
         self.csvData = True
@@ -1195,6 +1420,7 @@ Please make sure that x and y data sizes match! """
                 
     # =============================== User Interactions             
     def main(self):
+        '''
         while True: 
             if self.nextFunc == 'askInputFileName':
                 self.processType = 'fetchInputData'
@@ -1262,12 +1488,36 @@ Please make sure that x and y data sizes match! """
                 self.askMainTitle()
                 self.plotPyt.showPlot(self.title, self.numOfPlots)
                 break
+        '''
+        self.plotPyt = plotFuncs.plotPython()
+        self.plotPyt.prepPlot(self.numOfPlots) # prepare the plot environment
+        self.fetchInputData()
+        for i in range(len(self.mainconfig['PLOT'])):
+            for j in range(len(self.mainconfig['PLOT']['Subplot' + str(i)]) - 34): # TODO Fix -33!!! 34 - 1
+                print(j)
+                self.plotPyt.mainPlotter(i, len(self.mainconfig['PLOT']), 
+                        (self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type']), #self.plotSelect, # REMOVE IT 
+                        self.plotPlotSelect, # REMOVE IT
+                        j, #self.yDataCounter - 1,
+                        (self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_xdata']),#self.fetchColX, 
+                        (self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_ydata']),#self.fetchColY, 
+                        (self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_zdata']),#self.fetchColZ, 
+                        (self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_edata']),#self.fetchColE, 
+                        (self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['plot_legend']),#self.legendName, 
+                        #(self.plotconfig['HISTOGRAM']['Subplot' + str(i)]['dataset' + str(j)]['binres']), #self.binRes, # REMOVE IT
+                        self.data) # TODO: Why do I send self.numOfPlots???
+                self.threeD = True if self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type'] == '3d' else False
+            #self.plotPyt.graphConfigs(self.plot_xlabel, self.yLabel, self.plot_zlabel, self.threeD, self.figure_title, self.numOfPlots, self.plotSelect, self.yDataCounter)
+            self.plotPyt.graphConfigs(self.mainconfig['PLOT']['Subplot' + str(i)]['plot_xlabel'], self.mainconfig['PLOT']['Subplot' + str(i)]['plot_ylabel'], self.mainconfig['PLOT']['Subplot' + str(i)]['plot_zlabel'], self.threeD, self.mainconfig['PLOT']['Subplot' + str(i)]['plot_title'], len(self.mainconfig['PLOT']), self.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type'], len(self.mainconfig['PLOT']['Subplot' + str(i)]) - 34) # TODO get rid of plotselect, does not make sense
+            
+            self.main_reinitializeVars()
+        self.plotPyt.showPlot(self.mainconfig['MAIN']['figure_title'], len(self.mainconfig['PLOT']))
        
     # =============================== Initiate and Run the PlotPython Class
     def initiatePlotter(self):
         self.plotPyt = plotFuncs.plotPython()
 
 # #################################### MAIN
-task = userInteractions()
-task.main() # Fetch self.data-related info from user
-task.initiatePlotter()  
+#task = userInteractions()
+#task.main() # Fetch self.data-related info from user
+#task.initiatePlotter()  
