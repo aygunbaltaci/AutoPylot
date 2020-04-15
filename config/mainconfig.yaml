@@ -4,28 +4,12 @@
 ############################################################################################
 
 MAIN:
-    # Directory name where input csv files saved
-    inputfile_directory : 'inputFiles'
-    # File name of input data 
-    inputfile_name : 'plotFromCsv'
-    # File format
-    inputfile_format : 'csv'
-    # Default delimeter type for CSV files
-    inputfile_delimeter : ','
-    # Default encoding type for CSV files
-    inputfile_encoder : 'utf-8-sig' 
-    # Directory name of folder where plot files to be saved
-    outputfigure_directory : 'outputFiles' 
-    # Data format type of the plots to be saved
-    outputfigure_format : 'pdf' 
-    # Figure dimensions
-    outputfigure_xdimension : 25.60 
-    # Figure dimensions
-    outputfigure_ydimension : 14.40 
+    # Default y-axis label name of CDF plots
+    cdf_defaultlabel : 'CDF'
     # Num of subplots per row
     figure_plotperrow : 1 
     # Halve the width of one-column plots. Better x&y scaling for two-column scientific papers. VALID iff plotsPerRow : 1.
-    figure_singlecolumnnarrowplot : True 
+    figure_singlecolumnnarrowplot : True
     # Location of x title. 0.3 is center. VALID iff oneColSpecPlt : True. 
     figure_singlecolumnnarrowplot_xtitlelocation : 0.3
     # Have the x-axes of the plots in the same scale. VALID inputs: True, False, col, row 
@@ -40,104 +24,173 @@ MAIN:
     figure_ylabelfrominputfile : True 
     # Fetch z label name from csv file. It will overwrite the values in defaultXLabel below.
     figure_zlabelfrominputfile : False 
-    # Default y-axis label name of histogram plots
-    histogram_defaultlabel : 'Density' 
-    # Default y-axis label name of CDF plots
-    cdf_defaultlabel : 'CDF' 
     # Print a single legend for all suplots
-    figurelegend : False 
+    figurelegend : False
     # Place legend in a specific box configuration. Use  for default. Format: (x, y) or (x, y, w, h). Check out: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
-    figurelegend_bbox_to_anchor :  
-    # Location of the figure legend
-    figurelegend_location : 'upper left'
+    figurelegend_bbox_to_anchor :
+    # Legend axis padding
+    figurelegend_border_axispad : 0.0 
+    # Location of the figure legend. 'best': 0 'upper right': 1 'upper left': 2 'lower left': 3 'lower right':  'right': 5 'center left': 6 'center right': 7 'lower center': 8 'upper center': 9 'center': 10
+    figurelegend_location : 2
     # Set to 'expand' if you want horizontal expansion
     figurelegend_mode :   
-    # Legend axis padding
-    figurelegend_border_axispad : 0 
     # Number of legend columns
     figurelegend_ncolumn : 1 
+    # Default y-axis label name of histogram plots
+    histogram_defaultlabel : 'Density' 
+    # Default delimeter type for CSV files
+    inputfile_delimeter : ','
+    # Directory name where input csv files saved
+    inputfile_directory : 'inputFiles'
+    # Default encoding type for CSV files
+    inputfile_encoder : 'utf-8-sig' 
+    # File name of input data 
+    inputfile_name : 'plotFromCsv'
+    # File format
+    inputfile_format : 'csv'
+    # Directory name of folder where plot files to be saved
+    outputfigure_directory : 'outputFiles' 
+    # Data format type of the plots to be saved
+    outputfigure_format : 'pdf' 
+    # Figure dimensions
+    outputfigure_xdimension : 25.60 
+    # Figure dimensions
+    outputfigure_ydimension : 14.40 
 
 PLOT:
     Subplot0:
         dataset0:
             # Plot types. VALID choices: bar, box, cdf, histogram, line, errorbar, seaborn line, seaborn joint.
-            graph_type : 'cdf' 
-            # Transparency level of graphs
+            graph_type : 'line' 
+            # Transparency level of graphs - enter value between (0,1)
             graph_alpha : 0.5
+            # ONLY FOR ERRORBAR plots. Column number for your error data from input file
+            input_edata : 5
             # Column number for your x-axis input from input file
-            input_xdata : 1 
+            input_xdata : 0 
+            # Column number for your y-axis input from input file
+            input_ydata : 1 
+            # ONLY FOR 3D plots. Column number for your z-axis input from input file
+            input_zdata : 5 
+            # Legend name of data
+            plot_legend : 'legend' 
+            # y-axes offset value. VALID iff additionalYAxes : True
+            yaxis_axisoffset : 0.1
+            # Turn on or off additional y-axes. VALID starting from Dataset1. VALID iff multipleyaxis_turnon : True
+            yaxis_on : False 
+            # Extra values to add to the y limits of additional y-axes. VALID iff additionalYAxes : True
+            yaxis_ylimthreshold : 25 
+        
+        dataset1:
+            # Plot types. VALID choices: bar, box, cdf, histogram, line, errorbar, seaborn line, seaborn joint.
+            graph_type : 'line' 
+            # Transparency level of graphs - enter value between (0,1)
+            graph_alpha : 0.5
+            # ONLY FOR ERRORBAR plots. Column number for your error data from input file
+            input_edata : 5
+            # Column number for your x-axis input from input file
+            input_xdata : 3 
+            # Column number for your y-axis input from input file
+            input_ydata : 2 
+            # ONLY FOR 3D plots. Column number for your z-axis input from input file
+            input_zdata : 5 
+            # Legend name of data
+            plot_legend : 'legend' 
+            # y-axes offset value. VALID iff additionalYAxes : True
+            yaxis_axisoffset : 0.1
+            # Turn on or off additional y-axes. VALID starting from Dataset1. VALID iff multipleyaxis_turnon : True
+            yaxis_on : False 
+            # Extra values to add to the y limits of additional y-axes. VALID iff additionalYAxes : True
+            yaxis_ylimthreshold : 25
+        
+        dataset2:
+            # Plot types. VALID choices: bar, box, cdf, histogram, line, errorbar, seaborn line, seaborn joint.
+            graph_type : 'line' 
+            # Transparency level of graphs - enter value between (0,1)
+            graph_alpha : 0.5
+            # ONLY FOR ERRORBAR plots. Column number for your error data from input file
+            input_edata : 5
+            # Column number for your x-axis input from input file
+            input_xdata : 3 
             # Column number for your y-axis input from input file
             input_ydata : 3 
             # ONLY FOR 3D plots. Column number for your z-axis input from input file
             input_zdata : 5 
-            # ONLY FOR ERRORBAR plots. Column number for your error data from input file
-            input_edata : 5 
-            # Turn on or off additional y-axes. VALID starting from Dataset1. VALID iff multipleyaxis_turnon : True
-            yaxis_on : False 
-            # y-axes offset value. VALID iff additionalYAxes : True
-            yaxis_axisoffset : 0.1 
-            # Extra values to add to the y limits of additional y-axes. VALID iff additionalYAxes : True
-            yaxis_ylimthreshold : 25  
             # Legend name of data
             plot_legend : 'legend' 
+            # y-axes offset value. VALID iff additionalYAxes : True
+            yaxis_axisoffset : 0.1
+            # Turn on or off additional y-axes. VALID starting from Dataset1. VALID iff multipleyaxis_turnon : True
+            yaxis_on : False 
+            # Extra values to add to the y limits of additional y-axes. VALID iff additionalYAxes : True
+            yaxis_ylimthreshold : 25  
 
         # Enable multiple y-axis
-        multipleyaxis : False 
-        # Title name of subplot
-        plot_title : 'subplot1'
-        # x label of subplot
-        plot_xlabel : 'x' 
-        # y label of subplot
-        plot_ylabel : 'y' 
-        # z label of subplot
-        plot_zlabel : 'z' 
-        # Padding size between x label and xticks in the plot. Increase it if label conflicts with ticks in the plot
-        plot_xlabel_pad : 2 
-        # Padding size between y label and yticks in the plot. Increase it if label conflicts with ticks in the plot
-        plot_ylabel_pad : 2 
-        # Padding size between z label and zticks in the plot. Increase it if label conflicts with ticks in the plot
-        plot_zlabel_pad : 2 
-        # Scale of x-axes. Valid inputs are: linear, log, symlog, logit, ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
-        plot_xscale : 'linear' 
-        # Scale of y-axes. Valid inputs are: linear, log, symlog, logit, ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
-        plot_yscale : 'linear' 
-        # Scale of z-axes. Valid inputs are: linear, log, symlog, logit, ... check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
-        plot_zscale : 'linear' 
+        multipleyaxis : False
         # Azimuth degree of viewpoint of 3D plots
         plot_threed_azimdegree : -160 
         # Elevation degree of viewpoint of 3D plots
         plot_threed_elevdegree : 30 
+        # Title name of subplot
+        plot_title : 'subplot1'
+        # x label of subplot
+        plot_xlabel : 'x' 
+        # Padding size between x label and xticks in the plot. Increase it if label conflicts with ticks in the plot
+        plot_xlabel_pad : 2.0
+        # Limit the range of x-axes. E.g. (0, 100) 0: starting point, 100: ending point
+        plot_xlimit_min : 
+        plot_xlimit_max : 
+        # Scale of x-axes. Valid inputs are: linear, log, symlog, logit. check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+        plot_xscale : 'linear'
+        # Set spacing of xticks. Min, max, seperation distance 
+        plot_xticks_distance :  
+        plot_xticks_min : 
+        plot_xticks_max : 
+        # y label of subplot
+        plot_ylabel : 'y' 
+        # Padding size between y label and yticks in the plot. Increase it if label conflicts with ticks in the plot
+        plot_ylabel_pad : 2.0
+        # Limit the range of y-axes. E.g. (0, 100) 0: starting point, 100: ending point
+        plot_ylimit_min : 
+        plot_ylimit_max : 
+        # Scale of y-axes. Valid inputs are: linear, log, symlog, logit. check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+        plot_yscale : 'linear'
+        # Set spacing of yticks. Min, max, seperation distance
+        plot_yticks_distance : 
+        plot_yticks_min : 
+        plot_yticks_max :  
+        # z label of subplot
+        plot_zlabel : 'z' 
+        # Padding size between z label and zticks in the plot. Increase it if label conflicts with ticks in the plot
+        plot_zlabel_pad : 2.0
+        # Limit the range of z-axes. E.g. (0, 100) 0: starting point, 100: ending point
+        plot_zlimit_min : 
+        plot_zlimit_max :
+        # Scale of z-axes. Valid inputs are: linear, log, symlog, logit. check out https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.axes.Axes.set_yscale.html
+        plot_zscale : 'linear'
+        # Set spacing of zticks. Min, max, seperation distance
+        plot_zticks_distance : 
+        plot_zticks_min : 
+        plot_zticks_max :
         # Print legend per subplot
         plotlegend  : True 
         # Legend configurations. VALID iff figure_subplotlegend : True 
         # !!! IF SET, ONLY THE LEGENDS OF LAST PLOT WILL BE USED !!! Place legend in a specific box configuration. Use  for default. Format: (x, y) or (x, y, w, h). Check out: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
-        plotlegend_bbox_to_anchor : 
-        # Location of the figure legend
-        plotlegend_location : 'upper left'
+        plotlegend_bbox_to_anchor :
+        # Legend axis padding
+        plotlegend_border_axisPad : 0.0
+        # Location of the plot legend. 'best': 0 'upper right': 1 'upper left': 2 'lower left': 3 'lower right':  'right': 5 'center left': 6 'center right': 7 'lower center': 8 'upper center': 9 'center': 10
+        plotlegend_location : 2
         # Set to 'expand' if you want horizontal expansion
         plotlegend_mode : 
-        # Legend axis padding
-        plotlegend_border_axisPad : 0
         # Number of columns
         plotlegend_ncolumn : 1
-        # Limit the range of x-axes. E.g. (0, 100) 0: starting point, 100: ending point
-        plot_xlimit_min : 
-        plot_xlimit_max :  
-        # Limit the range of y-axes. E.g. (0, 100) 0: starting point, 100: ending point
-        plot_ylimit_min : 
-        plot_ylimit_max :   
-        # Limit the range of z-axes. E.g. (0, 100) 0: starting point, 100: ending point
-        plot_zlimit_min : 
-        plot_zlimit_max : 
-        # Set spacing of xticks. Min, max, seperation distance 
-        plot_xticks_min : 
-        plot_xticks_max : 
-        plot_xticks_distance :  
-        # Set spacing of yticks. Min, max, seperation distance
-        plot_yticks_min : 
-        plot_yticks_max : 
-        plot_yticks_distance : 
-        # Set spacing of yticks. Min, max, seperation distance
-        plot_zticks_min : 
-        plot_zticks_max : 
-        plot_zticks_distance : 
+        
+          
+         
+        
+        
+        
+        
+        
+        

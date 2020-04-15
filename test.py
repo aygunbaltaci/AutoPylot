@@ -4,38 +4,46 @@ import json
 import toml 
 import yaml
 
-# Read YAML file
-with open("config\config.yaml", 'r') as stream:
-    data_loaded = yaml.safe_load(stream)
+class ParentClass(object):
 
-print(data_loaded['AWS']['Resources']['EC1']['hi'])
-print(len(data_loaded['AWS']))
-'''
-with open("config\config.json") as json_data_file:
-    data = json.load(json_data_file)
-print(data['mysql']['host'])
+    def __init__(self):
+        self.x = [1,2,3]
 
-config = configparser.ConfigParser()
-configFolder = 'config' + os.sep
-config.read(configFolder + 'config.ini')
-#print(config.sections())
-#print(config.options(config.sections()[1]))
-#print(config['PLOT2']['nasilsin'])
-#print(config.get('PLOT2', 'nasilsin'))
-#print(config.get('PLOT2', 'nasilsin'))
-plotType, plotNum = [], []
+    def test(self):
+        print('Im in parent class')
+    
+    def openFile(self):
+        try:
+            with open('config/' + 'mainconfig.' + 'yaml', 'r') as input_data:
+                data = yaml.safe_load(input_data)
+        except FileNotFoundError:
+            print("File does not exist")
+            return False
+        return data
+        
+    # =============================== Find the given key in a dictionary
+    def findkeys(self, input_dict, input_key):
+        # Taken from https://stackoverflow.com/questions/9807634/find-all-occurrences-of-a-key-in-nested-dictionaries-and-lists
+        if isinstance(input_dict, list):
+            for i in input_dict:
+                for x in findkeys(i, input_key):
+                    yield x
+        elif isinstance(input_dict, dict):
+            if input_key in input_dict:
+                yield input_dict[input_key]
+            for j in input_dict.values():
+                for x in self.findkeys(j, input_key):
+                    yield x
 
 
-for i in range(1, len(config.sections()) - 1):
-    plotType.append(config['PLOT' + str(i + 1)]['deneme'])
-    plotNum.append(config['PLOT' + str(i + 1)]['nasilsin'])
+class ChildClass(ParentClass):
 
-print(plotType)
-print(plotType[0].split(','))
-print(plotType[1].split(','))
-print(plotNum)
-print(plotNum[0].split(','))
-print(plotNum[1].split(','))
-print(plotNum[1].split(',')[3])
-print(plotNum[1][4])
-'''
+    def test(self):
+        super(ChildClass, self).test()
+        print("Value of x = %s" %self.x)
+
+
+x = ChildClass()
+x.test()
+y = ParentClass()
+print(y.openFile())

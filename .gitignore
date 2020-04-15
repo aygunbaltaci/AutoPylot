@@ -1,8 +1,8 @@
 myapp
-logs/*
+outputFiles/*
 lib/__pycache__
-!logs/placeholder.txt
-inputCsvFiles/*
+!outputFiles/placeholder.txt
+inputFiles/*
 !inputCsvFiles/plotFromCsv.csv
 *.svg
-snscdf.py
+test.py
