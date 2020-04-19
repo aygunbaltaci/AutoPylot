@@ -12,45 +12,19 @@ Subplot0:
       style : 'solid'
       # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
       width : 12
-Subplot1:
-  dataset0:
-    BOX:
-      # Number of times to bootstrap the median to determine its 95% confidence intervals. VALID inputs: int. 
-      bootstrap : 
+  dataset1:
+    LINE:
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      boxcolor : 5 
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      capcolor : 4
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      fliercolor : 2
-      # Labels of each box plot. Set to  if you do not want labels
-      label : 
-        - ''
-        - ''
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      linecolor : 0
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      markeredgecolor : 0
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      mediancolor : 0
-      # Produce notched box plots
-      notched : true
-      # Raw boxes with patch artists 
-      patchartist : true
-      # set the positions of each box. Must be same length as 'input_xdata' in mainconfig.yaml
-      position: 
-        - 1.5
-        - 4.5
-      # Produce vertical box plots
-      vertical : true
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      whiskercolor : 0
-      # The reach of whiskers beyond the 1st and 3rd quartiles
-      whiskerreach : 1.5 
-      # Widths of each box plot
-      width : 0.5 
-      # Sets the zorder of the boxplot. VALID inputs: scalar. 
-      zorder :
+      color : 3 
+      # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
+      markerstyle : 'v'
+      # Marker size. 
+      markersize : 10
+      # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+      style : 'solid'
+      # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+      width : 12
+
 
 ##################################################
 # ALL SETTINGS BELOW UNUSED
@@ -83,13 +57,17 @@ BOX:
   # Number of times to bootstrap the median to determine its 95% confidence intervals. VALID inputs: int. 
   bootstrap : 
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-  boxcolor : 0 
+  boxcolor : 4
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
   capcolor : 0
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
   fliercolor : 0
   # Labels of each box plot. Set to  if you do not want labels
-  label : 'label1'
+  label : 
+    - 'a'
+    - 'b'
+    - 'c'
+    - 'd'
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
   linecolor : 0
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
@@ -99,9 +77,15 @@ BOX:
   # Produce notched box plots
   notched : false
   # Raw boxes with patch artists 
-  patchartist : true 
+  patchartist : true
+  # positions of each box 
+  position : 
+    - 1.5
+    - 2.5
+    - 3.5
+    - 4.5
   # Produce vertical box plots
-  vertical : false
+  vertical : true
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
   whiskercolor : 0
   # The reach of whiskers beyond the 1st and 3rd quartiles
@@ -123,6 +107,21 @@ CDF:
   style : 'solid'
   # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
   width : 10 
+
+############ ERRORBAR ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.errorbar.html
+ERRORBAR:
+  # Plot errorbars above the plot symbols
+  barsabove : false
+  # Cap size of errorbars. 
+  capsize : 1 
+  # Cap thickness of errorbars. 
+  capthickness : 1
+  # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+  color : 0 
+  # Linestyle per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+  style : 'solid' 
+  # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+  width : 1 
 
 ############ HISTOGRAM ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.hist.html
 HISTOGRAM:
@@ -162,33 +161,12 @@ LINE:
   # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
   width : 12
 
-############ ERRORBAR ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.errorbar.html
-ERRORBAR:
-  # Plot errorbars above the plot symbols
-  barsabove : false
-  # Cap size of errorbars. 
-  capsize : 1 
-  # Cap thickness of errorbars. 
-  capthickness : 1
+############ SEABORN JOINT ############ - https://seaborn.pydata.org/generated/seaborn.jointplot.html
+SNSJOINT:
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
   color : 0 
-  # Linestyle per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
-  style : 'solid' 
-  # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-  width : 1 
-
-############ 3D ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
-THREED:
-  # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-  color : 0
-  # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
-  markerstyle : 'v' 
-  # Marker size. 
-  markersize : 1
-  # Linestyle per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
-  style : 'solid'
-  # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-  width : 1
+  # !!!ONLY ONE ENTRY!!! Type of graph for sns regression plots.  VALID inputs: {scatter, resid, reg, kde, hex}
+  kind : 'reg' 
 
 ############ SEABORN LINE ############ - https://seaborn.pydata.org/generated/seaborn.lineplot.html https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html 
 SNSLINE:
@@ -209,9 +187,15 @@ SNSLINE:
   # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
   width : 10 
 
-############ SEABORN JOINT ############ - https://seaborn.pydata.org/generated/seaborn.jointplot.html
-SNSJOINT:
+############ 3D ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.plot.html
+THREED:
   # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-  color : 0 
-  # !!!ONLY ONE ENTRY!!! Type of graph for sns regression plots.  VALID inputs: {scatter, resid, reg, kde, hex}
-  kind : 'reg' 
+  color : 0
+  # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
+  markerstyle : 'v' 
+  # Marker size. 
+  markersize : 1
+  # Linestyle per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+  style : 'solid'
+  # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+  width : 1

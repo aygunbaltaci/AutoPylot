@@ -30,63 +30,27 @@ PLOT:
     dataset0:
       graph_alpha: 0.5
       graph_type: line
-      input_edata: null
-      input_xdata: 14
-      input_ydata: 15
-      input_zdata: null
-      plot_legend: legend
+      input_edata: 0
+      input_xdata: 3
+      input_ydata: 4
+      input_zdata: 5
+      plot_legend: megend
       yaxis_axisoffset: 0.1
       yaxis_on: false
       yaxis_ylimthreshold: 25
-    multipleyaxis: false
-    plot_threed_azimdegree: -160
-    plot_threed_elevdegree: 30
-    plot_title: subplot1
-    plot_xlabel: x
-    plot_xlabel_pad: 2.0
-    plot_xlimit_max: null
-    plot_xlimit_min: null
-    plot_xscale: log
-    plot_xticks_distance: null
-    plot_xticks_max: null
-    plot_xticks_min: null
-    plot_ylabel: y
-    plot_ylabel_pad: 2.0
-    plot_ylimit_max: null
-    plot_ylimit_min: null
-    plot_yscale: linear
-    plot_yticks_distance: null
-    plot_yticks_max: null
-    plot_yticks_min: null
-    plot_zlabel: z
-    plot_zlabel_pad: 2.0
-    plot_zlimit_max: null
-    plot_zlimit_min: null
-    plot_zscale: linear
-    plot_zticks_distance: null
-    plot_zticks_max: null
-    plot_zticks_min: null
-    plotlegend: true
-    plotlegend_bbox_to_anchor: null
-    plotlegend_border_axisPad: 0.0
-    plotlegend_location: 2
-    plotlegend_mode: null
-    plotlegend_ncolumn: 1
-  Subplot1:
-    dataset0:
+    dataset1:
       graph_alpha: 0.5
-      graph_type: box
-      input_edata: null
-      input_xdata:
-      - 12
-      - 13
-      input_ydata: null
-      input_zdata: null
-      plot_legend: legend
+      graph_type: line
+      input_edata: 0
+      input_xdata: 3
+      input_ydata: 4
+      input_zdata: 5
+      plot_legend: megend
       yaxis_axisoffset: 0.1
-      yaxis_on: false
+      yaxis_on: true
       yaxis_ylimthreshold: 25
-    multipleyaxis: false
+
+    multipleyaxis: true
     plot_threed_azimdegree: -160
     plot_threed_elevdegree: 30
     plot_title: subplot1
@@ -94,11 +58,12 @@ PLOT:
     plot_xlabel_pad: 2.0
     plot_xlimit_max: null
     plot_xlimit_min: null
-    plot_xscale: log
+    plot_xscale: linear
     plot_xticks_distance: null
     plot_xticks_max: null
     plot_xticks_min: null
-    plot_ylabel: y
+    plot_ylabel0: y
+    plot_ylabel1: y
     plot_ylabel_pad: 2.0
     plot_ylimit_max: null
     plot_ylimit_min: null
