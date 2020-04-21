@@ -1,8 +1,10 @@
 myapp
-outputFiles/*
+lib_oneGraph/*
+lib_twoGraphs/*
+lib_fourGraphs/*
+logs/*
 lib/__pycache__
-!outputFiles/placeholder.txt
-inputFiles/*
+!logs/placeholder.txt
+inputCsvFiles/*
 !inputCsvFiles/plotFromCsv.csv
 *.svg
-test.py
