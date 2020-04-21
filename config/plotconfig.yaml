@@ -1,30 +1,59 @@
 
 Subplot0:
   dataset0:
-    LINE:
+    SNSLINE:
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : 0 
+      color : 0  
+      # Grouping variable that will produce lines with different colors
+      hue :
       # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
-      markerstyle : 'v'
-      # Marker size. 
-      markersize : 10
-      # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+      markerstyle  : 'v' 
+      # Marker size.
+      markersize : 15 
+      # Grouping variable that will produce lines with different widths
+      size : 
+      # Grouping variable that will produce lines with different dashes and/or markers
+      sns_style :  
+      # Linestyle per plot. VALID inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
       style : 'solid'
       # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-      width : 12
+      width : 10 
   dataset1:
-    LINE:
+    SNSLINE:
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : 3 
+      color : 1 
+      # Grouping variable that will produce lines with different colors
+      hue :
       # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
-      markerstyle : 'v'
-      # Marker size. 
-      markersize : 10
-      # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+      markerstyle  : 'v' 
+      # Marker size.
+      markersize : 15 
+      # Grouping variable that will produce lines with different widths
+      size : 
+      # Grouping variable that will produce lines with different dashes and/or markers
+      sns_style :  
+      # Linestyle per plot. VALID inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
       style : 'solid'
       # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-      width : 12
-
+      width : 10 
+  dataset2:
+    SNSLINE:
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 2
+      # Grouping variable that will produce lines with different colors
+      hue :
+      # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
+      markerstyle  : 'v' 
+      # Marker size.
+      markersize : 15 
+      # Grouping variable that will produce lines with different widths
+      size : 
+      # Grouping variable that will produce lines with different dashes and/or markers
+      sns_style :  
+      # Linestyle per plot. VALID inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+      style : 'solid'
+      # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+      width : 10 
 
 ##################################################
 # ALL SETTINGS BELOW UNUSED

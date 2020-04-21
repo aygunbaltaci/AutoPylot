@@ -5,7 +5,7 @@ MAIN:
   figure_shareyaxis: false
   figure_singlecolumnnarrowplot: true
   figure_singlecolumnnarrowplot_xtitlelocation: 0.3
-  figure_title: ' '
+  figure_title: \\textbf{'Test Title'}
   figure_xlabelfrominputfile: true
   figure_ylabelfrominputfile: true
   figure_zlabelfrominputfile: false
@@ -29,23 +29,37 @@ PLOT:
   Subplot0:
     dataset0:
       graph_alpha: 0.5
-      graph_type: line
+      graph_type: snsline
       input_edata: 0
-      input_xdata: 3
-      input_ydata: 4
+      input_xdata: 4
+      input_ydata: 3
       input_zdata: 5
       plot_legend: megend
+      dataset_ylabel: xyxzs
       yaxis_axisoffset: 0.1
-      yaxis_on: false
+      yaxis_on: true
       yaxis_ylimthreshold: 25
     dataset1:
       graph_alpha: 0.5
-      graph_type: line
+      graph_type: snsline
       input_edata: 0
       input_xdata: 3
       input_ydata: 4
       input_zdata: 5
-      plot_legend: megend
+      plot_legend: megend2
+      dataset_ylabel: yy
+      yaxis_axisoffset: 0.1
+      yaxis_on: false
+      yaxis_ylimthreshold: 25
+    dataset2:
+      graph_alpha: 0.5
+      graph_type: snsline
+      input_edata: 0
+      input_xdata: 7
+      input_ydata: 8
+      input_zdata: 5
+      plot_legend: megend3
+      dataset_ylabel: z
       yaxis_axisoffset: 0.1
       yaxis_on: true
       yaxis_ylimthreshold: 25
@@ -62,8 +76,7 @@ PLOT:
     plot_xticks_distance: null
     plot_xticks_max: null
     plot_xticks_min: null
-    plot_ylabel0: y
-    plot_ylabel1: y
+    plot_ylabel: yi
     plot_ylabel_pad: 2.0
     plot_ylimit_max: null
     plot_ylimit_min: null

@@ -1,21 +1,23 @@
 #!/usr/bin/env python3
 
-import os
-import sys
-import math
 from colorama import Fore, Back, init # colored output on the terminal
-from datetime import datetime
-import pandas as pd
-import tkinter
 import csv
-import numpy as np
-import yaml
-import re
+from datetime import datetime
+import math
+import matplotlib
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
+import os
+import pandas as pd
+import re
 import seaborn as sns
+import sys
+import tkinter
+import yaml
 sys.path.append('config' + os.sep)
 import config_matplotlibrc
+
 init(autoreset = True) # turn off colors after each print()
 
 class BoolError(Exception):
@@ -89,13 +91,15 @@ class AutoPylot:
                     j, # TODO get rid of this
                     self.plot_handler.guestPlotCnt,
                     self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['plot_xlabel'], 
-                    self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['plot_ylabel0'], 
+                    self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['plot_ylabel'], 
                     self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['plot_zlabel'], 
                     self.threeD, 
                     self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['plot_title'], 
                     len(self.data_handler.mainconfig['PLOT']), 
                     self.data_handler.check_num_dataset(i), 
-                    i)
+                    i,
+                    self.plot_handler.boxplot,
+                    self.plot_handler.boxplot_legendname)
         self.graph_handler.show_graph(self.data_handler.mainconfig['MAIN']['figure_title'], len(self.data_handler.mainconfig['PLOT']))
 
 ###################### USER INTERACTIONS
@@ -436,37 +440,39 @@ class dataHandler(AutoPylot):
 class graphHandler(AutoPylot):
     # =============================== Initializer / Instance attributes
     def __init__(self, data_handler):
-        #super().__init__() # inherit all the methods and instances from parent class
-        self.boxplot_data = []
         self.data_handler = data_handler
-        self.lineTypes = ['-', '--', '-.', '.']
+        self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.figRowCnt = 0
         self.figColCnt = 0
-        self.numOfRow = 0
-        self.plotCounter = 0
-        self.plotFuncName = ''
-        self.oneColSpecPlt = False
-        self.guest = []
-        self.snsJntPlot = None
-        self.hostLines, self.hostLabels, self.guestLines, self.guestLabels, self.linesSum, self.labelsSum  = [], [], [], [], [], []
-        self.date = datetime.now().strftime('%Y%m%d_%H%M%S')
         self.fTxtNoXServer = f"""
 {Fore.RED}Your X-server is not running, cannot plot the graph.
 Please turn on your X-server first and then hit [enter]"""
+        self.guest = []
+        self.guestLabels = []
+        self.guestLines = []
+        self.hostLabels = []
+        self.hostLines = []
+        self.labelsSum = []
+        self.linesSum = []
+        self.numOfRow = 0
+        self.oneColSpecPlt = False
+        self.plotCounter = 0
+        self.plotFuncName = ''
+        self.snsJntPlot = None
 
     # =============================== Color the axes for multi-y axes (seaborn) line plots
     def axisColoring(self, colors, colorHost, colorGuest, guestPlotCnt):
         # color host
-        self.graph_handler.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(colors[colorHost])
-        self.graph_handler.host[self.figColCnt, self.figRowCnt].yaxis.label.set_alpha(
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_color(colors[colorHost])
+        self.host[self.figColCnt, self.figRowCnt].yaxis.label.set_alpha(
                 self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['graph_alpha'])
         # color guests     
         self.guest[guestPlotCnt - 1].yaxis.label.set_color(colors[colorGuest])
         self.guest[guestPlotCnt - 1].yaxis.label.set_alpha(
-                self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
+                self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(guestPlotCnt)]['graph_alpha'])
     
     # =============================== Graph Configurations
-    def graph_configs(self, dataNum, guestPlotCnt, xLabel, yLabel, zLabel, threeD, title, numOfPlots, numData, plotCounter):
+    def graph_configs(self, dataNum, guestPlotCnt, xLabel, yLabel, zLabel, threeD, title, numOfPlots, numData, plotCounter, boxplot_legend, boxplot_legendname):
         self.plotCounter = plotCounter 
         self.dataNum = dataNum # TODO get rid of dataNum in this class. It does not make sense. 
         
@@ -479,7 +485,7 @@ Please turn on your X-server first and then hit [enter]"""
         self.set_axis_label(numData, threeD, xLabel, yLabel, zLabel)
         self.set_axis_label_pad(threeD)
         self.set_subtitle(numOfPlots, title)
-        self.set_plot_legend(guestPlotCnt)
+        self.set_plot_legend(boxplot_legend, boxplot_legendname, guestPlotCnt)
         self.set_snsjoint_setting(title)
         self.place_subplot()
     
@@ -561,12 +567,12 @@ Please turn on your X-server first and then hit [enter]"""
     # =============================== set axis labels
     def set_axis_label(self, numData, threeD, xLabel, yLabel, zLabel):
         self.host[self.figColCnt, self.figRowCnt].set_xlabel(xLabel)
-        self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel[0])
+        self.host[self.figColCnt, self.figRowCnt].set_ylabel(yLabel)
         if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']:# and plotSelect in ['line', 'seaborn line']:
             guestCnt = 0
-            for i in range(numData - 1):
-                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_on']: 
-                    self.guest[guestCnt].set_ylabel(self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_ylabel' + str(i)])
+            for i in range(self.data_handler.check_num_dataset(self.plotCounter) - 1):
+                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(i + 1)]['yaxis_on']: 
+                    self.guest[guestCnt].set_ylabel(self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(i + 1)]['dataset_ylabel'])
                     guestCnt += 1
         if threeD: self.host[self.figColCnt, self.figRowCnt].set_zlabel(zLabel)
 
@@ -630,13 +636,20 @@ Please turn on your X-server first and then hit [enter]"""
                 ncol = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'])
     
     # =============================== set plot legends
-    def set_plot_legend(self, guestPlotCnt):
+    def set_plot_legend(self, boxplot_legend, boxplot_legendname, guestPlotCnt):
         if guestPlotCnt > 0: 
             self.linesSum = self.hostLines + self.linesSum
             self.labelsSum = self.hostLabels + self.labelsSum
-            self.guest[guestPlotCnt - 1].legend(self.linesSum, self.labelsSum)
-        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend']:
-            if not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'box'} and not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: # box plots do not have legend
+            lines_labels_zipped = dict(zip(self.labelsSum, self.linesSum)) # to avoid duplicate labels in legend, taken from https://stackoverflow.com/questions/13588920/stop-matplotlib-repeating-labels-in-legend
+            self.guest[guestPlotCnt - 1].legend(lines_labels_zipped.values(), lines_labels_zipped.keys())
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend']: # TODO does not make sense,  move it to set_graph_configs
+            if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'box'}: # TODO fix self.dataNum. Does not make sense.
+                label_box, legend_box = [], []
+                for i in range(len(boxplot_legend)):
+                    label_box.append(boxplot_legendname[i])
+                    legend_box.append(boxplot_legend[i]['boxes'][0])
+                self.host[self.figColCnt, self.figRowCnt].legend(legend_box, label_box, loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'])
+            elif not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: 
                 if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'] != None: # TODO is this correct ??? Set up legend only for the last plot
                     self.host[self.figColCnt, self.figRowCnt].legend(
                             bbox_to_anchor = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_bbox_to_anchor'], 
@@ -687,6 +700,8 @@ class plotHandler(AutoPylot):
     def __init__(self, data_handler, graph_handler):
         self.data_handler = data_handler
         self.graph_handler = graph_handler
+        self.boxplot = []
+        self.boxplot_legendname = []
         self.colors = ['steelblue', 'sandybrown', 'mediumseagreen', 'indianred', 'dimgrey', 'orchid', 
                 'goldenrod', 'darkcyan', 'mediumslateblue', 'darkkhaki'] # Taken from https://matplotlib.org/3.1.0/gallery/color/named_colors.html
 
@@ -716,7 +731,7 @@ class plotHandler(AutoPylot):
         else:
             boxplot_data.append(self.data_handler.data[colNumX])
  
-        self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].boxplot(
+        self.boxplot.append(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].boxplot(
                 boxplot_data, 
                 positions = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['position'],
                 boxprops = dict(facecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['boxcolor']], 
@@ -733,7 +748,8 @@ class plotHandler(AutoPylot):
                 whis = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['whiskerreach'], 
                 bootstrap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['bootstrap'], 
                 patch_artist = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['patchartist'], 
-                zorder = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['zorder'])
+                zorder = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['zorder']))
+        self.boxplot_legendname.append(legendName) 
 
     # =============================== CDF graph
     def cdf(self, colNumX, legendName):
@@ -804,7 +820,7 @@ class plotHandler(AutoPylot):
                 min(self.data_handler.data[colNumY]) - self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'], 
                 max(self.data_handler.data[colNumY]) + self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'])
         self.graph_handler.guest[self.guestPlotCnt].grid(False)
-        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(("axes", self.axisOffset)) 
+        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(('axes', self.axisOffset)) 
         lines, labels = self.graph_handler.guest[self.guestPlotCnt].get_legend_handles_labels()
         return lines, labels
 
@@ -852,25 +868,18 @@ class plotHandler(AutoPylot):
         p = []
         if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: # multiple-axis enabled
             if self.dataNum == 0:
-                self.line_host(p, colNumX, colNumY, colNumE, legendName)
+                self.line_host_withguest(p, colNumX, colNumY, colNumE, legendName)
             else:
                 if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_on']:
-                    lines, labels = self.line_guest(p, colNumX, colNumY, colNumE, legendName)
-                    self.graph_handler.guestLines += lines
-                    self.graph_handler.guestLabels += labels
-                    self.guestPlotCnt += 1
-                    self.axisOffset += self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_axisoffset']
+                    self.line_guest(p, colNumX, colNumY, colNumE, legendName)
                 else:
-                    self.line_host(p, colNumX, colNumY, colNumE, legendName)
-            self.graph_handler.hostLines, self.graph_handler.hostLabels = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].get_legend_handles_labels()
-            self.graph_handler.linesSum = self.graph_handler.hostLines + self.graph_handler.guestLines
-            self.graph_handler.labelsSum = self.graph_handler.hostLabels + self.graph_handler.guestLabels
-            if self.guestPlotCnt > 0: self.graph_handler.guest[self.guestPlotCnt - 1].legend(self.graph_handler.linesSum, self.graph_handler.labelsSum)
-            if self.guestPlotCnt == self.dataNum - 1: self.graph_handler.axisColoring(
-                    self.colors,
-                    self.data_handler.plotconfig['LINE']['Plot' + str(0)]['color'], 
-                    self.data_handler.plotconfig['LINE']['Plot' + str(self.dataNum)]['color'],
-                    self.guestPlotCnt) # color the axes iff each line has a y-axis
+                    self.line_host_withguest(p, colNumX, colNumY, colNumE, legendName)
+            if all(self.data_handler.find_keys(self.data_handler.mainconfig, 'yaxis_on')) and self.guestPlotCnt > 0: 
+                self.graph_handler.axisColoring(
+                        self.colors, 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['LINE']['color'], 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['color'],
+                        self.guestPlotCnt) # TODO find a solution instead of any() color the axes iff each line has a y-axis
         else:
             self.line_host(p, colNumX, colNumY, colNumE, legendName)
     
@@ -879,7 +888,7 @@ class plotHandler(AutoPylot):
         p.append(0) #initialize array entry
         self.graph_handler.guest.append(0) #initialize array entry
         self.graph_handler.guest[self.guestPlotCnt] = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].twinx() # setup 2nd axis based on the first graph
-        p[self.guestPlotCnt], = self.graph_handler.guest[self.guestPlotCnt].plot(
+        p[-1], = self.graph_handler.guest[self.guestPlotCnt].plot(
                 self.data_handler.data[colNumX], 
                 self.data_handler.data[colNumY], 
                 self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['color']], 
@@ -893,14 +902,17 @@ class plotHandler(AutoPylot):
                 min(self.data_handler.data[colNumY]) - self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'], 
                 max(self.data_handler.data[colNumY]) + self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'])
         self.graph_handler.guest[self.guestPlotCnt].grid(False)
-        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(("axes", self.axisOffset)) 
+        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(('axes', self.axisOffset)) 
         lines, labels = self.graph_handler.guest[self.guestPlotCnt].get_legend_handles_labels()
-        return lines, labels
+        self.graph_handler.linesSum += lines
+        self.graph_handler.labelsSum += labels
+        self.guestPlotCnt += 1
+        self.axisOffset += self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_axisoffset']
 
-    # =============================== Line Plot - Primary y-axis  
+    # =============================== Line Plot
     def line_host(self, p, colNumX, colNumY, colNumE, legendName):
         p.append(0) #initialize array entry
-        p[self.guestPlotCnt], = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].plot(
+        p[-1], = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].plot(
                 self.data_handler.data[colNumX], 
                 self.data_handler.data[colNumY], 
                 self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['color']], 
@@ -908,8 +920,15 @@ class plotHandler(AutoPylot):
                 linestyle = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['style'], 
                 marker = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['markerstyle'], 
                 markersize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['markersize'],  
-                label = legendName, 
+                label = legendName,
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
+    
+    # =============================== Line Plot - Primary y-axis when used with guest plot
+    def line_host_withguest(self, p, colNumX, colNumY, colNumE, legendName):
+        self.line_host(p, colNumX, colNumY, colNumE, legendName)
+        lines, labels = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].get_legend_handles_labels()
+        self.graph_handler.hostLines += lines
+        self.graph_handler.hostLabels += labels
 
     # =============================== Plotter function
     def main(self, plotCounter, numOfPlots, plotSelect, dataNum, colNumX, colNumY, colNumZ, colNumE, legendName):
@@ -949,12 +968,12 @@ class plotHandler(AutoPylot):
                     self.snsline_guest(colNumX, colNumY, legendName)
                 else:
                     self.snsline_host_withguest(colNumX, colNumY, legendName)
-            if any(self.data_handler.find_keys(self.data_handler.mainconfig, 'yaxis_on')) and self.guestPlotCnt > 0: 
+            if all(self.data_handler.find_keys(self.data_handler.mainconfig, 'yaxis_on')) and self.guestPlotCnt > 0: 
                 self.graph_handler.axisColoring(
                         self.colors, 
-                        self.snsline_color.split(self.config_separator)[0], 
-                        self.snsline_color.split(self.config_separator)[self.dataNum],
-                        self.guesPlotCnt) # TODO find a solution instead of any() color the axes iff each line has a y-axis
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['SNSLINE']['color'], 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['color'],
+                        self.guestPlotCnt) # TODO find a solution instead of any() color the axes iff each line has a y-axis
         else:
             self.snsline_host(colNumX, colNumY, legendName)
     
@@ -965,7 +984,7 @@ class plotHandler(AutoPylot):
         sns.lineplot(
                 x = self.data_handler.data[colNumX], 
                 y = self.data_handler.data[colNumY], 
-                color = self.colors[self.snsline_color.split(self.config_separator)[i % len(self.snsline_color.split(self.config_separator))]], 
+                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['color']], 
                 linewidth = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['width'], 
                 marker = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['markerstyle'],
                 markersize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['markersize'], 
@@ -981,7 +1000,7 @@ class plotHandler(AutoPylot):
                 max(self.data_handler.data[colNumY]) + self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'])
         self.graph_handler.guest[self.guestPlotCnt].grid(False)
         self.graph_handler.guest[self.guestPlotCnt].legend_.remove()
-        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(("axes", self.axisOffset))
+        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(('axes', self.axisOffset))
         lines, labels = self.graph_handler.guest[self.guestPlotCnt].get_legend_handles_labels()
         self.graph_handler.linesSum += lines
         self.graph_handler.labelsSum += labels
@@ -1002,14 +1021,14 @@ class plotHandler(AutoPylot):
                 style = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['sns_style'], 
                 label = legendName, 
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'],
-                ax = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt]) 
-        self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].lines[self.dataNum].set_linestyle(
+                ax = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt])
+        self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].lines[-1].set_linestyle(
                 self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSLINE']['style'])
         self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].legend_.remove()
 
     # =============================== Seaborn Line Graph - Primary y-axis when used with guest plot
     def snsline_host_withguest(self, colNumX, colNumY, legendName):
-        self.snsline_host(colNumX, colNumY, legendName, self.data_handler.data)
+        self.snsline_host(colNumX, colNumY, legendName)
         lines, labels = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].get_legend_handles_labels()
         self.graph_handler.hostLines += lines
         self.graph_handler.hostLabels += labels

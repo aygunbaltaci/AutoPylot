@@ -129,7 +129,7 @@ parameters = {
 ## The font.size property is the default font size for text, given in pts.
 ## 10 pt is the standard value.
 
-#'font.family'         : 'serif',
+'font.family'         : 'serif',
 #'font.style'          : normal,
 #'font.variant'        : normal,
 #'font.weight'         : normal,
@@ -140,7 +140,7 @@ parameters = {
 ## relative to font.size, using the following values: xx-small, x-small,
 ## small, medium, large, x-large, xx-large, larger, or smaller
 #'font.size'           : 10.0,
-#'font.serif'          : DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif,
+#'font.serif'          : 'Times', # DejaVu Serif, Bitstream Vera Serif, Computer Modern Roman, New Century Schoolbook, Century Schoolbook L, Utopia, ITC Bookman, Bookman, Nimbus Roman No9 L, Times New Roman, Times, Palatino, Charter, serif,
 #'font.sans-serif'     : 'Avant Garde', # DejaVu Sans, Bitstream Vera Sans, Computer Modern Sans Serif, Lucida Grande, Verdana, Geneva, Lucid, Arial, Helvetica, Avant Garde, sans-serif,
 #'font.cursive'        : Apple Chancery, Textile, Zapf Chancery, Sand, Script MT, Felipa, cursive,
 #'font.fantasy'        : Comic Sans MS, Chicago, Charcoal, ImpactWestern, Humor Sans, xkcd, fantasy,
@@ -206,7 +206,7 @@ parameters = {
 #'mathtext.it'  : sans:italic,
 #'mathtext.bf'  : sans:bold,
 #'mathtext.sf'  : sans,
-#'mathtext.fontset' : dejavusans, ## Should be 'dejavusans' (default),
+#'mathtext.fontset' : 'dejavusans', ## Should be 'dejavusans' (default),
                                ## 'dejavuserif', 'cm' (Computer Modern), 'stix',
                                ## 'stixsans' or 'custom'
 #'mathtext.fallback_to_cm': True,  ## When True, use symbols from the Computer Modern
