@@ -6,9 +6,9 @@
 # ADD () for entries with multiple values. E.g. 'figure.figsize'   : (6.4, 4.8)
 # ADD '' for string entries. E.g. 'patch.edgecolor'        : 'black'
 fontColor = '#404040' # dark grey
-fontSize = 46
-legendSize = 26
-titleSize = 50
+fontSize = 38
+legendSize = 20
+titleSize = 56
 parameters = {
 #'lines.linewidth'   : 1.5,     ## line width in points
 #'lines.linestyle'   : -,       ## solid line
@@ -129,7 +129,7 @@ parameters = {
 ## The font.size property is the default font size for text, given in pts.
 ## 10 pt is the standard value.
 
-'font.family'         : 'serif',
+#'font.family'         : 'serif',
 #'font.style'          : normal,
 #'font.variant'        : normal,
 #'font.weight'         : normal,
@@ -162,7 +162,7 @@ parameters = {
                               ## If another font is desired which can loaded using the
                               ## LaTeX \usepackage command, please inquire at the
                               ## matplotlib mailing list
-#'text.latex.preamble':,      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
+'text.latex.preamble': r'\usepackage{libertine}',      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
                             ## AND IS THEREFORE UNSUPPORTED. PLEASE DO NOT ASK FOR HELP
                             ## IF THIS FEATURE DOES NOT DO WHAT YOU EXPECT IT TO.
                             ## text.latex.preamble is a single line of LaTeX code that
@@ -223,7 +223,7 @@ parameters = {
 ## http://matplotlib.org/api/axes_api.html#module-matplotlib.axes
 'axes.facecolor'      : 'white', #'whitesmoke',   ## axes background color
 'axes.edgecolor'      : fontColor,   ## axes edge color
-'axes.linewidth'      : 0.5,     ## edge linewidth
+'axes.linewidth'      : 1.5,     ## edge linewidth
 'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
 #'axes.grid.which'     : major,   ## gridlines at major, minor or both ticks
@@ -338,11 +338,11 @@ parameters = {
 #### GRIDS
 'grid.color'       :   'grey', #'#F0F0F0',    ## grid color
 'grid.linestyle'   :   '--',         ## solid
-'grid.linewidth'   :   0.5,       ## in points
-'grid.alpha'       :   0.1,       ## transparency, between 0.0 and 1.0
+'grid.linewidth'   :   2.5,       ## in points
+'grid.alpha'       :   0.2,       ## transparency, between 0.0 and 1.0
 
 #### Legend
-'legend.loc'           : 'upper left',
+'legend.loc'           : 'upper right',
 #'legend.frameon'       : True,     ## if True, draw the legend on a background patch
 'legend.framealpha'    : 0.4,      ## legend patch transparency
 #'legend.facecolor'     : inherit,  ## inherit from axes.facecolor; or color spec
@@ -381,9 +381,9 @@ parameters = {
 #'figure.subplot.right'   : 0.9,    ## the right side of the subplots of the figure
 #'figure.subplot.bottom' : 0.11,   ## the bottom of the subplots of the figure
 #'figure.subplot.top'     : 0.88,   ## the top of the subplots of the figure
-#'figure.subplot.wspace'  : 0.2,    ## the amount of width reserved for space between subplots,
+'figure.subplot.wspace'  : 0.4,    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
-'figure.subplot.hspace'  : 0.5,    ## the amount of height reserved for space between subplots,
+'figure.subplot.hspace'  : 0.75,    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout

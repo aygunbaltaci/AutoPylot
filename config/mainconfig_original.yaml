@@ -27,15 +27,18 @@ MAIN:
     # Print a single legend for all suplots
     figurelegend : False
     # Place legend in a specific box configuration. Use  for default. Format: (x, y) or (x, y, w, h). Check out: https://matplotlib.org/api/_as_gen/matplotlib.pyplot.legend.html
-    figurelegend_bbox_to_anchor :
+    figurelegend_bbox_to_anchor_x : 0
+    figurelegend_bbox_to_anchor_y : 0
     # Legend axis padding
     figurelegend_border_axispad : 0.0 
-    # Location of the figure legend. 'best': 0 'upper right': 1 'upper left': 2 'lower left': 3 'lower right':  'right': 5 'center left': 6 'center right': 7 'lower center': 8 'upper center': 9 'center': 10
+    # Location of the figure legend. 'best': 0 'upper right': 1 'upper left': 2 'lower left': 3 'lower right': 4 'right': 5 'center left': 6 'center right': 7 'lower center': 8 'upper center': 9 'center': 10
     figurelegend_location : 2
     # Set to 'expand' if you want horizontal expansion
     figurelegend_mode :   
     # Number of legend columns
     figurelegend_ncolumn : 1 
+    # Show the figure 
+    figure_show : false
     # Default y-axis label name of histogram plots
     histogram_defaultlabel : 'Density' 
     # Default delimeter type for CSV files

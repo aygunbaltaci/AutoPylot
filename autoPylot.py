@@ -12,6 +12,7 @@ import os
 import pandas as pd
 import re
 import seaborn as sns
+import scipy
 import sys
 import tkinter
 import yaml
@@ -85,9 +86,10 @@ class AutoPylot:
                         self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_ydata'], 
                         self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_zdata'], 
                         self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['input_edata'], 
-                        self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['plot_legend']) # TODO: Why do I send self.numOfPlots???
+                        self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['plot_legend'],
+                        self.data_handler.check_num_dataset(i))
                 self.threeD = True if self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['dataset' + str(j)]['graph_type'] == 'threed' else False
-            self.graph_handler.graph_configs(
+            self.graph_handler.main(
                     j, # TODO get rid of this
                     self.plot_handler.guestPlotCnt,
                     self.data_handler.mainconfig['PLOT']['Subplot' + str(i)]['plot_xlabel'], 
@@ -98,9 +100,13 @@ class AutoPylot:
                     len(self.data_handler.mainconfig['PLOT']), 
                     self.data_handler.check_num_dataset(i), 
                     i,
-                    self.plot_handler.boxplot,
-                    self.plot_handler.boxplot_legendname)
-        self.graph_handler.show_graph(self.data_handler.mainconfig['MAIN']['figure_title'], len(self.data_handler.mainconfig['PLOT']))
+                    self.plot_handler.box_histplot,
+                    self.plot_handler.box_histplot_legendname)
+        self.graph_handler.show_graph(
+                self.plot_handler.box_histplot, 
+                self.plot_handler.box_histplot_legendname, 
+                self.data_handler.mainconfig['MAIN']['figure_title'], 
+                len(self.data_handler.mainconfig['PLOT']))
 
 ###################### USER INTERACTIONS
 class dataHandler(AutoPylot):
@@ -120,7 +126,7 @@ class dataHandler(AutoPylot):
         self.inputFile = '' 
         self.inputFileDir = '' 
         self.limits_data_columns = ['input_edata', 'input_xdata', 'input_ydata', 'input_zdata']
-        self.limits_mainconfig_graph_alpha = np.arange(0, 1, 0.00001)
+        self.limits_mainconfig_graph_alpha = np.arange(0, 1, 0.01)
         self.limits_mainconfig_graph_type = ['bar', 'box', 'cdf', 'errorbar', 'histogram', 'line', 'snsline', 'snsjoint', 'threed']
         self.limits_mainconfig_inputfile_format = ['csv']
         self.limits_mainconfig_inputfile_encoder = ['ascii', 'utf-7' 'utf-8', 'utf-8-sig', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le'] # from https://docs.python.org/3/library/codecs.html#standard-encodings
@@ -146,7 +152,7 @@ class dataHandler(AutoPylot):
                 self.limits_plotconfig_markerstyle, self.limits_plotconfig_orientation, self.limits_plotconfig_snsjoint_kind, self.limits_plotconfig_style,
                 self.limits_plotconfig_type]
         self.mainconfig_booleans = ['figure_singlecolumnnarrowplot', 'figure_sharexaxis', 'figure_shareyaxis', 'figure_xlabelfrominputfile', 
-                'figure_ylabelfrominputfile', 'figure_zlabelfrominputfile', 'figurelegend', 'multipleyaxis', 'plotlegend', 'yaxis_on']
+                'figure_ylabelfrominputfile', 'figure_zlabelfrominputfile', 'figurelegend', 'figure_show' 'multipleyaxis', 'plotlegend', 'yaxis_on']
         self.mainconfig_floats = ['figure_singlecolumnnarrowplot_xtitlelocation', 'figurelegend_border_axispad', 'outputfigure_xdimension',
                 'outputfigure_ydimension', 'plot_xlabel_pad', 'plot_ylabel_pad', 'plot_zlabel_pad', 'plotlegend_border_axisPad', 'yaxis_axisoffset']
         self.mainconfig_integers = ['figurelegend_location', 'figurelegend_ncolumn', 'figure_plotperrow', 'plot_threed_azimdegree', 'plot_threed_elevdegree', 
@@ -472,20 +478,22 @@ Please turn on your X-server first and then hit [enter]"""
                 self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(guestPlotCnt)]['graph_alpha'])
     
     # =============================== Graph Configurations
-    def graph_configs(self, dataNum, guestPlotCnt, xLabel, yLabel, zLabel, threeD, title, numOfPlots, numData, plotCounter, boxplot_legend, boxplot_legendname):
+    def main(self, dataNum, guestPlotCnt, xLabel, yLabel, zLabel, threeD, title, numOfPlots, numData, plotCounter, box_histplot, box_histplot_legendname):
         self.plotCounter = plotCounter 
         self.dataNum = dataNum # TODO get rid of dataNum in this class. It does not make sense. 
         
-        if not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'box'}:
-            self.set_axis_label_scale(threeD)
+        #if not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'box':
+        self.set_axis_label_scale(threeD) # TODO find a solution for this, it blocks the labels of box plots
         if threeD: 
             self.set_azim_elev()
         self.set_axis_limit(threeD)
-        self.set_axis_tick(threeD)
+        self.set_axis_tick(numData, threeD)
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'box':
+            self.set_axis_tick_label()
         self.set_axis_label(numData, threeD, xLabel, yLabel, zLabel)
         self.set_axis_label_pad(threeD)
         self.set_subtitle(numOfPlots, title)
-        self.set_plot_legend(boxplot_legend, boxplot_legendname, guestPlotCnt)
+        self.set_plot_legend(box_histplot, box_histplot_legendname, guestPlotCnt)
         self.set_snsjoint_setting(title)
         self.place_subplot()
     
@@ -600,7 +608,16 @@ Please turn on your X-server first and then hit [enter]"""
                 zmax = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_zlimit_max'])
     
     # =============================== set axis ticks
-    def set_axis_tick(self, threeD):
+    def set_axis_tick(self, numData, threeD):
+        # set ticks for box plots
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'box':
+            box_ticks = buckets = [0] * len(self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['position'])
+            for i in range(numData):
+                for j in range(len(self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(i)]['BOX']['position'])):
+                    box_ticks[j] += self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(i)]['BOX']['position'][j]
+            box_ticks[:] = [x / numData for x in box_ticks]
+            self.host[self.figColCnt, self.figRowCnt].set_xticks(box_ticks)
+        
         # set ticks
         if not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xticks_distance'] is None: # check if user set spacing for ticks, otherwise don't set up xticks manually
             if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xticks_min'] is None or self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xticks_max'] is None: # get start and end points from ax if user did not define them
@@ -621,22 +638,49 @@ Please turn on your X-server first and then hit [enter]"""
             else:
                 self.host[self.figColCnt, self.figRowCnt].zaxis.set_ticks(np.arange(self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_zticks_min'], self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_zticks_max'], self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_zticks_distance']))
 
+    # =============================== set axis tick label for box plots
+    def set_axis_tick_label(self):
+        self.host[self.figColCnt, self.figRowCnt].set_xticklabels(self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['BOX']['label'])
+
     # =============================== set azimuth and elevation angles for 3D plots
     def set_azim_elev(self):
         self.host[self.figColCnt, self.figRowCnt].azim = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_threed_azimdegree']
         self.host[self.figColCnt, self.figRowCnt].elev = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_threed_elevdegree']
      
     # =============================== set figure legend
-    def set_figure_legend(self):
-        self.fig.legend(
-                bbox_to_anchor = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'], 
-                loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'], 
-                mode = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_mode'], 
-                borderaxespad = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_border_axisPad'], 
-                ncol = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'])
+    def set_figure_legend(self, box_histplot, box_histplot_legendname):
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'box', 'histogram'}: # TODO fix self.dataNum. Does not make sense.
+            label_box_hist, legend_box_hist = [], []
+            for i in range(len(box_histplot)):
+                label_box_hist.append(box_histplot_legendname[i])
+                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'box':
+                    legend_box_hist.append(box_histplot[i]['boxes'][0])
+            self.fig.legend(
+                    legend_box_hist, 
+                    label_box_hist,
+                    bbox_to_anchor = (
+                            self.data_handler.mainconfig['MAIN']['figurelegend_bbox_to_anchor_x'], 
+                            self.data_handler.mainconfig['MAIN']['figurelegend_bbox_to_anchor_y']),
+                    loc = self.data_handler.mainconfig['MAIN']['figurelegend_location'],
+                    mode = self.data_handler.mainconfig['MAIN']['figurelegend_mode'], 
+                    borderaxespad = self.data_handler.mainconfig['MAIN']['figurelegend_border_axispad'], 
+                    ncol = self.data_handler.mainconfig['MAIN']['figurelegend_ncolumn'])
+        else:
+            handles, labels = plt.gca().get_legend_handles_labels() # to avoid duplicate labels. Taken from: https://stackoverflow.com/questions/13588920/stop-matplotlib-repeating-labels-in-legend
+            by_label = dict(zip(labels, handles))
+            self.fig.legend(
+                    by_label.values(), 
+                    by_label.keys(),
+                    bbox_to_anchor = (
+                            self.data_handler.mainconfig['MAIN']['figurelegend_bbox_to_anchor_x'], 
+                            self.data_handler.mainconfig['MAIN']['figurelegend_bbox_to_anchor_y']), 
+                    loc = self.data_handler.mainconfig['MAIN']['figurelegend_location'], 
+                    mode = self.data_handler.mainconfig['MAIN']['figurelegend_mode'], 
+                    borderaxespad = self.data_handler.mainconfig['MAIN']['figurelegend_border_axispad'], 
+                    ncol = self.data_handler.mainconfig['MAIN']['figurelegend_ncolumn'])
     
     # =============================== set plot legends
-    def set_plot_legend(self, boxplot_legend, boxplot_legendname, guestPlotCnt):
+    def set_plot_legend(self, box_histplot, box_histplot_legendname, guestPlotCnt):
         if guestPlotCnt > 0: 
             self.linesSum = self.hostLines + self.linesSum
             self.labelsSum = self.hostLabels + self.labelsSum
@@ -644,26 +688,24 @@ Please turn on your X-server first and then hit [enter]"""
             self.guest[guestPlotCnt - 1].legend(lines_labels_zipped.values(), lines_labels_zipped.keys())
         if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend']: # TODO does not make sense,  move it to set_graph_configs
             if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'box'}: # TODO fix self.dataNum. Does not make sense.
-                label_box, legend_box = [], []
-                for i in range(len(boxplot_legend)):
-                    label_box.append(boxplot_legendname[i])
-                    legend_box.append(boxplot_legend[i]['boxes'][0])
-                self.host[self.figColCnt, self.figRowCnt].legend(legend_box, label_box, loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'])
+                label_box_hist, legend_box_hist = [], []
+                for i in range(len(box_histplot)):
+                    label_box_hist.append(box_histplot_legendname[i])
+                    legend_box_hist.append(box_histplot[i]['boxes'][0])
+                self.host[self.figColCnt, self.figRowCnt].legend(legend_box_hist, label_box_hist, loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'])
             elif not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: 
-                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'] != None: # TODO is this correct ??? Set up legend only for the last plot
+                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_bbox_to_anchor_x'] != None: # TODO is this correct ??? Set up legend only for the last plot
                     self.host[self.figColCnt, self.figRowCnt].legend(
-                            bbox_to_anchor = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_bbox_to_anchor'], 
+                            bbox_to_anchor = (
+                                    self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_bbox_to_anchor_x'], 
+                                    self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_bbox_to_anchor_y']), 
                             loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'], 
                             mode = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_mode'], 
                             borderaxespad = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_border_axisPad'], 
                             ncol = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'])
                 else:    
                     self.host[self.figColCnt, self.figRowCnt].legend(
-                            bbox_to_anchor = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_bbox_to_anchor'], 
-                            loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'], 
-                            mode = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_mode'], 
-                            borderaxespad = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_border_axisPad'], 
-                            ncol = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_ncolumn'])
+                            loc = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plotlegend_location'])
             self.hostLines, self.hostLabels, self.guestLines, self.guestLabels, self.linesSum, self.labelsSum  = [], [], [], [], [], [] # reinitialize label arrays
 
     # =============================== set settings for sns joint plot
@@ -684,26 +726,31 @@ Please turn on your X-server first and then hit [enter]"""
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
             
     # =============================== Show the plot
-    def show_graph(self, title, numOfPlots):
+    def show_graph(self, box_histplot, box_histplot_legendname, title, numOfPlots): # TODO reorganize this function. Move all stuff not related to plt.show function
+        self.fig.subplots_adjust(bottom = 0.2) # TODO Integrate this into the main program
         if not self.oneColSpecPlt:
             self.fig.suptitle(title) # Main title
         else:
             self.fig.suptitle(title, x = self.data_handler.mainconfig['MAIN']['figure_singlecolumnnarrowplot_xtitlelocation']) # Main title
         if self.data_handler.mainconfig['MAIN']['figurelegend']: 
-            self.set_figure_legend()
+            self.set_figure_legend(box_histplot, box_histplot_legendname)
         self.save_figure()
         self.fig.tight_layout() # to adjust spacing between graphs and labels
-        plt.show()
-
+        print("DONE!")
+        if self.data_handler.mainconfig['MAIN']['figure_show']: plt.show()
+        
 ###################### PLOTTER CLASS
 class plotHandler(AutoPylot):
     def __init__(self, data_handler, graph_handler):
         self.data_handler = data_handler
         self.graph_handler = graph_handler
-        self.boxplot = []
-        self.boxplot_legendname = []
+        self.box_histplot = []
+        self.box_histplot_legendname = []
+        self.histogramplot = []
+        self.histogramplot_legendname = []
         self.colors = ['steelblue', 'sandybrown', 'mediumseagreen', 'indianred', 'dimgrey', 'orchid', 
                 'goldenrod', 'darkcyan', 'mediumslateblue', 'darkkhaki'] # Taken from https://matplotlib.org/3.1.0/gallery/color/named_colors.html
+        self.oldPlotCounter = 0
 
     # =============================== Bar graph
     def bar(self, colNumX, colNumY, legendName):
@@ -722,7 +769,7 @@ class plotHandler(AutoPylot):
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha']) 
 
     # =============================== Box graph
-    def box(self, colNumX, legendName):
+    def box(self, colNumX, dataNum, legendName, numData):
         boxplot_data = []
         
         if type(colNumX) is list:
@@ -731,7 +778,7 @@ class plotHandler(AutoPylot):
         else:
             boxplot_data.append(self.data_handler.data[colNumX])
  
-        self.boxplot.append(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].boxplot(
+        self.box_histplot.append(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].boxplot(
                 boxplot_data, 
                 positions = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['position'],
                 boxprops = dict(facecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['boxcolor']], 
@@ -742,15 +789,19 @@ class plotHandler(AutoPylot):
                 markeredgecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['markeredgecolor']]), 
                 medianprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['mediancolor']]), 
                 widths = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['width'], 
-                labels = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['label'], 
+                #labels = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['label'], 
                 vert = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['vertical'], 
                 notch = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['notched'], 
                 whis = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['whiskerreach'], 
                 bootstrap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['bootstrap'], 
                 patch_artist = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['patchartist'], 
                 zorder = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['zorder']))
-        self.boxplot_legendname.append(legendName) 
+        self.box_histplot_legendname.append(legendName)
 
+    # =============================== Reinitalize the legend variables of box plot
+    def box_reinitialize(self):
+        self.box_histplot, self.box_histplot_legendname = [], []
+    
     # =============================== CDF graph
     def cdf(self, colNumX, legendName):
         bin_edges_list = [] 
@@ -771,7 +822,6 @@ class plotHandler(AutoPylot):
                 markersize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['CDF']['markersize'], 
                 label = legendName,   
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
-        print(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].legend())
 
     # =============================== Errorbar-type graphs
     def errorbar(self, colNumX, colNumY, colNumE, legendName):
@@ -839,17 +889,49 @@ class plotHandler(AutoPylot):
                 barsabove = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['ERRORBAR']['barsabove'], 
                 label = legendName, 
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
-    
-    # =============================== Histogram graph
+
+    # =============================== Line-type graphs
     def histogram(self, colNumX, legendName):
-        self.bins = np.arange(
-            min(self.data_handler.data[colNumX]) - self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'], 
-            max(self.data_handler.data[colNumX]) + self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'] * 2, 
-            self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres']) # TODO get rid of this. Only do number of bins
-        self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].hist(
-                self.data_handler.data[colNumX], 
-                bins = self.bins, 
-                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color']], 
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: # multiple-axis enabled
+            if self.dataNum == 0:
+                self.histogram_host_withguest(colNumX, legendName)
+            else:
+                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_on']:
+                    self.histogram_guest(colNumX, legendName)
+                else:
+                    self.histogram_host_withguest(colNumX, legendName)
+            if all(self.data_handler.find_keys(self.data_handler.mainconfig, 'yaxis_on')) and self.guestPlotCnt > 0: 
+                self.graph_handler.axisColoring(
+                        self.colors, 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['HISTOGRAM']['color'], 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color'],
+                        self.guestPlotCnt) # TODO find a solution instead of any() color the axes iff each line has a y-axis
+        else:
+            self.histogram_host(colNumX, legendName)
+    
+    # =============================== Line Plot - Additional y-axes
+    def histogram_guest(self, colNumX, legendName):
+        histogramplot_data = []
+        self.graph_handler.guest.append(0) #initialize array entry
+        
+        if type(colNumX) is list:
+            for item in colNumX:
+                histogramplot_data.append(self.data_handler.data[item])
+        else:
+            histogramplot_data.append(self.data_handler.data[colNumX])
+
+        self.graph_handler.guest[self.guestPlotCnt] = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].twiny() # setup 2nd axis based on the first graph
+        '''
+        for i in range(len(histogramplot_data)):
+            self.bins.append(np.arange(
+                min(self.data_handler.data[colNumX[i]]) - self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'][i], 
+                max(self.data_handler.data[colNumX[i]]) + self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'][i] * 2, 
+                self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'][i])) # TODO get rid of this. Only do number of bins
+        '''
+        self.box_histplot.append(self.graph_handler.guest[self.guestPlotCnt].hist(
+                histogramplot_data, 
+                bins = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'], 
+                color = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color'], #self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color']], 
                 edgecolor = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['edgecolor'], 
                 histtype = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['type'], 
                 density = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['density'], 
@@ -859,9 +941,77 @@ class plotHandler(AutoPylot):
                 orientation = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['orientation'], 
                 rwidth = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['relativewidth'], 
                 stacked = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['stacked'],
-                label = legendName, 
-                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])  
-        self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].set_xticks(self.bins[:-1]) # TODO modify this per ax
+                #label = legendName, 
+                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])) 
+        #self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].set_xticks(self.bins[:-1]) # TODO modify this per ax
+        self.box_histplot_legendname.append(legendName) # TODO Not sure whether this is correct
+        #self.graph_handler.guest[self.guestPlotCnt].set_ylim(
+        #        min(self.data_handler.data[colNumY]) - self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'], 
+        #        max(self.data_handler.data[colNumY]) + self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_ylimthreshold'])
+        self.graph_handler.guest[self.guestPlotCnt].grid(False)
+        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(('axes', self.axisOffset)) 
+        lines, labels = self.graph_handler.guest[self.guestPlotCnt].get_legend_handles_labels()
+        self.graph_handler.linesSum += lines
+        self.graph_handler.labelsSum += labels
+        self.guestPlotCnt += 1
+        self.axisOffset += self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_axisoffset']
+
+    # =============================== Histogram graph
+    def histogram_host(self, colNumX, legendName):
+        histogramplot_data = []
+        
+        if type(colNumX) is list:
+            for item in colNumX:
+                histogramplot_data.append(self.data_handler.data[item])
+        else:
+            histogramplot_data.append(self.data_handler.data[colNumX])
+
+        for i in range(len(histogramplot_data)):
+            self.bins = np.arange(
+                min(self.data_handler.data[colNumX]) - self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'], 
+                max(self.data_handler.data[colNumX]) + self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'] * 2, 
+                self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres']) # TODO get rid of this. Only do number of bins
+
+        self.box_histplot.append(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].hist(
+                histogramplot_data, 
+                bins = self.bins, # self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'], 
+                color =  self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color'], #self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color']], 
+                edgecolor = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['edgecolor'], 
+                histtype = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['type'], 
+                density = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['density'], 
+                cumulative = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['cumulative'], 
+                bottom = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['bottom'], 
+                align = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['align_histogram'],
+                orientation = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['orientation'], 
+                rwidth = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['relativewidth'], 
+                stacked = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['stacked'],
+                #label = legendName, 
+                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha']))  
+        #self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].set_xticks(self.bins[:-1]) # TODO modify this per ax
+        self.box_histplot_legendname.append(legendName)
+
+    # =============================== Line Plot - Primary y-axis when used with guest plot
+    def histogram_host_withguest(self, colNumX, legendName):
+        self.histogram_host(colNumX, legendName)
+        lines, labels = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].get_legend_handles_labels()
+        self.graph_handler.hostLines += lines
+        self.graph_handler.hostLabels += labels
+    
+    '''
+    # =============================== Line Plot
+    def histogram_host(self, p, colNumX, colNumY, colNumE, legendName):
+        p.append(0) #initialize array entry
+        p[-1], = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].plot(
+                self.data_handler.data[colNumX], 
+                self.data_handler.data[colNumY], 
+                self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['color']], 
+                linewidth = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['width'], 
+                linestyle = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['style'], 
+                marker = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['markerstyle'], 
+                markersize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['markersize'],  
+                label = legendName,
+                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
+    '''
 
     # =============================== Line-type graphs
     def line(self, colNumX, colNumY, colNumE, legendName):
@@ -931,18 +1081,22 @@ class plotHandler(AutoPylot):
         self.graph_handler.hostLabels += labels
 
     # =============================== Plotter function
-    def main(self, plotCounter, numOfPlots, plotSelect, dataNum, colNumX, colNumY, colNumZ, colNumE, legendName):
+    def main(self, plotCounter, numOfPlots, plotSelect, dataNum, colNumX, colNumY, colNumZ, colNumE, legendName, numData):
         self.plotCounter = plotCounter
         self.dataNum = dataNum
 
+        if self.plotCounter != self.oldPlotCounter:
+            self.box_reinitialize()
+        
         if self.dataNum == 0:
             self.guestPlotCnt = 0
             self.axisOffset = 1
+        
         # Main if clause for plots
         if plotSelect == 'bar':
             self.bar(colNumX, colNumY, legendName)
         elif plotSelect == 'box':
-            self.box(colNumX, legendName)
+            self.box(colNumX, dataNum, legendName, numData)
         elif plotSelect == 'cdf':
             self.cdf(colNumX, legendName)
         elif plotSelect == 'histogram':
@@ -958,6 +1112,8 @@ class plotHandler(AutoPylot):
         elif plotSelect == 'threed':
             self.threed(numOfPlots, plotSelect, colNumX, colNumY, colNumZ, legendName)
     
+        self.oldPlotCounter = self.plotCounter
+
     # =============================== Seaborn Line Graph
     def snsline(self, colNumX, colNumY, legendName):
         if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: # multiple-axis enabled
