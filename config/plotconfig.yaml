@@ -5,11 +5,11 @@ Subplot0:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 1
+      binres : 0.5
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : steelblue
+      color : 0
       # Cumulative histogram 
       cumulative : false
       # Normalized probability density
@@ -30,11 +30,11 @@ Subplot1:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 1
+      binres : 25
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : steelblue
+      color : 0
       # Cumulative histogram 
       cumulative : false
       # Normalized probability density
@@ -49,18 +49,6 @@ Subplot1:
       stacked : false
       # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
       type : 'bar'
-  dataset1:
-    LINE:
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : 1
-      # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
-      markerstyle : ''
-      # Marker size. 
-      markersize : 10
-      # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
-      style : 'solid'
-      # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-      width : 6
 Subplot2:
   dataset0:
     HISTOGRAM:
@@ -71,7 +59,7 @@ Subplot2:
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : steelblue
+      color : 0
       # Cumulative histogram 
       cumulative : false
       # Normalized probability density
@@ -92,11 +80,11 @@ Subplot3:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 100
+      binres : 25
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : steelblue
+      color : 0
       # Cumulative histogram 
       cumulative : false
       # Normalized probability density
@@ -117,11 +105,11 @@ Subplot4:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 0.5
+      binres : 25
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : steelblue
+      color : 0
       # Cumulative histogram 
       cumulative : false
       # Normalized probability density
@@ -136,18 +124,6 @@ Subplot4:
       stacked : false
       # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
       type : 'bar'
-  dataset1:
-    LINE:
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : 1
-      # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
-      markerstyle : ''
-      # Marker size. 
-      markersize : 10
-      # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
-      style : 'solid'
-      # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
-      width : 6
 Subplot5:
   dataset0:
     HISTOGRAM:
@@ -158,7 +134,7 @@ Subplot5:
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : steelblue
+      color : 0
       # Cumulative histogram 
       cumulative : false
       # Normalized probability density

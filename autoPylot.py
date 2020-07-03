@@ -6,6 +6,7 @@ from datetime import datetime
 import math
 import matplotlib
 import matplotlib.pyplot as plt
+import matplotlib.gridspec as gridspec
 from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
 import os
@@ -101,7 +102,8 @@ class AutoPylot:
                     self.data_handler.check_num_dataset(i), 
                     i,
                     self.plot_handler.box_histplot,
-                    self.plot_handler.box_histplot_legendname)
+                    self.plot_handler.box_histplot_legendname,
+                    self.plot_handler.snsjoint_plot)
         self.graph_handler.show_graph(
                 self.plot_handler.box_histplot, 
                 self.plot_handler.box_histplot_legendname, 
@@ -123,11 +125,12 @@ class dataHandler(AutoPylot):
         self.error_invalidFunc = f"{Fore.RED} Your function for %s is invalid. Please enter a valid function from numpy (np.*) or math (math.*) libraries. {Fore.WHITE}"
         self.error_outsideboundary = f"{Fore.RED} Following inputs in %s need to defined with their corresponding boundaries: Input: %s \t Valid range: %s {Fore.WHITE}"
         self.error_wrongtype = f"{Fore.RED} Following inputs in %s must be %s: %s {Fore.WHITE}"
+        self.fInputDataNotValid = f"{Fore.RED} Your input data is not valid. {Fore.WHITE}"
         self.inputFile = '' 
         self.inputFileDir = '' 
         self.limits_data_columns = ['input_edata', 'input_xdata', 'input_ydata', 'input_zdata']
-        self.limits_mainconfig_graph_alpha = np.arange(0, 1, 0.01)
-        self.limits_mainconfig_graph_type = ['bar', 'box', 'cdf', 'errorbar', 'histogram', 'line', 'snsline', 'snsjoint', 'threed']
+        self.limits_mainconfig_graph_alpha = np.arange(0, 1.01, 0.01)
+        self.limits_mainconfig_graph_type = ['bar', 'box', 'cdf', 'errorbar', 'hexbin', 'histogram', 'line', 'snsline', 'snsjoint', 'threed']
         self.limits_mainconfig_inputfile_format = ['csv']
         self.limits_mainconfig_inputfile_encoder = ['ascii', 'utf-7' 'utf-8', 'utf-8-sig', 'utf-16', 'utf-16-be', 'utf-16-le', 'utf-32', 'utf-32-be', 'utf-32-le'] # from https://docs.python.org/3/library/codecs.html#standard-encodings
         self.limits_mainconfig_legend_location = np.arange(0, 10, 1)
@@ -464,7 +467,6 @@ Please turn on your X-server first and then hit [enter]"""
         self.oneColSpecPlt = False
         self.plotCounter = 0
         self.plotFuncName = ''
-        self.snsJntPlot = None
 
     # =============================== Color the axes for multi-y axes (seaborn) line plots
     def axisColoring(self, colors, colorHost, colorGuest, guestPlotCnt):
@@ -478,7 +480,7 @@ Please turn on your X-server first and then hit [enter]"""
                 self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(guestPlotCnt)]['graph_alpha'])
     
     # =============================== Graph Configurations
-    def main(self, dataNum, guestPlotCnt, xLabel, yLabel, zLabel, threeD, title, numOfPlots, numData, plotCounter, box_histplot, box_histplot_legendname):
+    def main(self, dataNum, guestPlotCnt, xLabel, yLabel, zLabel, threeD, title, numOfPlots, numData, plotCounter, box_histplot, box_histplot_legendname, snsjoint):
         self.plotCounter = plotCounter 
         self.dataNum = dataNum # TODO get rid of dataNum in this class. It does not make sense. 
         
@@ -493,8 +495,10 @@ Please turn on your X-server first and then hit [enter]"""
         self.set_axis_label(numData, threeD, xLabel, yLabel, zLabel)
         self.set_axis_label_pad(threeD)
         self.set_subtitle(numOfPlots, title)
-        self.set_plot_legend(box_histplot, box_histplot_legendname, guestPlotCnt)
-        self.set_snsjoint_setting(title)
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] != 'hexbin':
+            self.set_plot_legend(box_histplot, box_histplot_legendname, guestPlotCnt)
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'snsjoint':
+            self.set_snsjoint_setting(snsjoint, title, xLabel, yLabel)
         self.place_subplot()
     
     # =============================== logic to place subplots in the right location
@@ -709,21 +713,33 @@ Please turn on your X-server first and then hit [enter]"""
             self.hostLines, self.hostLabels, self.guestLines, self.guestLabels, self.linesSum, self.labelsSum  = [], [], [], [], [], [] # reinitialize label arrays
 
     # =============================== set settings for sns joint plot
-    def set_snsjoint_setting(self, title):
+    def set_snsjoint_setting(self, snsjoint, title, xLabel, yLabel):
         # seaborn jointplot specific settings
-        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'seaborn joint'}:
-            self.snsJntPlot.ax_joint.set_xlabel(xLabel)
-            self.snsJntPlot.ax_joint.set_ylabel(yLabel[0])
-            self.snsJntPlot.ax_joint.tick_params(axis = 'x')
-            self.snsJntPlot.ax_joint.tick_params(axis = 'y')
-            plt.suptitle(title)
-            plt.subplots_adjust(top = 0.9, bottom = 0.2)
+        snsjoint.ax_joint.set_xlabel(xLabel)
+        snsjoint.ax_joint.set_ylabel(yLabel)
+        snsjoint.ax_joint.axes.xaxis.labelpad = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xlabel_pad']
+        snsjoint.ax_joint.axes.yaxis.labelpad = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_ylabel_pad']
+        snsjoint.ax_joint.set_xscale(self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xscale'])
+        snsjoint.ax_joint.set_yscale(self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_yscale'])
+        snsjoint.ax_joint.set_xlim(xmin = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xlimit_min'],
+                xmax = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_xlimit_max'])
+        snsjoint.ax_joint.set_ylim(ymin = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_ylimit_min'],
+                ymax = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['plot_ylimit_max'])
+        
+        
+        
+        snsjoint.fig.suptitle(title, x = self.data_handler.mainconfig['MAIN']['figure_singlecolumnnarrowplot_xtitlelocation'], y = 0.95) # TODO integrate this into mainconfig.py and create separate variables for plot titles.
+        snsjoint.ax_joint.tick_params(axis = 'x')
+        snsjoint.ax_joint.tick_params(axis = 'y')
+        # sns.plt.title(title)
+        plt.subplots_adjust(top = 0.9, bottom = 0.2)
     
     # =============================== set subtitle
     def set_subtitle(self, numOfPlots, title):
         # set subtitle
         if numOfPlots > 1:
-            self.host[self.figColCnt, self.figRowCnt].title.set_text(title)
+            self.host[self.figColCnt, self.figRowCnt].title.set_text(title) 
+            # self.host[self.figColCnt, self.figRowCnt].title.set_position([1.25, 1.05]) # TODO add x-axis location to mainconfig.py and add y-axis location, 
             
     # =============================== Show the plot
     def show_graph(self, box_histplot, box_histplot_legendname, title, numOfPlots): # TODO reorganize this function. Move all stuff not related to plt.show function
@@ -731,11 +747,11 @@ Please turn on your X-server first and then hit [enter]"""
         if not self.oneColSpecPlt:
             self.fig.suptitle(title) # Main title
         else:
-            self.fig.suptitle(title, x = self.data_handler.mainconfig['MAIN']['figure_singlecolumnnarrowplot_xtitlelocation']) # Main title
+            self.fig.suptitle(title, x = self.data_handler.mainconfig['MAIN']['figure_singlecolumnnarrowplot_xtitlelocation']) # Main title TODO add y-axis location
         if self.data_handler.mainconfig['MAIN']['figurelegend']: 
             self.set_figure_legend(box_histplot, box_histplot_legendname)
         self.save_figure()
-        self.fig.tight_layout() # to adjust spacing between graphs and labels
+        self.fig.tight_layout() # to adjust spacing between graphs and labels # comment this when using joint plot
         print("DONE!")
         if self.data_handler.mainconfig['MAIN']['figure_show']: plt.show()
         
@@ -751,6 +767,7 @@ class plotHandler(AutoPylot):
         self.colors = ['steelblue', 'sandybrown', 'mediumseagreen', 'indianred', 'dimgrey', 'orchid', 
                 'goldenrod', 'darkcyan', 'mediumslateblue', 'darkkhaki'] # Taken from https://matplotlib.org/3.1.0/gallery/color/named_colors.html
         self.oldPlotCounter = 0
+        self.snsjoint_plot = []
 
     # =============================== Bar graph
     def bar(self, colNumX, colNumY, legendName):
@@ -768,6 +785,7 @@ class plotHandler(AutoPylot):
                 label = legendName, 
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha']) 
 
+    '''
     # =============================== Box graph
     def box(self, colNumX, dataNum, legendName, numData):
         boxplot_data = []
@@ -797,6 +815,103 @@ class plotHandler(AutoPylot):
                 patch_artist = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['patchartist'], 
                 zorder = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['zorder']))
         self.box_histplot_legendname.append(legendName)
+    '''
+
+    # =============================== Line-type graphs
+    def box(self, colNumX, dataNum, legendName, numData):
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: # multiple-axis enabled
+            if self.dataNum == 0:
+                self.box_host_withguest(colNumX, dataNum, legendName, numData)
+            else:
+                if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_on']:
+                    self.box_guest(colNumX, dataNum, legendName, numData)
+                else:
+                    self.box_host_withguest(colNumX, dataNum, legendName, numData)
+            if self.guestPlotCnt > 0: 
+                self.graph_handler.axisColoring(
+                        self.colors, 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['BOX']['boxcolor'], 
+                        self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['boxcolor'],
+                        self.guestPlotCnt) # TODO find a solution instead of any() color the axes iff each line has a y-axis
+        else:
+            self.box_host(colNumX, dataNum, legendName, numData)
+    
+    # =============================== Line Plot - Additional y-axes
+    def box_guest(self, colNumX, dataNum, legendName, numData):
+        self.graph_handler.guest.append(0) #initialize array entry
+        self.graph_handler.guest[self.guestPlotCnt] = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].twinx() # setup 2nd axis based on the first graph
+        boxplot_data = []
+        
+        if type(colNumX) is list:
+            for item in colNumX:
+                boxplot_data.append(self.data_handler.data[item])
+        else:
+            boxplot_data.append(self.data_handler.data[colNumX])
+ 
+        self.box_histplot.append(self.graph_handler.guest[self.guestPlotCnt].boxplot(
+                boxplot_data, 
+                positions = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['position'],
+                boxprops = dict(facecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['boxcolor']], 
+                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['linecolor']]), 
+                capprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['capcolor']]), 
+                whiskerprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['whiskercolor']]), 
+                flierprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['fliercolor']], 
+                markeredgecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['markeredgecolor']]), 
+                medianprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['mediancolor']]), 
+                widths = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['width'], 
+                #labels = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['label'], 
+                vert = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['vertical'], 
+                notch = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['notched'], 
+                whis = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['whiskerreach'], 
+                bootstrap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['bootstrap'], 
+                patch_artist = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['patchartist'], 
+                zorder = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['zorder']))
+        self.box_histplot_legendname.append(legendName)
+
+        self.graph_handler.guest[self.guestPlotCnt].grid(False)
+        self.graph_handler.guest[self.guestPlotCnt].spines['right'].set_position(('axes', self.axisOffset)) 
+        lines, labels = self.graph_handler.guest[self.guestPlotCnt].get_legend_handles_labels()
+        self.graph_handler.linesSum += lines
+        self.graph_handler.labelsSum += labels
+        self.guestPlotCnt += 1
+        self.axisOffset += self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['yaxis_axisoffset']
+
+    # =============================== Line Plot
+    def box_host(self, colNumX, dataNum, legendName, numData):
+        boxplot_data = []
+        
+        if type(colNumX) is list:
+            for item in colNumX:
+                boxplot_data.append(self.data_handler.data[item])
+        else:
+            boxplot_data.append(self.data_handler.data[colNumX])
+ 
+        self.box_histplot.append(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].boxplot(
+                boxplot_data, 
+                positions = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['position'],
+                boxprops = dict(facecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['boxcolor']], 
+                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['linecolor']]), 
+                capprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['capcolor']]), 
+                whiskerprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['whiskercolor']]), 
+                flierprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['fliercolor']], 
+                markeredgecolor = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['markeredgecolor']]), 
+                medianprops = dict(color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['mediancolor']]), 
+                widths = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['width'], 
+                #labels = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['label'], 
+                vert = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['vertical'], 
+                notch = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['notched'], 
+                whis = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['whiskerreach'], 
+                bootstrap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['bootstrap'], 
+                patch_artist = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['patchartist'], 
+                zorder = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['BOX']['zorder']))
+        self.box_histplot_legendname.append(legendName)
+    
+    # =============================== Line Plot - Primary y-axis when used with guest plot
+    def box_host_withguest(self, colNumX, dataNum, legendName, numData):
+        self.box_host(colNumX, dataNum, legendName, numData)
+        lines, labels = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].get_legend_handles_labels()
+        self.graph_handler.hostLines += lines
+        self.graph_handler.hostLabels += labels
 
     # =============================== Reinitalize the legend variables of box plot
     def box_reinitialize(self):
@@ -890,6 +1005,47 @@ class plotHandler(AutoPylot):
                 label = legendName, 
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
 
+    # =============================== Errorbar Plot - Primary y-axis  
+    def hexbin(self, colNumX, colNumY, legendName):
+        hexbin = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].hexbin(
+                self.data_handler.data[colNumX], 
+                self.data_handler.data[colNumY],
+                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'],
+                cmap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['HEXBIN']['cmap'], 
+                gridsize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['HEXBIN']['gridsize'],
+                #label = legendName
+                )
+
+        colorbar = self.graph_handler.fig.colorbar(hexbin, ax = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt])
+        colorbar.set_label('Counts')
+        #if self.plotCounter == 7:
+        #    colorbar.set_ticks(np.linspace(0, 25, 6)) # TODO integrate this
+    
+    # =============================== Histogram graph
+    def histogram(self, colNumX, legendName):
+        self.bins = np.arange(
+            min(self.data_handler.data[colNumX]) - self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'], 
+            max(self.data_handler.data[colNumX]) + self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'] * 2, 
+            self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres']) # TODO get rid of this. Only do number of bins
+        self.box_histplot.append(self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].hist(
+                self.data_handler.data[colNumX], 
+                bins = self.bins, 
+                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['color']], 
+                edgecolor = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['edgecolor'], 
+                histtype = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['type'], 
+                density = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['density'], 
+                cumulative = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['cumulative'], 
+                bottom = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['bottom'], 
+                align = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['align_histogram'],
+                orientation = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['orientation'], 
+                rwidth = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['relativewidth'], 
+                stacked = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['stacked'],
+                label = legendName, 
+                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])) 
+        self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].set_xticks(self.bins[:-1]) # TODO modify this per ax
+
+        self.box_histplot_legendname.append(legendName)
+    '''
     # =============================== Line-type graphs
     def histogram(self, colNumX, legendName):
         if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['multipleyaxis']: # multiple-axis enabled
@@ -921,13 +1077,13 @@ class plotHandler(AutoPylot):
             histogramplot_data.append(self.data_handler.data[colNumX])
 
         self.graph_handler.guest[self.guestPlotCnt] = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].twiny() # setup 2nd axis based on the first graph
-        '''
+
         for i in range(len(histogramplot_data)):
             self.bins.append(np.arange(
                 min(self.data_handler.data[colNumX[i]]) - self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'][i], 
                 max(self.data_handler.data[colNumX[i]]) + self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'][i] * 2, 
                 self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'][i])) # TODO get rid of this. Only do number of bins
-        '''
+
         self.box_histplot.append(self.graph_handler.guest[self.guestPlotCnt].hist(
                 histogramplot_data, 
                 bins = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HISTOGRAM']['binres'], 
@@ -996,21 +1152,6 @@ class plotHandler(AutoPylot):
         lines, labels = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].get_legend_handles_labels()
         self.graph_handler.hostLines += lines
         self.graph_handler.hostLabels += labels
-    
-    '''
-    # =============================== Line Plot
-    def histogram_host(self, p, colNumX, colNumY, colNumE, legendName):
-        p.append(0) #initialize array entry
-        p[-1], = self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].plot(
-                self.data_handler.data[colNumX], 
-                self.data_handler.data[colNumY], 
-                self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['color']], 
-                linewidth = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['width'], 
-                linestyle = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['style'], 
-                marker = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['markerstyle'], 
-                markersize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['LINE']['markersize'],  
-                label = legendName,
-                alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
     '''
 
     # =============================== Line-type graphs
@@ -1085,7 +1226,7 @@ class plotHandler(AutoPylot):
         self.plotCounter = plotCounter
         self.dataNum = dataNum
 
-        if self.plotCounter != self.oldPlotCounter:
+        if self.plotCounter != self.oldPlotCounter and self.plotCounter != 7:
             self.box_reinitialize()
         
         if self.dataNum == 0:
@@ -1099,13 +1240,15 @@ class plotHandler(AutoPylot):
             self.box(colNumX, dataNum, legendName, numData)
         elif plotSelect == 'cdf':
             self.cdf(colNumX, legendName)
+        elif plotSelect == 'hexbin':
+            self.hexbin(colNumX, colNumY, legendName)
         elif plotSelect == 'histogram':
             self.histogram(colNumX, legendName)
         elif plotSelect in 'line':
             self.line(colNumX, colNumY, colNumE, legendName)
         elif plotSelect in 'errorbar':
             self.errorbar(colNumX, colNumY, colNumE, legendName)
-        elif plotSelect == 'snsjointplot':
+        elif plotSelect == 'snsjoint':
             self.snsjoint(colNumX, colNumY, legendName)
         elif plotSelect == 'snsline':
             self.snsline(colNumX, colNumY, legendName)
@@ -1113,6 +1256,18 @@ class plotHandler(AutoPylot):
             self.threed(numOfPlots, plotSelect, colNumX, colNumY, colNumZ, legendName)
     
         self.oldPlotCounter = self.plotCounter
+
+    # =============================== Seaborn Joint Graph
+    def snsjoint(self, colNumX, colNumY, legendName):
+        self.snsjoint_plot = sns.jointplot(
+                x = self.data_handler.data[colNumX], 
+                y = self.data_handler.data[colNumY], 
+                kind = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSJOINT']['kind'], 
+                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSJOINT']['color']], 
+                joint_kws = dict(gridsize = 13), #TODO integrate this in mainconfig.py
+                label = legendName)
+        #self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].set_axis_off()
+        # SeabornFig2Grid(self.snsjoint_plot[-1], self.graph_handler.fig, self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt])
 
     # =============================== Seaborn Line Graph
     def snsline(self, colNumX, colNumY, legendName):
@@ -1189,15 +1344,6 @@ class plotHandler(AutoPylot):
         self.graph_handler.hostLines += lines
         self.graph_handler.hostLabels += labels
 
-    # =============================== Seaborn Joint Graph
-    def snsjoint(self, colNumX, colNumY, legendName):
-        sns.jointplot(
-                x = self.data_handler.data[colNumX], 
-                y = self.data_handler.data[colNumY], 
-                kind = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSJOINT']['kind'], 
-                color = self.colors[self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['SNSJOINT']['color']], 
-                label = legendName)
-
     # =============================== 3D graph
     def threed(self, numOfPlots, plotSelect, colNumX, colNumY, colNumZ, legendName):
         self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].plot(
@@ -1211,6 +1357,59 @@ class plotHandler(AutoPylot):
                 markersize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['THREED']['markersize'],
                 label = legendName, 
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])
-        
+
+# Taken from: https://stackoverflow.com/questions/35042255/how-to-plot-multiple-seaborn-jointplot-in-subplot     
+class SeabornFig2Grid(plotHandler):
+    def __init__(self, seaborngrid, fig,  subplot_spec):
+        self.fig = fig
+        self.sg = seaborngrid
+        self.subplot = subplot_spec
+        if isinstance(self.sg, sns.axisgrid.FacetGrid) or \
+            isinstance(self.sg, sns.axisgrid.PairGrid):
+            self._movegrid()
+        elif isinstance(self.sg, sns.axisgrid.JointGrid):
+            self._movejointgrid()
+        self._finalize()
+
+    def _movegrid(self):
+        """ Move PairGrid or Facetgrid """
+        self._resize()
+        n = self.sg.axes.shape[0]
+        m = self.sg.axes.shape[1]
+        self.subgrid = gridspec.GridSpecFromSubplotSpec(n,m, subplot_spec=self.subplot)
+        for i in range(n):
+            for j in range(m):
+                self._moveaxes(self.sg.axes[i,j], self.subgrid[i,j])
+
+    def _movejointgrid(self):
+        """ Move Jointgrid """
+        h= self.sg.ax_joint.get_position().height
+        h2 = self.sg.ax_marg_x.get_position().height
+        r = int(np.round(h/h2))
+        self._resize()
+        self.subgrid = gridspec.GridSpecFromSubplotSpec(r + 1, r + 1, subplot_spec = self.subplot)
+
+        self._moveaxes(self.sg.ax_joint, self.subgrid[1:, :-1])
+        self._moveaxes(self.sg.ax_marg_x, self.subgrid[0, :-1])
+        self._moveaxes(self.sg.ax_marg_y, self.subgrid[1:, -1])
+
+    def _moveaxes(self, ax, gs):
+        #https://stackoverflow.com/a/46906599/4124317
+        ax.remove()
+        ax.figure=self.fig
+        self.fig.axes.append(ax)
+        self.fig.add_axes(ax)
+        ax._subplotspec = gs
+        ax.set_position(gs.get_position(self.fig))
+        ax.set_subplotspec(gs)
+
+    def _finalize(self):
+        plt.close(self.sg.fig)
+        self.fig.canvas.mpl_connect("resize_event", self._resize)
+        self.fig.canvas.draw()
+
+    def _resize(self, evt=None):
+        self.sg.fig.set_size_inches(self.fig.get_size_inches())
+
 autopylot = AutoPylot()
 autopylot.MAIN()

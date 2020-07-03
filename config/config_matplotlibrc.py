@@ -6,9 +6,9 @@
 # ADD () for entries with multiple values. E.g. 'figure.figsize'   : (6.4, 4.8)
 # ADD '' for string entries. E.g. 'patch.edgecolor'        : 'black'
 fontColor = '#404040' # dark grey
-fontSize = 38
+fontSize = 26
 legendSize = 20
-titleSize = 56
+titleSize = 32
 parameters = {
 #'lines.linewidth'   : 1.5,     ## line width in points
 #'lines.linestyle'   : -,       ## solid line
@@ -162,7 +162,7 @@ parameters = {
                               ## If another font is desired which can loaded using the
                               ## LaTeX \usepackage command, please inquire at the
                               ## matplotlib mailing list
-'text.latex.preamble': r'\usepackage{libertine}',      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
+'text.latex.preamble':r'\usepackage{libertine}',      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
                             ## AND IS THEREFORE UNSUPPORTED. PLEASE DO NOT ASK FOR HELP
                             ## IF THIS FEATURE DOES NOT DO WHAT YOU EXPECT IT TO.
                             ## text.latex.preamble is a single line of LaTeX code that
@@ -227,7 +227,7 @@ parameters = {
 'axes.grid'           : True,   ## display grid or not
 #'axes.grid.axis'      : both,    ## which axis the grid should apply to
 #'axes.grid.which'     : major,   ## gridlines at major, minor or both ticks
-'axes.titlesize'      : fontSize,   ## fontsize of the axes title
+'axes.titlesize'      : titleSize,   ## fontsize of the axes title
 'axes.titleweight'    : 'bold',  ## font weight of title
 #'axes.titlepad'       : 6.0,     ## pad between axes and title in points
 'axes.labelsize'      : fontSize,  ## fontsize of the x any y labels
@@ -381,9 +381,9 @@ parameters = {
 #'figure.subplot.right'   : 0.9,    ## the right side of the subplots of the figure
 #'figure.subplot.bottom' : 0.11,   ## the bottom of the subplots of the figure
 #'figure.subplot.top'     : 0.88,   ## the top of the subplots of the figure
-'figure.subplot.wspace'  : 0.4,    ## the amount of width reserved for space between subplots,
+'figure.subplot.wspace'  : 0.2,    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
-'figure.subplot.hspace'  : 0.75,    ## the amount of height reserved for space between subplots,
+'figure.subplot.hspace'  : 0.5,    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height
 
 ## Figure layout

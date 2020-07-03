@@ -9,9 +9,9 @@ MAIN:
   figure_xlabelfrominputfile: true
   figure_ylabelfrominputfile: true
   figure_zlabelfrominputfile: false
-  figurelegend: false
-  figurelegend_bbox_to_anchor_x: 0.35
-  figurelegend_bbox_to_anchor_y: 0.12
+  figurelegend: true
+  figurelegend_bbox_to_anchor_x: 0.5
+  figurelegend_bbox_to_anchor_y: 0.05
   figurelegend_border_axispad: 0.0
   figurelegend_location: 2
   figurelegend_mode: null
@@ -34,10 +34,10 @@ PLOT:
       graph_alpha: 0.65
       graph_type: histogram
       input_edata: 0
-      input_xdata: 30
+      input_xdata: 2
       input_ydata: 2
       input_zdata: 
-      plot_legend: DJI Spark - Captured Data
+      plot_legend: Simulation Data
       dataset_ylabel: Data Rate (kbps)
       yaxis_axisoffset: 0.1
       yaxis_on: true
@@ -47,14 +47,14 @@ PLOT:
     plot_threed_azimdegree: -160
     plot_threed_elevdegree: 30
     plot_title: 
-    plot_xlabel: Data Rate (kbps)
+    plot_xlabel: \begin{center}Data Rate (kbps) \\(a) \end{center}
     plot_xlabel_pad: 2
     plot_xlimit_max: null
     plot_xlimit_min: null
     plot_xscale: linear
-    plot_xticks_distance: null
-    plot_xticks_max: null
-    plot_xticks_min: null
+    plot_xticks_distance: 1
+    plot_xticks_max: 9
+    plot_xticks_min: 1
     plot_ylabel: Density
     plot_ylabel_pad: 2.0
     plot_ylimit_max: null
@@ -71,7 +71,7 @@ PLOT:
     plot_zticks_distance: null
     plot_zticks_max: null
     plot_zticks_min: null
-    plotlegend: true
+    plotlegend: false
     plotlegend_bbox_to_anchor_x: null
     plotlegend_bbox_to_anchor_y: null
     plotlegend_border_axisPad: 0.0
@@ -84,38 +84,27 @@ PLOT:
       graph_alpha: 0.65
       graph_type: histogram
       input_edata: 0
-      input_xdata: 39
+      input_xdata: 0
       input_ydata: 2
       input_zdata: 
-      plot_legend: DJI Spark - Captured Data
+      plot_legend: Simulation Data
       dataset_ylabel: Data Rate (kbps)
       yaxis_axisoffset: 0.1
       yaxis_on: true
       yaxis_ylimthreshold: 25
-    dataset1:
-      graph_alpha: 0.65
-      graph_type: line
-      input_edata: 0
-      input_xdata: 42
-      input_ydata: 45
-      input_zdata: 
-      plot_legend: Expon. Model
-      dataset_ylabel: Data Rate (kbps)
-      yaxis_axisoffset: 0.1
-      yaxis_on: true
-      yaxis_ylimthreshold: 25
+
     multipleyaxis: false
     plot_threed_azimdegree: -160
     plot_threed_elevdegree: 30
     plot_title: Downlink PDF Analysis
-    plot_xlabel: Packet Inter-arrival (ms)
+    plot_xlabel: \begin{center}Packet Inter-arrival (ms) \\(b) \end{center}
     plot_xlabel_pad: 2
-    plot_xlimit_max: 41
-    plot_xlimit_min: -5
+    plot_xlimit_max: null
+    plot_xlimit_min: null
     plot_xscale: linear
-    plot_xticks_distance: 20
-    plot_xticks_max: 41
-    plot_xticks_min: 0
+    plot_xticks_distance: null
+    plot_xticks_max: null
+    plot_xticks_min: null
     plot_ylabel: Density
     plot_ylabel_pad: 2.0
     plot_ylimit_max: null
@@ -132,7 +121,7 @@ PLOT:
     plot_zticks_distance: null
     plot_zticks_max: null
     plot_zticks_min: null
-    plotlegend: true
+    plotlegend: false
     plotlegend_bbox_to_anchor_x: null
     plotlegend_bbox_to_anchor_y: null
     plotlegend_border_axisPad: 0.0
@@ -145,10 +134,10 @@ PLOT:
       graph_alpha: 0.65
       graph_type: histogram
       input_edata: 0
-      input_xdata: 48
+      input_xdata: 1
       input_ydata: 2
       input_zdata: 
-      plot_legend: DJI Spark - Captured Data
+      plot_legend: Simulation Data
       dataset_ylabel: Data Rate (kbps)
       yaxis_axisoffset: 0.1
       yaxis_on: true
@@ -158,14 +147,14 @@ PLOT:
     plot_threed_azimdegree: -160
     plot_threed_elevdegree: 30
     plot_title: 
-    plot_xlabel: Packet Length (bytes)
+    plot_xlabel: \begin{center}Packet Length (bytes) \\(c) \end{center}
     plot_xlabel_pad: 2
     plot_xlimit_max: null
     plot_xlimit_min: null
     plot_xscale: linear
-    plot_xticks_distance: null
-    plot_xticks_max: null
-    plot_xticks_min: null
+    plot_xticks_distance: 25
+    plot_xticks_max: 151
+    plot_xticks_min: 75
     plot_ylabel: Density
     plot_ylabel_pad: 2.0
     plot_ylimit_max: null
@@ -182,7 +171,7 @@ PLOT:
     plot_zticks_distance: null
     plot_zticks_max: null
     plot_zticks_min: null
-    plotlegend: true
+    plotlegend: false
     plotlegend_bbox_to_anchor_x: null
     plotlegend_bbox_to_anchor_y: null
     plotlegend_border_axisPad: 0.0
@@ -195,10 +184,10 @@ PLOT:
       graph_alpha: 0.65
       graph_type: histogram
       input_edata: 0
-      input_xdata: 0
+      input_xdata: 5
       input_ydata: 2
       input_zdata: 
-      plot_legend: DJI Spark - Captured Data
+      plot_legend: Simulation Data
       dataset_ylabel: DJI Spark - Captured Data
       yaxis_axisoffset: 0.1
       yaxis_on: true
@@ -208,7 +197,57 @@ PLOT:
     plot_threed_azimdegree: -160
     plot_threed_elevdegree: 30
     plot_title: 
-    plot_xlabel: Data Rate (kbps)
+    plot_xlabel: \begin{center}Data Rate (kbps) \\(d) \end{center}
+    plot_xlabel_pad: 2
+    plot_xlimit_max: null
+    plot_xlimit_min: null
+    plot_xscale: linear
+    plot_xticks_distance: 100
+    plot_xticks_max: 401
+    plot_xticks_min: 100
+    plot_ylabel: Density
+    plot_ylabel_pad: 2.0
+    plot_ylimit_max: null
+    plot_ylimit_min: null
+    plot_yscale: linear
+    plot_yticks_distance: null
+    plot_yticks_max: null
+    plot_yticks_min: null
+    plot_zlabel: z
+    plot_zlabel_pad: 2.0
+    plot_zlimit_max: null
+    plot_zlimit_min: null
+    plot_zscale: linear
+    plot_zticks_distance: null
+    plot_zticks_max: null
+    plot_zticks_min: null
+    plotlegend: false
+    plotlegend_bbox_to_anchor_x: null
+    plotlegend_bbox_to_anchor_y: null
+    plotlegend_border_axisPad: 0.0
+    plotlegend_location: 2 
+    plotlegend_mode: null
+    plotlegend_ncolumn: 1
+
+  Subplot4:
+    dataset0:
+      graph_alpha: 0.65
+      graph_type: histogram
+      input_edata: 0
+      input_xdata: 3
+      input_ydata: 2
+      input_zdata: 
+      plot_legend: Simulation Data
+      dataset_ylabel: Data Rate (kbps)
+      yaxis_axisoffset: 0.1
+      yaxis_on: true
+      yaxis_ylimthreshold: 25
+
+    multipleyaxis: false
+    plot_threed_azimdegree: -160
+    plot_threed_elevdegree: 30
+    plot_title: Uplink PDF Analysis
+    plot_xlabel: \begin{center}Packet Inter-arrival (ms) \\(e) \end{center}
     plot_xlabel_pad: 2
     plot_xlimit_max: null
     plot_xlimit_min: null
@@ -232,68 +271,7 @@ PLOT:
     plot_zticks_distance: null
     plot_zticks_max: null
     plot_zticks_min: null
-    plotlegend: true
-    plotlegend_bbox_to_anchor_x: null
-    plotlegend_bbox_to_anchor_y: null
-    plotlegend_border_axisPad: 0.0
-    plotlegend_location: 2 
-    plotlegend_mode: null
-    plotlegend_ncolumn: 1
-
-  Subplot4:
-    dataset0:
-      graph_alpha: 0.65
-      graph_type: histogram
-      input_edata: 0
-      input_xdata: 9
-      input_ydata: 2
-      input_zdata: 
-      plot_legend: DJI Spark - Captured Data 
-      dataset_ylabel: Data Rate (kbps)
-      yaxis_axisoffset: 0.1
-      yaxis_on: true
-      yaxis_ylimthreshold: 25
-    dataset1:
-      graph_alpha: 0.65
-      graph_type: line
-      input_edata: 0
-      input_xdata: 12
-      input_ydata: 15
-      input_zdata: 
-      plot_legend: Expon. Model
-      dataset_ylabel: Data Rate (kbps)
-      yaxis_axisoffset: 0.1
-      yaxis_on: true
-      yaxis_ylimthreshold: 25
-    multipleyaxis: false
-    plot_threed_azimdegree: -160
-    plot_threed_elevdegree: 30
-    plot_title: Uplink PDF Analysis
-    plot_xlabel: Packet Inter-arrival (ms)
-    plot_xlabel_pad: 2
-    plot_xlimit_max: 31
-    plot_xlimit_min: -5
-    plot_xscale: linear
-    plot_xticks_distance: 10
-    plot_xticks_max: 31
-    plot_xticks_min: 0
-    plot_ylabel: Density
-    plot_ylabel_pad: 2.0
-    plot_ylimit_max: null
-    plot_ylimit_min: null
-    plot_yscale: linear
-    plot_yticks_distance: null
-    plot_yticks_max: null
-    plot_yticks_min: null
-    plot_zlabel: z
-    plot_zlabel_pad: 2.0
-    plot_zlimit_max: null
-    plot_zlimit_min: null
-    plot_zscale: linear
-    plot_zticks_distance: null
-    plot_zticks_max: null
-    plot_zticks_min: null
-    plotlegend: true
+    plotlegend: false
     plotlegend_bbox_to_anchor_x: null
     plotlegend_bbox_to_anchor_y: null
     plotlegend_border_axisPad: 0.0
@@ -306,10 +284,10 @@ PLOT:
       graph_alpha: 0.65
       graph_type: histogram
       input_edata: 0
-      input_xdata: 18
+      input_xdata: 4
       input_ydata: 2
       input_zdata: 
-      plot_legend: DJI Spark - Captured Data
+      plot_legend: Simulation Data
       dataset_ylabel: Data Rate (kbps)
       yaxis_axisoffset: 0.1
       yaxis_on: true
@@ -319,7 +297,7 @@ PLOT:
     plot_threed_azimdegree: -160
     plot_threed_elevdegree: 30
     plot_title: 
-    plot_xlabel: Packet Length (bytes)
+    plot_xlabel: \begin{center}Packet Length (bytes) \\(f) \end{center}
     plot_xlabel_pad: 2
     plot_xlimit_max: null
     plot_xlimit_min: null
@@ -343,7 +321,7 @@ PLOT:
     plot_zticks_distance: null
     plot_zticks_max: null
     plot_zticks_min: null
-    plotlegend: true
+    plotlegend: false
     plotlegend_bbox_to_anchor_x: null
     plotlegend_bbox_to_anchor_y: null
     plotlegend_border_axisPad: 0.0
