@@ -162,7 +162,7 @@ parameters = {
                               ## If another font is desired which can loaded using the
                               ## LaTeX \usepackage command, please inquire at the
                               ## matplotlib mailing list
-'text.latex.preamble':r'\usepackage{libertine}',      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
+'text.latex.preamble': r'\usepackage{libertine}',      ## IMPROPER USE OF THIS FEATURE WILL LEAD TO LATEX FAILURES
                             ## AND IS THEREFORE UNSUPPORTED. PLEASE DO NOT ASK FOR HELP
                             ## IF THIS FEATURE DOES NOT DO WHAT YOU EXPECT IT TO.
                             ## text.latex.preamble is a single line of LaTeX code that
@@ -381,7 +381,7 @@ parameters = {
 #'figure.subplot.right'   : 0.9,    ## the right side of the subplots of the figure
 #'figure.subplot.bottom' : 0.11,   ## the bottom of the subplots of the figure
 #'figure.subplot.top'     : 0.88,   ## the top of the subplots of the figure
-'figure.subplot.wspace'  : 0.2,    ## the amount of width reserved for space between subplots,
+'figure.subplot.wspace'  : 0.35,    ## the amount of width reserved for space between subplots,
                                  ## expressed as a fraction of the average axis width
 'figure.subplot.hspace'  : 0.5,    ## the amount of height reserved for space between subplots,
                                  ## expressed as a fraction of the average axis height

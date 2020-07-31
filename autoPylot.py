@@ -4,6 +4,7 @@ from colorama import Fore, Back, init # colored output on the terminal
 import csv
 from datetime import datetime
 import math
+from matplotlib.offsetbox import AnchoredText
 import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
@@ -485,6 +486,7 @@ Please turn on your X-server first and then hit [enter]"""
         self.dataNum = dataNum # TODO get rid of dataNum in this class. It does not make sense. 
         
         #if not self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'box':
+        #self.set_text()
         self.set_axis_label_scale(threeD) # TODO find a solution for this, it blocks the labels of box plots
         if threeD: 
             self.set_azim_elev()
@@ -653,14 +655,14 @@ Please turn on your X-server first and then hit [enter]"""
      
     # =============================== set figure legend
     def set_figure_legend(self, box_histplot, box_histplot_legendname):
-        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] in {'box', 'histogram'}: # TODO fix self.dataNum. Does not make sense.
+        if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter - 1)]['dataset' + str(self.dataNum)]['graph_type'] in {'box', 'histogram'}: # TODO fix self.dataNum. Does not make sense.
             label_box_hist, legend_box_hist = [], []
             for i in range(len(box_histplot)):
                 label_box_hist.append(box_histplot_legendname[i])
                 if self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_type'] == 'box':
                     legend_box_hist.append(box_histplot[i]['boxes'][0])
             self.fig.legend(
-                    legend_box_hist, 
+                    #legend_box_hist, 
                     label_box_hist,
                     bbox_to_anchor = (
                             self.data_handler.mainconfig['MAIN']['figurelegend_bbox_to_anchor_x'], 
@@ -739,8 +741,21 @@ Please turn on your X-server first and then hit [enter]"""
         # set subtitle
         if numOfPlots > 1:
             self.host[self.figColCnt, self.figRowCnt].title.set_text(title) 
-            # self.host[self.figColCnt, self.figRowCnt].title.set_position([1.25, 1.05]) # TODO add x-axis location to mainconfig.py and add y-axis location, 
+            self.host[self.figColCnt, self.figRowCnt].title.set_position([1.25, 1.05]) # TODO add x-axis location to mainconfig.py and add y-axis location, 
             
+    # =============================== set text on the plot
+    def set_text(self):
+        text_box = AnchoredText('test', frameon=True, loc=4, pad=0.5)
+        plt.setp(text_box.patch, facecolor='white', alpha=0.5)
+        self.host[self.figColCnt, self.figRowCnt].add_artist(text_box)
+        #coordinates = self.host[self.figColCnt, self.figRowCnt].get_position()
+        #print(coordinates)
+        #self.host[self.figColCnt, self.figRowCnt].text(0, 0, 'boxed italics text in data coords', style='italic',
+        #bbox={'facecolor': 'red', 'alpha': 0.5, 'pad': 10})
+        #print(a.x0)
+        #print(a.y0)
+        #self.host[self.figColCnt, self.figRowCnt].text(coordinates.x0, coordinates.y0, 'matplotlib') # TODO improve this to give user flexibility to add the text wherever he wants on the plot, and even multiple text per plot
+
     # =============================== Show the plot
     def show_graph(self, box_histplot, box_histplot_legendname, title, numOfPlots): # TODO reorganize this function. Move all stuff not related to plt.show function
         self.fig.subplots_adjust(bottom = 0.2) # TODO Integrate this into the main program
@@ -1011,8 +1026,8 @@ class plotHandler(AutoPylot):
                 self.data_handler.data[colNumX], 
                 self.data_handler.data[colNumY],
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'],
-                cmap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['HEXBIN']['cmap'], 
-                gridsize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(0)]['HEXBIN']['gridsize'],
+                cmap = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HEXBIN']['cmap'], 
+                gridsize = self.data_handler.plotconfig['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['HEXBIN']['gridsize'],
                 #label = legendName
                 )
 
@@ -1043,7 +1058,6 @@ class plotHandler(AutoPylot):
                 label = legendName, 
                 alpha = self.data_handler.mainconfig['PLOT']['Subplot' + str(self.plotCounter)]['dataset' + str(self.dataNum)]['graph_alpha'])) 
         self.graph_handler.host[self.graph_handler.figColCnt, self.graph_handler.figRowCnt].set_xticks(self.bins[:-1]) # TODO modify this per ax
-
         self.box_histplot_legendname.append(legendName)
     '''
     # =============================== Line-type graphs

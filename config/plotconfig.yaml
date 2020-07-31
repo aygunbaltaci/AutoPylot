@@ -1,11 +1,10 @@
-
 Subplot0:
   dataset0:
     HISTOGRAM:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 0.5
+      binres : 1
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
@@ -16,6 +15,30 @@ Subplot0:
       density : true 
       # Edge color of histogram bars # TBD, change it to numbers
       edgecolor : 'black'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar' 
+  dataset1:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 1
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 1
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'sandybrown'
       # Orientation of bins. VALID inputs: {horizontal, vertical}
       orientation : 'vertical' 
       # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
@@ -30,7 +53,7 @@ Subplot1:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 25
+      binres : 1
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
@@ -49,13 +72,49 @@ Subplot1:
       stacked : false
       # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
       type : 'bar'
+  dataset1:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 1
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 1
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'sandybrown'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+  # dataset1:
+  #   LINE:
+  #     # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+  #     color : 1
+  #     # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
+  #     markerstyle : ''
+  #     # Marker size. 
+  #     markersize : 10
+  #     # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+  #     style : 'solid'
+  #     # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+  #     width : 3
 Subplot2:
   dataset0:
     HISTOGRAM:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
       align_histogram : 'left'
       # Number of bins in the graph
-      binres : 5
+      binres : 15
       # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
       bottom : 0
       # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
@@ -66,6 +125,30 @@ Subplot2:
       density : true 
       # Edge color of histogram bars # TBD, change it to numbers
       edgecolor : 'black'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+  dataset1:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 15
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 1
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'sandybrown'
       # Orientation of bins. VALID inputs: {horizontal, vertical}
       orientation : 'vertical' 
       # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
@@ -76,55 +159,12 @@ Subplot2:
       type : 'bar'
 Subplot3:
   dataset0:
-    HISTOGRAM:
-      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
-      align_histogram : 'left'
-      # Number of bins in the graph
-      binres : 25
-      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
-      bottom : 0
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : 0
-      # Cumulative histogram 
-      cumulative : false
-      # Normalized probability density
-      density : true 
-      # Edge color of histogram bars # TBD, change it to numbers
-      edgecolor : 'black'
-      # Orientation of bins. VALID inputs: {horizontal, vertical}
-      orientation : 'vertical' 
-      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
-      relativewidth :
-      # Multiple data stacked on top of each other. 
-      stacked : false
-      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
-      type : 'bar' 
+    HEXBIN:
+      # Colormap
+      cmap : Blues
+      # Gridsize
+      gridsize : 15
 Subplot4:
-  dataset0:
-    HISTOGRAM:
-      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
-      align_histogram : 'left'
-      # Number of bins in the graph
-      binres : 25
-      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
-      bottom : 0
-      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
-      color : 0
-      # Cumulative histogram 
-      cumulative : false
-      # Normalized probability density
-      density : true 
-      # Edge color of histogram bars # TBD, change it to numbers
-      edgecolor : 'black'
-      # Orientation of bins. VALID inputs: {horizontal, vertical}
-      orientation : 'vertical' 
-      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
-      relativewidth :
-      # Multiple data stacked on top of each other. 
-      stacked : false
-      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
-      type : 'bar'
-Subplot5:
   dataset0:
     HISTOGRAM:
       # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
@@ -148,7 +188,148 @@ Subplot5:
       # Multiple data stacked on top of each other. 
       stacked : false
       # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+  dataset1:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 100
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 1
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'sandybrown'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+Subplot5:
+  dataset0:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 0.5
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 0
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'black'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+  dataset1:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 0.5
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 1
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'sandybrown'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+  # dataset1:
+  #   LINE:
+  #     # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+  #     color : 1
+  #     # Marker style. For acceptable inputs, check out https://matplotlib.org/api/markers_api.html#module-matplotlib.markers
+  #     markerstyle : ''
+  #     # Marker size. 
+  #     markersize : 10
+  #     # Line style per plot. Valid inputs: {-, --, -., :, ,  , , solid, dashed, dashdot, dotted}
+  #     style : 'solid'
+  #     # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
+  #     width : 3
+Subplot6:
+  dataset0:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 100
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 0
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'black'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
+      type : 'bar'
+  dataset1:
+    HISTOGRAM:
+      # Alignment of histogram bars. VALID inputs: {left, mid, right}. 
+      align_histogram : 'left'
+      # Number of bins in the graph
+      binres : 100
+      # Location of the bottom baseline of each bin. VALID inputs: array of scalar. 
+      bottom : 0
+      # Color order for lines per plot. 0: steelblue, 1: sandybrown, 2: mediumseagreen, 3: indianred, 4: dimgrey, 5: orchid, 6: goldenrod, 7: darkcyan, 8: mediumslateblue, 9: darkkhaki. ADD MORE COLOR CODES TO "self.colors:" in plotFuncs.py if you need more color options for your plot!
+      color : 1
+      # Cumulative histogram 
+      cumulative : false
+      # Normalized probability density
+      density : true 
+      # Edge color of histogram bars # TBD, change it to numbers
+      edgecolor : 'sandybrown'
+      # Orientation of bins. VALID inputs: {horizontal, vertical}
+      orientation : 'vertical' 
+      # Relative width of the bars as a fraction of the bin width. VALID inputs: scalar or . 
+      relativewidth :
+      # Multiple data stacked on top of each other. 
+      stacked : false
+      # Type of histogram to draw. VALID inputs: {bar, barstacked, step, stepfilled}.  
       type : 'bar' 
+Subplot7:
+  dataset0:
+    HEXBIN:
+      # Colormap
+      cmap : Blues
+      # Gridsize
+      gridsize : 100
 
 ##################################################
 # ALL SETTINGS BELOW UNUSED
@@ -174,8 +355,6 @@ BAR:
   # Widths of the bars
   width : 1 
     
-     
-
 ############ BOX PLOTS ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.boxplot.html
 BOX:
   # Number of times to bootstrap the median to determine its 95% confidence intervals. VALID inputs: int. 
@@ -246,6 +425,13 @@ ERRORBAR:
   style : 'solid' 
   # Line width for lines per plots. First entry of array is the first input data. Increase array size if you plot more than 10 lines in a plot! 
   width : 1 
+
+############ HEXBIN ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.hexbin.html
+HEXBIN:
+  # Colormap
+  cmap : Blues
+  # Gridsize
+  gridsize : 20
 
 ############ HISTOGRAM ############ - https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.hist.html
 HISTOGRAM:
